@@ -1,0 +1,77 @@
+# Claude Code Configuration for {{PROJECT_NAME}}
+
+_Profile: java-service_
+_Last updated: {{DATE}}_
+
+## Project Goal
+- What this service does:
+- Main upstream and downstream systems:
+- Current business goal:
+
+## Stack
+- Build: Maven
+- Runtime:
+- Spring Boot version:
+- Persistence: Hibernate / JPA
+- Datastores: Oracle / PostgreSQL / ClickHouse
+- Messaging: Kafka
+
+## Runbook
+```bash
+# run tests
+mvn test
+
+# run a focused test
+mvn -Dtest=ClassNameTest test
+
+# package
+mvn package
+```
+
+## Recommended Skills
+- `java-service-convention`
+- `git-convention`
+- `jpa-db-review`
+- `integration-patterns`
+
+## Service Boundaries
+- Public API surface:
+- Owned data:
+- External REST dependencies:
+- Kafka topics consumed:
+- Kafka topics produced:
+
+## Local Working Agreement
+- Read this file before non-trivial work.
+- Default to plan first and ask targeted questions before editing.
+- Keep controllers thin and put business logic in services.
+- Do not leak JPA entities outside the data-owning layer.
+- Add or update tests for behavior changes.
+- Ask before schema, API, Kafka contract, or wide refactor changes.
+
+## Team Convention Defaults
+Verify these rules for this repo and adjust if needed.
+
+- Branch format: `{type}/{JIRA-ISSUE-CODE}-{short-description}`
+- Commit format: `{JIRA-ISSUE-CODE}: {verb-led description}`
+- Work branches start from `master`
+- Validation happens through `staging`
+- `staging` must never be merged into `master`
+- Do not commit directly to `master` or `staging`
+
+## Invariants
+- Required validation rules:
+- Required logging and masking rules:
+- Restricted packages or modules:
+- Local exceptions to the shared convention:
+
+## Data And Rollout Notes
+- Schema migration constraints:
+- Oracle / PostgreSQL specifics:
+- ClickHouse specifics:
+- Backward-compatibility constraints:
+
+## Acceptance Checklist
+- Required Maven test commands:
+- Manual checks:
+- Rollout notes:

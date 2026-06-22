@@ -1,0 +1,60 @@
+# Claude Code Configuration for {{PROJECT_NAME}}
+
+_Last updated: {{DATE}}_
+
+## Project Goal
+- What this project does:
+- Primary user or customer:
+- Success criteria for current work:
+
+## Stack
+- Runtime / language:
+- Framework:
+- Storage:
+- Messaging:
+- Infra / deployment:
+
+## Commands
+```bash
+# install
+
+# run locally
+
+# test
+
+# lint
+
+# build
+```
+
+## Architecture Map
+- Entrypoints:
+- Core modules:
+- External services:
+- Data boundaries:
+
+## Local Working Agreement
+- Read this file before non-trivial work.
+- Plan before multi-file or high-risk changes.
+- Keep diffs small and avoid unrelated refactors.
+- Match existing conventions unless asked to modernize.
+- Ask before destructive, wide-scope, or irreversible actions.
+- Add or update tests for behavior changes.
+
+## Invariants
+- Rules that must stay true:
+- Public contracts that must not break:
+- Performance or security constraints:
+
+## Restricted Paths
+- Files or directories that should not be modified casually:
+
+## Current Priorities
+- Active feature or migration:
+- Known problem areas:
+- Deferred cleanup:
+
+## Acceptance Checklist
+- Required tests:
+- Required manual checks:
+- Rollout or migration notes:

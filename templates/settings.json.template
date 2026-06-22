@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rg *)",
+      "Bash(find *)",
+      "Bash(ls *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git branch *)",
+      "Bash(npm test *)",
+      "Bash(npm run test *)",
+      "Bash(npm run lint *)",
+      "Bash(pnpm test *)",
+      "Bash(pnpm run lint *)",
+      "Bash(pytest *)",
+      "Bash(uv run pytest *)",
+      "Bash(mvn test *)",
+      "Bash(./mvnw test *)",
+      "Bash(cargo test *)"
+    ]
+  }
+}

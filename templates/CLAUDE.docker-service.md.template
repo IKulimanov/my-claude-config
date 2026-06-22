@@ -1,0 +1,67 @@
+# Claude Code Configuration for {{PROJECT_NAME}}
+
+_Profile: docker-service_
+_Last updated: {{DATE}}_
+
+## Project Goal
+- What this service does:
+- Deployment target (local dev only / CI / prod):
+- Primary consumers:
+
+## Stack
+- Language / runtime:
+- Base image:
+- Infrastructure services (db, kafka, redis, etc.):
+
+## Runbook
+```bash
+# Start all services
+docker compose up -d
+
+# Start infra only (run app locally)
+docker compose up -d postgres kafka
+
+# View logs
+docker compose logs -f app
+
+# Run tests
+# (fill in your test command)
+
+# Rebuild after Dockerfile change
+docker compose build app && docker compose up -d app
+```
+
+## Recommended Skills
+- `docker`
+
+## Container Layout
+- Production image target:
+- Dev image target (if different):
+- Services defined in Compose:
+- Volumes:
+- Networks:
+
+## Local Working Agreement
+- Read this file before non-trivial work.
+- Never put secrets in Dockerfile or Compose files — use `.env.local`.
+- Keep `.env.example` updated when adding new environment variables.
+- Validate Compose files with `docker compose config` before committing.
+- Flag changes to shared volumes or networks before applying.
+
+## Invariants
+- App must not run as root in the production image.
+- Base image must be pinned to a specific version tag.
+- Services with `depends_on` must have healthchecks defined.
+- `.env.local` must be in `.gitignore`.
+
+## Environment Variables
+- Required variables (add to `.env.example`):
+- Optional variables:
+- Variables that differ between local and prod:
+
+## Acceptance Checklist
+- [ ] `docker compose config` passes with no warnings
+- [ ] `docker compose build` succeeds
+- [ ] `docker compose up -d` — all services reach healthy state
+- [ ] App responds on expected port
+- [ ] No secrets in Dockerfile or committed Compose files

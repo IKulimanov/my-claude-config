@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rg *)",
+      "Bash(find *)",
+      "Bash(ls *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git branch *)",
+      "Bash(mvn test *)",
+      "Bash(mvn -Dtest=* test)",
+      "Bash(mvn package *)",
+      "Bash(mvn verify *)"
+    ]
+  }
+}

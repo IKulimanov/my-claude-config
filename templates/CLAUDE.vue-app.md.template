@@ -1,0 +1,89 @@
+# Claude Code Configuration for {{PROJECT_NAME}}
+
+_Profile: vue-app_
+_Last updated: {{DATE}}_
+
+## Project Goal
+- What this application does:
+- Target users:
+- Current objective:
+
+## Stack
+- Vue: 3.x
+- Build: Vite
+- State: Pinia
+- Router: Vue Router
+- TypeScript: yes / no
+- CSS: plain CSS / Tailwind / SCSS / etc.
+- API: REST / GraphQL
+- Testing: Vitest + Vue Test Utils
+
+## Runbook
+```bash
+# install
+npm install
+
+# dev
+npm run dev
+
+# test
+npx vitest run
+
+# build
+npm run build
+
+# lint
+npm run lint
+```
+
+## Recommended Skills
+- `vue-frontend`
+- `git-convention`
+
+## Project Structure
+```
+src/
+  components/     # Reusable components
+  views/          # Page-level components (routes)
+  composables/    # Composition functions (use*.ts)
+  stores/         # Pinia stores
+  types/          # TypeScript types
+  utils/          # Pure utility functions
+  router/         # Route configuration
+  api/            # API layer
+  assets/         # Static assets
+  styles/         # Global styles
+```
+
+## Local Working Agreement
+- Read this file before non-trivial work.
+- Use Composition API with `<script setup>` only.
+- Props must have type declarations.
+- Emits must be declared with types.
+- Keep components focused — one responsibility each.
+- Tests mandatory for new components, composables, stores.
+- Use `data-testid` for test selectors.
+- No `any` in TypeScript — use proper types.
+
+## Component Conventions
+- File naming: PascalCase.vue
+- Composable naming: use*.ts
+- Store naming: domain.ts
+- Props: typed with `defineProps<{...}>()`
+- Emits: typed with `defineEmits<{...}>()`
+
+## API Layer
+- Base URL:
+- Auth mechanism:
+- Error handling pattern:
+
+## Invariants
+- Required env variables:
+- Auth/session handling rules:
+- Browser support targets:
+
+## Acceptance Checklist
+- All tests pass: `npx vitest run`
+- No TypeScript errors: `npx vue-tsc --noEmit`
+- Lint clean: `npm run lint`
+- Manual checks:

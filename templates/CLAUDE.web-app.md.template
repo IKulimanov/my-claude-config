@@ -1,0 +1,55 @@
+# Claude Code Configuration for {{PROJECT_NAME}}
+
+_Profile: web-app_
+_Last updated: {{DATE}}_
+
+## Project Goal
+- What this application does:
+- Target users:
+- Current objective:
+
+## Stack
+- Backend: Go / Node / static
+- Frontend: vanilla JS / htmx / Alpine.js / React / Vue
+- CSS: plain CSS / Tailwind / etc.
+- Bundler: none / esbuild / vite
+- Target browsers:
+
+## Runbook
+```bash
+# install
+npm install  # or: go build ./...
+
+# dev
+npm run dev  # or: go run ./cmd/server
+
+# test
+npm test     # or: go test ./...
+
+# build
+npm run build
+```
+
+## Recommended Skills
+- `web-app`
+- `go-best-practices` (if Go backend)
+- `docker`
+- `repo-onboarding`
+
+## Local Working Agreement
+- Read this file before non-trivial work.
+- Security is non-negotiable: CSP headers, input validation, XSS prevention.
+- Performance budget: <200KB JS compressed, <2.5s LCP.
+- Prefer progressive enhancement over JS-heavy approaches.
+- Test security-sensitive paths.
+- Add or update tests for behavior changes.
+
+## Invariants
+- Security headers that must always be set:
+- Auth/session handling rules:
+- Public API contracts that must not break:
+
+## Acceptance Checklist
+- Required test commands:
+- Lighthouse score thresholds:
+- Manual checks:

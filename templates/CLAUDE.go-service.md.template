@@ -1,0 +1,55 @@
+# Claude Code Configuration for {{PROJECT_NAME}}
+
+_Profile: go-service_
+_Last updated: {{DATE}}_
+
+## Project Goal
+- What this service or tool does:
+- Main user or consumer:
+- Current objective:
+
+## Stack
+- Go version:
+- Main packages:
+- HTTP or CLI entrypoint:
+- Storage and external APIs:
+
+## Runbook
+```bash
+# test
+go test ./...
+
+# test with race detection
+go test -race ./...
+
+# lint
+golangci-lint run ./...
+
+# run
+go run ./cmd/server
+
+# build
+go build -o bin/server ./cmd/server
+```
+
+## Recommended Skills
+- `go-best-practices`
+- `web-app` (if serving web content)
+- `docker`
+- `repo-onboarding`
+
+## Local Working Agreement
+- Read this file before non-trivial work.
+- Default to plan first and ask targeted questions before editing.
+- Keep packages cohesive and avoid unnecessary abstractions.
+- Preserve context propagation and explicit error handling.
+- Add or update tests for behavior changes.
+
+## Invariants
+- Package boundaries that must stay intact:
+- External contracts that must not break:
+- Restricted paths:
+
+## Acceptance Checklist
+- Required test commands:
+- Manual checks:
