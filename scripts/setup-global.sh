@@ -15,7 +15,7 @@ CLAUDE_HOME="${CLAUDE_HOME:-$HOME/.claude}"
 # ─── Defaults ────────────────────────────────────────────────────────────────
 APPLY=0
 MODE="symlink"          # symlink | copy
-COMPONENTS="skills,agents,commands,hooks,claude-md,output-styles"
+COMPONENTS="skills,agents,commands,hooks,claude-md,output-styles,statusline"
 COMMAND=""
 
 # ─── Args ────────────────────────────────────────────────────────────────────
@@ -32,7 +32,7 @@ Options:
   --apply             Реально применить. Без этого — dry-run, ничего не меняем.
   --copy              Использовать copy вместо symlink (по умолчанию: symlink)
   --components LIST   Список компонентов через запятую (default: $COMPONENTS)
-                      Доступно: skills,agents,commands,hooks,claude-md,output-styles
+                      Доступно: skills,agents,commands,hooks,claude-md,output-styles,statusline
   --config-dir DIR    Откуда брать (default: $ROOT_DIR)
   -h, --help
 
@@ -82,8 +82,8 @@ fi
 
 for comp in $(echo "$COMPONENTS" | tr ',' ' '); do
   case "$comp" in
-    skills|agents|commands|hooks|claude-md|output-styles) ;;
-    *) echo "Error: unknown component '$comp'. Valid: skills,agents,commands,hooks,claude-md,output-styles" >&2; exit 1 ;;
+    skills|agents|commands|hooks|claude-md|output-styles|statusline) ;;
+    *) echo "Error: unknown component '$comp'. Valid: skills,agents,commands,hooks,claude-md,output-styles,statusline" >&2; exit 1 ;;
   esac
 done
 
@@ -221,6 +221,44 @@ set_output_style() {
   fi
 }
 
+# Установить файл statusline.sh в ~/.claude/statusline.sh (symlink или copy).
+install_statusline_file() {
+  local src="$ROOT_DIR/statusline/statusline.sh"
+  local dst="$CLAUDE_HOME/statusline.sh"
+
+  if [ ! -f "$src" ]; then
+    echo "$(prefix) skip statusline — source not found: $src"
+    return
+  fi
+
+  backup_if_exists "$dst" || true
+
+  if [ "$MODE" = "copy" ]; then
+    do_or_echo "cp '$src' '$dst'"
+  else
+    do_or_echo "ln -s '$src' '$dst'"
+  fi
+}
+
+# Прописать .statusLine в ~/.claude/settings.json (вызывается после hooks, как outputStyle).
+set_statusline() {
+  local settings="$CLAUDE_HOME/settings.json"
+  local cmd="$CLAUDE_HOME/statusline.sh"
+  echo "$(prefix) settings.json: statusLine → $cmd"
+
+  if [ "$APPLY" -ne 1 ]; then return 0; fi
+
+  mkdir -p "$CLAUDE_HOME"
+  if [ -f "$settings" ]; then
+    mkdir -p "$BACKUP_DIR"
+    cp "$settings" "$BACKUP_DIR/settings.json.before-statusline"
+    local tmp; tmp="$(mktemp)"
+    jq --arg c "$cmd" '.statusLine = {type: "command", command: $c, padding: 0}' "$settings" > "$tmp" && mv "$tmp" "$settings"
+  else
+    jq -n --arg c "$cmd" '{statusLine: {type: "command", command: $c, padding: 0}}' > "$settings"
+  fi
+}
+
 # ─── Commands ────────────────────────────────────────────────────────────────
 
 cmd_status() {
@@ -274,6 +312,21 @@ cmd_status() {
     os_state="personal"
   fi
   printf '%-12s %-10s %s\n' "outputStyle" "$os_state" "in $settings"
+
+  # statusline: файл statusline.sh + .statusLine в settings.json
+  local sl_dst="$CLAUDE_HOME/statusline.sh" sl_src="$ROOT_DIR/statusline/statusline.sh" sl_state sl_target
+  if [ -L "$sl_dst" ]; then
+    sl_target=$(readlink "$sl_dst")
+    [ "$sl_target" = "$sl_src" ] && sl_state="linked-ok" || sl_state="linked-foreign"
+  elif [ -f "$sl_dst" ]; then
+    sl_state="file-present"; sl_target="(real file, not from config)"
+  else
+    sl_state="missing"; sl_target="—"
+  fi
+  if [ -f "$settings" ] && jq -e '.statusLine' "$settings" >/dev/null 2>&1; then
+    sl_state="$sl_state +cfg"
+  fi
+  printf '%-12s %-10s %s\n' "statusline" "$sl_state" "$sl_target"
   echo
   echo "Run '$(basename "$0") install' to see install plan, add --apply to execute."
 }
@@ -296,11 +349,15 @@ cmd_install() {
       skills|agents|commands|output-styles) install_component "$comp" ;;
       hooks)                                 install_hooks ;;
       claude-md)                             install_claude_md ;;
+      statusline)                            install_statusline_file ;;
     esac
   done
-  # outputStyle ставим ПОСЛЕ hooks, чтобы merge хуков не затёр настройку.
+  # Настройки в settings.json ставим ПОСЛЕ hooks, чтобы merge хуков не затёр их.
   case ",$COMPONENTS," in
     *,output-styles,*) set_output_style ;;
+  esac
+  case ",$COMPONENTS," in
+    *,statusline,*) set_statusline ;;
   esac
 
   echo
@@ -342,6 +399,22 @@ cmd_uninstall() {
     fi
   done
 
+  # statusline: убрать наш symlink на statusline.sh (реальный файл не трогаем)
+  local sl_dst="$CLAUDE_HOME/statusline.sh"
+  if [ -L "$sl_dst" ]; then
+    local sl_target
+    sl_target=$(readlink "$sl_dst")
+    if [ "$sl_target" = "$ROOT_DIR/statusline/statusline.sh" ]; then
+      do_or_echo "rm '$sl_dst'"
+    else
+      echo "$(prefix) skip statusline.sh — symlink points to '$sl_target', not ours"
+    fi
+  elif [ -f "$sl_dst" ]; then
+    echo "$(prefix) skip statusline.sh — is a real file, not installed by us. Trogai vruchnuiu."
+  else
+    echo "$(prefix) skip statusline.sh — not present"
+  fi
+
   # claude-md: убрать управляемый блок из ~/.claude/CLAUDE.md (ручной контент сохраняем)
   local cmd_file="$CLAUDE_HOME/CLAUDE.md"
   if [ -f "$cmd_file" ] && grep -qF "my-claude-config (managed)" "$cmd_file"; then
@@ -359,6 +432,13 @@ cmd_uninstall() {
     echo "$(prefix) restored settings.json from $latest_bak"
   else
     echo "$(prefix) settings.json: no backup found, leaving as-is. Удали секцию 'hooks' вручную если нужно."
+  fi
+
+  # statusLine: убираем из settings.json (после restore хуков, чтобы он не вернул её обратно)
+  if [ -f "$settings" ] && jq -e '.statusLine' "$settings" >/dev/null 2>&1; then
+    do_or_echo "tmp=\$(mktemp) && jq 'del(.statusLine)' '$settings' > \"\$tmp\" && mv \"\$tmp\" '$settings'"
+  else
+    echo "$(prefix) settings.json: statusLine not present"
   fi
 
   echo
