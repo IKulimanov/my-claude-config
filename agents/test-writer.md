@@ -70,6 +70,7 @@ Match existing convention. Default: `methodName_shouldDoExpectedBehavior_whenCon
 
 ## Output Rules
 
-- Write complete, compilable test classes with all imports.
+- Produce complete, compilable test classes with all imports.
 - Комментарии в коде тестов — на русском, параметризованные логи без PII (rule 07).
-- After writing, state: layer chosen (why), scenarios covered, gaps remaining.
+- After generating, state: layer chosen (why), scenarios covered, gaps remaining.
+- You are read-only: return the test code; the caller writes the file and runs it.

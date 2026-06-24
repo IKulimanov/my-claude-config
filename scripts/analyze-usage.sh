@@ -25,14 +25,19 @@ else
   SINCE="0000-00-00T00:00:00Z"
 fi
 
-# Helper: фильтр по времени и проекту
+# Helper: фильтр по времени и проекту.
+# Логи — строгий JSONL (одна запись на строку, гарантирует hook_log). Читаем
+# построчно через -R + fromjson?, чтобы единичная повреждённая строка
+# пропускалась, а не роняла весь отчёт.
 filter() {
   local file="$1"
   [ ! -f "$file" ] && return
   if [ -n "$PROJECT" ]; then
-    jq -c --arg since "$SINCE" --arg proj "$PROJECT" 'select(.ts >= $since and .project == $proj)' "$file"
+    jq -cR --arg since "$SINCE" --arg proj "$PROJECT" \
+      'fromjson? | select(.ts >= $since and .project == $proj)' "$file"
   else
-    jq -c --arg since "$SINCE" 'select(.ts >= $since)' "$file"
+    jq -cR --arg since "$SINCE" \
+      'fromjson? | select(.ts >= $since)' "$file"
   fi
 }
 
@@ -60,12 +65,17 @@ echo "▎Top subagents (Agent tool calls)"
 filter "$LOG_DIR/subagents.jsonl" | jq -r 'select(.event=="SubagentStart") | .agent_type // "(unspecified)"' | sort | uniq -c | sort -rn | head -15 | awk '{printf "  %5d  %s\n", $1, $2}'
 
 echo
-echo "▎Top skills (по InstructionsLoaded — что реально подхватилось)"
-filter "$LOG_DIR/instructions.jsonl" | jq -r 'select(.skill != null and .skill != "") | .skill' | sort | uniq -c | sort -rn | head -15 | awk '{printf "  %5d  %s\n", $1, $2}'
+# Skills грузятся через инструмент Skill (а не InstructionsLoaded — тот фиксирует
+# только CLAUDE.md/память). Поэтому источник — Skill-вызовы из tools.jsonl.
+echo "▎Top skills (Skill-вызовы из tools.jsonl)"
+filter "$LOG_DIR/tools.jsonl" | jq -r 'select(.phase=="pre" and .tool=="Skill") | .input.skill // "(unknown)"' | sort | uniq -c | sort -rn | head -15 | awk '{printf "  %5d  %s\n", $1, $2}'
 
 echo
 echo "▎Slash-команды"
-filter "$LOG_DIR/prompts.jsonl" | jq -r 'select(.slash_command != null and .slash_command != "") | .slash_command' | sort | uniq -c | sort -rn | head -15 | awk '{printf "  %5d  %s\n", $1, $2}'
+# Берём только первую строку значения и требуем форму команды (/token целиком):
+# защищает отчёт от старых повреждённых записей (многострочный промпт «протекал»
+# в slash_command) и от путей вроде /Users/... , попавших в поле.
+filter "$LOG_DIR/prompts.jsonl" | jq -r 'select(.slash_command != null and .slash_command != "") | (.slash_command | split("\n")[0]) | select(test("^/[A-Za-z][A-Za-z0-9_:-]*$"))' | sort | uniq -c | sort -rn | head -15 | awk '{printf "  %5d  %s\n", $1, $2}'
 
 echo
 echo "▎Токены"
@@ -99,6 +109,21 @@ echo "$STOPS_F" | jq -s '
   | .[]
   | "  \(.tokens)\t\(.project)"
 ' -r | awk -F'\t' '{printf "  %10s  %s\n", $1, $2}'
+
+echo
+echo "▎TDD-сигнал (правки/запуски тестов из tools.jsonl)"
+# Косвенная проверка iron-law TDD: сколько правок попадает в тест-файлы против
+# прод-файлов и как часто реально запускались тесты. Считаем по уже имеющимся
+# полям tools.jsonl (file_path / command) — отдельное логирование не нужно.
+TDD_F=$(filter "$LOG_DIR/tools.jsonl")
+TEST_RE='(Test|Tests)\.java$|_test\.go$|\.(test|spec)\.(ts|js|tsx|jsx)$|/(test|tests|__tests__)/'
+RUN_RE='mvn .*test|gradle.*test|gradlew.*test|go test|npm( run)? test|yarn test|pnpm test|vitest|jest|pytest'
+test_edits=$(echo "$TDD_F" | jq -rc --arg re "$TEST_RE" 'select(.phase=="pre" and (.tool=="Edit" or .tool=="Write" or .tool=="MultiEdit")) | (.input.file_path // "") | select(. != "" and test($re))' | grep -c '' || true)
+prod_edits=$(echo "$TDD_F" | jq -rc --arg re "$TEST_RE" 'select(.phase=="pre" and (.tool=="Edit" or .tool=="Write" or .tool=="MultiEdit")) | (.input.file_path // "") | select(. != "" and (test($re)|not))' | grep -c '' || true)
+test_runs=$(echo "$TDD_F" | jq -rc --arg re "$RUN_RE" 'select(.phase=="pre" and .tool=="Bash") | (.input.command // "") | select(. != "" and test($re))' | grep -c '' || true)
+printf '  правки тест-файлов:  %s\n' "$test_edits"
+printf '  правки прод-файлов:  %s\n' "$prod_edits"
+printf '  запуски тестов:      %s\n' "$test_runs"
 
 echo
 echo "▎Заблокированные действия"

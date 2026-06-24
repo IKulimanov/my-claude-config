@@ -65,6 +65,7 @@ TestFunctionName_errorCase
 
 ## Output Rules
 
-- Write complete, compilable test files with all imports.
+- Produce complete, compilable test code with all imports.
 - Комментарии в коде тестов — на русском (rule 07).
-- After writing, state: test type chosen and why, scenarios covered, remaining gaps.
+- After generating, state: test type chosen and why, scenarios covered, remaining gaps.
+- You are read-only: return the test code; the caller writes the file and runs it.

@@ -367,7 +367,7 @@ fi
 ### Неделя 2 — продуктивность
 - **День 6–7.** Прочитать исходники `anthropics/skills`, особенно `skill-creator/`, `pdf/`, `excel/`.
 - **День 8.** Скопировать `skill-creator` к себе. Создать через него один новый skill (Oracle или ClickHouse).
-- **День 9.** Прочитать «Building effective agents». Проверить свои `planner` и `migration-reviewer` на tool-leak и stop conditions.
+- **День 9.** Прочитать «Building effective agents». Проверить свой `migration-reviewer` и stack-reviewers на tool-leak и stop conditions.
 - **День 10.** Worktree isolation для `test-writer` (раздел 7).
 
 ### Неделя 3 — масштабирование

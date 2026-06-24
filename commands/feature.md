@@ -143,7 +143,7 @@ Present the plan for approval before implementing:
 ### Step 6 — Implement step by step (TDD-first, iron law)
 
 After approval, for each step:
-1. **RED:** Write the failing test FIRST (or let the user write it — see test authorship in `rules/06-tdd-discipline.md`). Run it. Confirm it fails for the right reason.
+1. **RED:** Author the failing test FIRST. Delegate test design to the stack's test-writer agent — Java/Spring → `test-writer`, Go → `go-test-writer`, Vue/Vite → `vue-test-writer`. The agent is read-only: it returns the test code; you write it to the test file and run it, confirming it fails for the right reason. For any other stack, write the failing test directly. (Or let the user write it — see test authorship in `rules/06-tdd-discipline.md`.)
 2. **GREEN:** Write the minimal production code to make the test pass. Run it. Confirm green.
 3. **REFACTOR:** Clean up code and test without changing behavior. Re-run tests.
 4. Only THEN move to the next step.

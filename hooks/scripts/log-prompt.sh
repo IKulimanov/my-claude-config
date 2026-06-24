@@ -14,11 +14,8 @@ CWD=$(hook_field "$INPUT" '.cwd')
 PROJECT=$(hook_project_name "$CWD")
 
 LEN=${#PROMPT}
-# Определить, если это slash-command
-SLASH=""
-if [[ "$PROMPT" =~ ^/[a-zA-Z][a-zA-Z0-9_-]* ]]; then
-  SLASH=$(echo "$PROMPT" | awk '{print $1}')
-fi
+# slash-команда (если есть) — только ведущий /token первой строки.
+SLASH=$(hook_slash_command "$PROMPT")
 
 # Превью промпта для анализа (первые 500 символов).
 # Используем bash-параметры вместо tr/head, чтобы не падать на UTF-8 (кириллица и пр.).

@@ -29,6 +29,8 @@ INPUT_SUMMARY=$(echo "$INPUT" | jq -c '
         command: (.command // "" | .[0:200]),
         description: .description,
         subagent_type: .subagent_type,
+        skill: .skill,
+        args: (.args // "" | .[0:120]),
         prompt: (.prompt // "" | .[0:120])
       }
       | with_entries(select(.value != null and .value != ""))

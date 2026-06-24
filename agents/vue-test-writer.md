@@ -47,8 +47,8 @@ Before writing tests, always:
 
 ## Output Rules
 
-- Write complete, runnable test files with all imports.
+- Produce complete, runnable test code with all imports.
 - Комментарии в коде тестов — на русском (rule 07).
 - State which layer was chosen and why.
 - List covered scenarios and remaining gaps.
-- Run tests if possible and report results.
+- You are read-only: return the test code; the caller writes the file and runs it.
