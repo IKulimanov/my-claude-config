@@ -28,6 +28,30 @@ Add a new hook when:
 - the detection rule is simple and reliable
 - false positives will stay low
 
+## Script vs Prompt: When to Make a Callable Helper
+
+Inspired by configs that call helper scripts (clipboard grab, renderers) instead of re-deriving the
+same procedure in prose each run.
+
+Decision rule:
+- **deterministic + repeatable + no judgment → script.** Put it in `scripts/helpers/`, call it from
+  the command. A script is fast, costs no tokens, is testable, and produces identical output every
+  run. Examples: scaffolding the `.ai/` skeleton (`ai-init.sh`), collecting a review diff
+  (`collect-diff.sh`), rendering markdown to PDF/HTML (`render-doc.sh`).
+- **needs context or judgment → prompt.** Keep it in the command/agent body. Examples: planning,
+  review reasoning, changelog selection, distilling a correction into a rule.
+
+Anti-pattern: an LLM re-computing a mechanical recipe (parsing, geometry, fixed file layout) on every
+invocation. If the steps are the same regardless of input meaning, it is a script.
+
+Conventions for `scripts/helpers/`:
+- `set -euo pipefail`, clear `Usage:` on bad args, non-zero exit on failure (never pretend success).
+- These are command helpers, not installers — they act immediately when called (no `--apply` gate),
+  but stay idempotent and low-risk (touch only the local work repo, e.g. `.ai/` and its `.gitignore`).
+- A `-n` / `--dry-run` flag is welcome for anything that writes files.
+- Add a test under `tests/` first (iron-law TDD): a self-contained `test-<name>.sh` that prints
+  `OK: ...` on success and `FAIL: ...` to stderr with a non-zero exit otherwise.
+
 ## Good First Extensions
 
 - a stack overlay skill for your primary runtime

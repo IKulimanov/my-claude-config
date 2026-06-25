@@ -10,91 +10,16 @@ Use this command for any new feature or significant change. It enforces a plan-f
 
 ## Workflow
 
-### Step 1 — Load context and detect stack
+### Step 1-2 — Load context, detect stack, load skills
 
-1. Read the local `CLAUDE.md`.
-2. Detect the stack:
-   - **Java/Spring**: `pom.xml` or `build.gradle` → Spring Boot version, modules (JPA, Kafka, REST, Security)
-   - **Go**: `go.mod` → Go version, main packages, HTTP framework
-   - **Vue/Vite**: `package.json` with `vue` dependency, `vite.config.ts` → Vue version, Pinia, Router, TypeScript
-   - **Web (other)**: `package.json` without Vue, or static HTML → bundler, CSS framework
-3. **Detect project type:** if cwd is under `/Users/ivankulimanov/dev/work/` → WORK project, canonical convention applies.
-   For Java work projects: load `java-service-convention` skill — it will redirect you to the canonical convention at `/Users/ivankulimanov/dev/work/java/convention-java/docs/`.
-4. Restate the requirement in concrete technical terms before planning.
-
-### Step 2 — Auto-detect and load skills
-
-#### Java/Spring
-| What is touched | Load |
-|---|---|
-| Any Java code | `java-service-convention` |
-| Spring beans, config, Security, Async, Cache | `spring-best-practices` |
-| Code structure, new abstractions, patterns | `java-patterns` |
-| JPA entities, repositories, SQL, schema | `jpa-db-review` |
-| Kafka consumers/producers, REST clients | `integration-patterns` |
-| Tests (always) | `testing` |
-
-#### Go
-| What is touched | Load |
-|---|---|
-| Any Go code | `go-best-practices` |
-| HTTP handlers, middleware, routing | `go-best-practices` + `web-app` (if serving HTML) |
-| Concurrency, goroutines | `go-best-practices/references/concurrency.md` |
-| Tests (always) | `go-best-practices/references/testing.md` |
-
-#### Vue/Vite
-| What is touched | Load |
-|---|---|
-| Components, composables | `vue-frontend` |
-| Pinia stores | `vue-frontend/references/state-routing.md` |
-| Router | `vue-frontend/references/state-routing.md` |
-| Tests (always) | `vue-frontend/references/testing-vue.md` |
-
-#### Always
-| What is touched | Load |
-|---|---|
-| Docker, CI, K8s | relevant DevOps skill |
-| Git branching, commit messages | `git-convention` |
+Follow the shared block: `~/dev/my-claude-config/docs/shared/stack-detection.md`. It covers reading
+the local `CLAUDE.md`, detecting Java/Spring · Go · Vue/Vite · Web, detecting WORK vs personal
+project, restating the requirement, and the per-stack skill-loading tables.
 
 ### Step 3 — Map affected layers
 
-List every layer the feature will touch:
-
-**Java/Spring:**
-```text
-- [ ] Controller / API
-- [ ] Service / Domain
-- [ ] Repository / Data access
-- [ ] Configuration
-- [ ] Messaging (Kafka)
-- [ ] External integrations (REST)
-- [ ] Tests (unit + integration)
-- [ ] DB migration (Liquibase/Flyway)
-```
-
-**Go:**
-```text
-- [ ] Handler / Transport
-- [ ] Service / Use cases
-- [ ] Repository / Data access
-- [ ] Configuration
-- [ ] Middleware
-- [ ] External integrations
-- [ ] Tests
-- [ ] DB migration
-```
-
-**Vue/Vite:**
-```text
-- [ ] Components (new / modified)
-- [ ] Composables
-- [ ] Pinia stores
-- [ ] Router (new routes / guards)
-- [ ] API layer (fetch/axios calls)
-- [ ] Types / interfaces
-- [ ] Tests (unit + component)
-- [ ] Build / env config
-```
+List every layer the feature will touch, using the checklist in
+`~/dev/my-claude-config/docs/shared/affected-layers.md` (Java/Spring · Go · Vue/Vite).
 
 ### Step 4 — State open questions
 
@@ -109,36 +34,23 @@ Surface ambiguities that would lead to wrong implementation:
 
 ### Step 5 — Produce phased implementation plan
 
-Present the plan for approval before implementing:
-
-```text
-# Feature Plan: <name>
-
-## Summary
-<what is changing and why>
-
-## Stack
-<detected stack and key details>
-
-## Affected Layers
-...
-
-## Open Questions
-- ...
-
-## Implementation Steps
-1. <step> — <file(s)>
-2. ...
-
-## Tests
-- Unit: <what and why>
-- Integration/Component: <what and why>
-
-## Migration (if applicable)
-- <schema or data change>
-```
+Present the plan for approval before implementing, using the shared format in
+`~/dev/my-claude-config/docs/shared/plan-template.md` (Summary, Stack, Affected Layers, Open
+Questions, Implementation Steps, Tests, Migration).
 
 **Wait for approval or answers to open questions.**
+
+#### Persist the plan to `.ai/` (light convention)
+
+When working inside a repo, save the approved plan as a durable artifact so it survives context
+compaction and follow-ups. See `docs/AI_ARTIFACTS.md`.
+
+```bash
+DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<feature>")   # creates .ai/<feature>/, gitignores .ai/
+```
+
+Write the plan to `$DIR/plan.md`. Update it as the implementation evolves. This is optional for
+trivial changes.
 
 ### Step 6 — Implement step by step (TDD-first, iron law)
 

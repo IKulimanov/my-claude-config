@@ -1,7 +1,7 @@
 ---
 description: Create an implementation plan before making non-trivial code changes
 argument-hint: <task description or Jira ID>
-allowed-tools: Read, Grep, Glob, Bash
+allowed-tools: Read, Grep, Glob, Bash, Write
 ---
 
 # Plan
@@ -17,6 +17,16 @@ Use this command when the task is ambiguous, multi-file, high-risk, or likely to
 5. Propose a phased implementation plan.
 6. Define the validation and tests needed.
 7. Wait for approval before large changes.
+
+## Persist to `.ai/` (light convention)
+
+When working inside a repo, save the plan as a durable artifact (see `docs/AI_ARTIFACTS.md`):
+
+```bash
+DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<task>")   # creates .ai/<task>/, gitignores .ai/
+```
+
+Write the plan below to `$DIR/plan.md`. Optional for trivial tasks.
 
 ## Output Format
 

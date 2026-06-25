@@ -1,7 +1,7 @@
 ---
 description: Review current changes for bugs, regressions, security risks, and missing tests. Auto-detects the stack (Java/Spring, Go, Vue) and delegates to the matching reviewer agent; other stacks are reviewed directly.
 argument-hint: [optional path or PR scope]
-allowed-tools: Read, Grep, Glob, Bash, Agent
+allowed-tools: Read, Grep, Glob, Bash, Agent, Write
 ---
 
 # Review
@@ -54,3 +54,13 @@ For every directly-reviewed branch (Web, DevOps, other), apply the Output Rules 
 - **CRITICAL**: data loss, security exposure, broken behavior, or unsafe rollout risk
 - **WARNING**: likely bug, regression risk, missing validation, or serious maintainability issue
 - **SUGGESTION**: lower-impact improvement worth considering
+
+## Persist to `.ai/` (light convention)
+
+When working inside a repo, save the findings as a durable artifact (see `docs/AI_ARTIFACTS.md`):
+
+```bash
+DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<feature-or-branch>")
+```
+
+Write the review (findings + severities) to `$DIR/review.md`. Optional when there are no findings.
