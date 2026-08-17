@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "week": "2026-W28",
+  "range": {
+    "from": "2026-07-04T00:00:00Z",
+    "to": "2026-07-11T00:00:00Z"
+  },
+  "generated_at": "2026-07-11T13:08:03Z",
+  "sessions": {
+    "total": 95,
+    "by_project": {
+      "Lark": 5,
+      "business-document-generation": 3,
+      "business-m2m-gateway": 18,
+      "cockpit-testing-management": 2,
+      "crkbd": 1,
+      "ivankulimanov": 43,
+      "lares": 5,
+      "lifeOS": 16,
+      "multi-client-instance": 2
+    }
+  },
+  "daily_sessions": {
+    "2026-07-05": 15,
+    "2026-07-06": 6,
+    "2026-07-07": 26,
+    "2026-07-08": 5,
+    "2026-07-09": 26,
+    "2026-07-10": 17
+  },
+  "active_days": 6,
+  "peak": {
+    "date": "2026-07-09",
+    "sessions": 26
+  },
+  "tokens": {
+    "input": 1098275,
+    "output": 7228093,
+    "cache_read": 1094413742,
+    "cache_write": 35813934,
+    "turns": 4004,
+    "by_project_top": [
+      {
+        "project": "business-m2m-gateway",
+        "input": 661086,
+        "output": 3819504
+      },
+      {
+        "project": "business-document-generation",
+        "input": 175517,
+        "output": 1723581
+      },
+      {
+        "project": "lifeOS",
+        "input": 85568,
+        "output": 883044
+      },
+      {
+        "project": "order_system",
+        "input": 98686,
+        "output": 698364
+      },
+      {
+        "project": "crkbd",
+        "input": 12624,
+        "output": 72156
+      }
+    ]
+  },
+  "models": {
+    "claude-fable-5": 4,
+    "claude-opus-4-8": 20
+  },
+  "tools": {
+    "top": [
+      {
+        "name": "Read",
+        "count": 2564
+      },
+      {
+        "name": "Bash",
+        "count": 2206
+      },
+      {
+        "name": "Edit",
+        "count": 1037
+      },
+      {
+        "name": "Write",
+        "count": 335
+      },
+      {
+        "name": "Agent",
+        "count": 118
+      },
+      {
+        "name": "TaskUpdate",
+        "count": 70
+      },
+      {
+        "name": "TaskCreate",
+        "count": 43
+      },
+      {
+        "name": "AskUserQuestion",
+        "count": 31
+      },
+      {
+        "name": "ToolSearch",
+        "count": 29
+      },
+      {
+        "name": "ExitPlanMode",
+        "count": 16
+      },
+      {
+        "name": "WebFetch",
+        "count": 7
+      },
+      {
+        "name": "WebSearch",
+        "count": 4
+      },
+      {
+        "name": "EnterWorktree",
+        "count": 1
+      },
+      {
+        "name": "Skill",
+        "count": 1
+      }
+    ],
+    "failures_total": 89,
+    "failures_by_tool": [
+      {
+        "name": "Read",
+        "count": 56
+      },
+      {
+        "name": "Bash",
+        "count": 32
+      },
+      {
+        "name": "Agent",
+        "count": 1
+      }
+    ]
+  },
+  "skills": {
+    "top": [
+      {
+        "name": "arch",
+        "count": 1
+      }
+    ]
+  },
+  "slash_commands": {
+    "top": [
+      {
+        "name": "/task",
+        "count": 15
+      },
+      {
+        "name": "/review",
+        "count": 3
+      },
+      {
+        "name": "/plan",
+        "count": 2
+      },
+      {
+        "name": "/review-mr",
+        "count": 1
+      }
+    ]
+  },
+  "subagents": {
+    "top": [
+      {
+        "name": "general-purpose",
+        "count": 61
+      },
+      {
+        "name": "Explore",
+        "count": 27
+      },
+      {
+        "name": "java-reviewer",
+        "count": 18
+      },
+      {
+        "name": "Plan",
+        "count": 11
+      },
+      {
+        "name": "test-writer",
+        "count": 1
+      }
+    ]
+  },
+  "prompts": {
+    "count": 138,
+    "mean_length": 1465,
+    "median_length": 168,
+    "slash_pct": 15.22,
+    "cyrillic_pct": 84.78
+  },
+  "plan_mode": {
+    "exit_plan_mode_count": 16
+  },
+  "tdd": {
+    "test_edits": 481,
+    "prod_edits": 891,
+    "test_runs": 390
+  },
+  "blocks": {
+    "by_kind": {
+      "destructive": 8,
+      "secret": 2
+    },
+    "total": 10
+  },
+  "friction": {
+    "total": 2,
+    "by_keyword": {
+      "не так": 1,
+      "опять": 1
+    }
+  },
+  "enrichment": {
+    "ccusage": {
+      "available": false,
+      "reason": "disabled"
+    }
+  }
+}

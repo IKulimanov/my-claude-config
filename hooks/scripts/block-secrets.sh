@@ -38,7 +38,8 @@ fi
 
 if echo "$TARGET" | grep -qE "$SECRET_PATTERN"; then
   hook_deny "Blocked: access to secret file/path. Open it manually if needed. Target: $(echo "$TARGET" | head -c 200)"
-  hook_log "blocks" "$(jq -n --arg ts "$(hook_now)" --arg tool "$TOOL" --arg tgt "$TARGET" --arg sid "$(hook_field "$INPUT" '.session_id')" --arg cwd "$(hook_field "$INPUT" '.cwd')" '{ts:$ts, kind:"secret", tool:$tool, session:$sid, cwd:$cwd, target:$tgt}')"
+  CWD=$(hook_field "$INPUT" '.cwd')
+  hook_log "blocks" "$(jq -n --arg ts "$(hook_now)" --arg tool "$TOOL" --arg tgt "$TARGET" --arg sid "$(hook_field "$INPUT" '.session_id')" --arg cwd "$CWD" --arg proj "$(hook_project_name "$CWD")" '{ts:$ts, kind:"secret", tool:$tool, session:$sid, project:$proj, cwd:$cwd, target:$tgt}')"
   exit 0
 fi
 

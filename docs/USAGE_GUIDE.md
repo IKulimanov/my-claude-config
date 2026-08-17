@@ -69,7 +69,7 @@
 ### Миграция БД
 
 ```
-/migration-plan
+/plan
 
 Нужно добавить таблицу order_items с внешним ключом на orders.
 Используем Oracle. Сервис production, ~500k строк в orders.
@@ -90,7 +90,7 @@
 ### Дебаг непонятного бага
 
 ```
-/debug
+/fix
 
 Сервис бросает LazyInitializationException в ProductionOrderProcessor.
 Stack trace: [вставь trace]
@@ -115,7 +115,7 @@ Stack trace: [вставь trace]
 ### Настроить локальное окружение с Docker Compose
 
 ```
-/docker-ops
+/plan
 
 Проект: Spring Boot + PostgreSQL + Kafka.
 Нужно:
@@ -171,29 +171,10 @@ Stack trace: [вставь trace]
 
 ## Мета-задачи: работа над самим конфигом
 
-### Проверить, не устарел ли skill
-
-```
-Выступи в роли prompt-auditor.
-Проверь skill jpa-db-review: нет ли устаревших инструкций, дублирования, неоднозначностей.
-```
-
----
-
 ### Начать работу в незнакомом репозитории
 
 ```
 Загрузи skill repo-onboarding и составь карту этого репозитория.
-```
-
----
-
-### Спроектировать нового агента или skill
-
-```
-Загрузи skill agent-design.
-Хочу добавить skill для работы с ClickHouse analytics queries.
-Помоги определить: что должно быть в SKILL.md, нужны ли references, как он будет триггериться.
 ```
 
 ---
@@ -226,7 +207,7 @@ Stack trace: [вставь trace]
 1. Есть ли локальный `CLAUDE.md` с описанием проекта? Если нет — заполни.
 2. Какие skills нужны для задачи?
 3. Нужен ли план перед реализацией? → `/plan`
-4. Затронуты ли DB, API-контракты, Kafka-топики? → сначала `/migration-plan` или `/plan`
+4. Затронуты ли DB, API-контракты, Kafka-топики? → сначала `/plan` (+ агент `migration-reviewer` для схемы)
 5. Готов ли тест/проверка перед тем как считать задачу выполненной?
 
 ---
@@ -286,11 +267,11 @@ Stack trace: [вставь trace]
 | Новая фича (любой стек) | `/feature` |
 | Code review своих изменений | `/review` или `java-reviewer` агент |
 | Ревью MR коллеги (на русском, сохраняется) | `/review-mr` |
-| Дебаг | `/debug` |
-| Миграция БД | `/migration-plan` |
-| Docker setup | `/docker-ops` + skill `docker` |
+| Дебаг | `/fix` (шаг 3a — причина до правки) |
+| Миграция БД | `/plan` + агент `migration-reviewer` |
+| Docker setup | skill `docker` (через `/plan`) |
 | Новый репозиторий | skill `repo-onboarding` |
-| Review Kafka/REST интеграций | `/integration-review` + skill `integration-patterns` |
+| Review Kafka/REST интеграций | `/review` + skill `integration-patterns` |
 | Review конвенций Java | `/convention-check` + skill `java-service-convention` |
-| Аудит промптов/конфига | агент `prompt-auditor` или skill `prompt-audit` |
-| Проектирование агентов | skill `agent-design` |
+| Аудит промптов/конфига | удалено 2026-08 (см. docs/audit-2026-08/04-config-changes.md) |
+| Проектирование агентов | удалено 2026-08 (см. docs/audit-2026-08/04-config-changes.md) |

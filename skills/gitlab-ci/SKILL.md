@@ -1,6 +1,7 @@
 ---
 name: gitlab-ci
-description: Use when writing or reviewing GitLab CI/CD pipelines. Covers pipeline structure, stages, caching, artifacts, Docker-in-Docker, variables, environments, templates, and branch strategies for Java/Spring services.
+description: Use when writing or reviewing GitLab CI/CD pipelines. Covers pipeline structure, stages, caching, artifacts, Docker-in-Docker, variables, environments, templates, and branch strategies for Java/Spring services. Triggers on .gitlab-ci.yml, pipeline/stage/job questions, CI variables, runners, `rules:`/`needs:`.
+paths: "**/.gitlab-ci.yml,**/.gitlab-ci.yaml,**/.gitlab/**"
 ---
 
 # GitLab CI

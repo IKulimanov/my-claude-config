@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "week": "2026-W21",
+  "range": {
+    "from": "2026-05-16T00:00:00Z",
+    "to": "2026-05-23T00:00:00Z"
+  },
+  "generated_at": "2026-07-11T08:25:10Z",
+  "sessions": {
+    "total": 11,
+    "by_project": {
+      "business-corporate-selfcare": 4,
+      "business-document-generation": 1,
+      "business-notification-core": 3,
+      "business-operator-detailing": 1,
+      "cockpit-document-generation-frontend": 1,
+      "lifeOS": 1
+    }
+  },
+  "daily_sessions": {
+    "2026-05-17": 1,
+    "2026-05-18": 5,
+    "2026-05-19": 2,
+    "2026-05-20": 2,
+    "2026-05-21": 1
+  },
+  "active_days": 5,
+  "peak": {
+    "date": "2026-05-18",
+    "sessions": 5
+  },
+  "tokens": {
+    "input": 5590,
+    "output": 1842178,
+    "cache_read": 340311950,
+    "cache_write": 13729256,
+    "turns": 1546,
+    "by_project_top": [
+      {
+        "project": "my-claude-config",
+        "input": 3733,
+        "output": 889655
+      },
+      {
+        "project": "business-document-generation",
+        "input": 966,
+        "output": 491753
+      },
+      {
+        "project": "business-notification-core",
+        "input": 257,
+        "output": 188952
+      },
+      {
+        "project": "business-corporate-selfcare",
+        "input": 233,
+        "output": 127391
+      },
+      {
+        "project": "cockpit-document-generation-frontend",
+        "input": 239,
+        "output": 120502
+      }
+    ]
+  },
+  "models": {
+    "claude-opus-4-6": 1,
+    "claude-opus-4-7": 8,
+    "claude-sonnet-4-6": 1
+  },
+  "tools": {
+    "top": [
+      {
+        "name": "Bash",
+        "count": 445
+      },
+      {
+        "name": "Read",
+        "count": 330
+      },
+      {
+        "name": "Edit",
+        "count": 213
+      },
+      {
+        "name": "Write",
+        "count": 13
+      },
+      {
+        "name": "AskUserQuestion",
+        "count": 11
+      },
+      {
+        "name": "Agent",
+        "count": 8
+      },
+      {
+        "name": "mcp__ccd_session__mark_chapter",
+        "count": 3
+      },
+      {
+        "name": "Skill",
+        "count": 1
+      }
+    ],
+    "failures_total": 5,
+    "failures_by_tool": [
+      {
+        "name": "Bash",
+        "count": 4
+      },
+      {
+        "name": "Read",
+        "count": 1
+      }
+    ]
+  },
+  "skills": {
+    "top": [
+      {
+        "name": "(unknown)",
+        "count": 1
+      }
+    ]
+  },
+  "slash_commands": {
+    "top": [
+      {
+        "name": "/review",
+        "count": 7
+      },
+      {
+        "name": "/jira",
+        "count": 3
+      },
+      {
+        "name": "/onboard",
+        "count": 3
+      },
+      {
+        "name": "/fix",
+        "count": 2
+      },
+      {
+        "name": "/plan",
+        "count": 2
+      }
+    ]
+  },
+  "subagents": {
+    "top": [
+      {
+        "name": "java-reviewer",
+        "count": 5
+      },
+      {
+        "name": "Explore",
+        "count": 1
+      },
+      {
+        "name": "migration-reviewer",
+        "count": 1
+      },
+      {
+        "name": "vue-reviewer",
+        "count": 1
+      }
+    ]
+  },
+  "prompts": {
+    "count": 42,
+    "mean_length": 2129,
+    "median_length": 90,
+    "slash_pct": 40.48,
+    "cyrillic_pct": 71.43
+  },
+  "plan_mode": {
+    "exit_plan_mode_count": 0
+  },
+  "tdd": {
+    "test_edits": 76,
+    "prod_edits": 150,
+    "test_runs": 46
+  },
+  "blocks": {
+    "by_kind": {
+      "destructive": 5,
+      "secret": 3
+    },
+    "total": 8
+  },
+  "friction": {
+    "total": 0,
+    "by_keyword": {}
+  },
+  "enrichment": {
+    "ccusage": {
+      "available": false,
+      "reason": "disabled"
+    }
+  }
+}

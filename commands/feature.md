@@ -35,8 +35,9 @@ Surface ambiguities that would lead to wrong implementation:
 ### Step 5 — Produce phased implementation plan
 
 Present the plan for approval before implementing, using the shared format in
-`~/dev/my-claude-config/docs/shared/plan-template.md` (Summary, Stack, Affected Layers, Open
-Questions, Implementation Steps, Tests, Migration).
+`~/dev/my-claude-config/docs/shared/plan-template.md` — Russian sections, including the **mandatory
+«Каким путём идём»** (explains the chosen approach and why, not just a list of steps). The plan must
+let the reader follow your reasoning, not only what changes.
 
 **Wait for approval or answers to open questions.**
 
@@ -64,10 +65,23 @@ If you cannot write a failing test first (e.g., genuine UI-only change with no b
 
 If an unexpected complication arises, pause and report before continuing.
 
-### Step 7 — Validate and report
+### Step 7 — Validate
 
 Run the appropriate validation:
 - **Java**: `mvn verify` (or from `CLAUDE.md`)
 - **Go**: `go test ./... && go vet ./...`
 - **Vue/Vite**: `npm run test` or `npx vitest run`
-- Report what was verified and flag any residual risks.
+
+### Step 8 — Convention gate (Java work projects), then report
+
+Before declaring the feature done, run the convention pre-check on the final diff so drift is caught
+locally, not by CI. For a WORK Java project (cwd under `~/dev/work/`), check the diff against the
+Sonar-aligned checklist `~/dev/my-claude-config/skills/java-service-convention/references/sonar-rules.md`
+(codes LANG-/SPR-/DB-) — equivalent to running `/convention-check`. Fix violations with TDD, then
+re-validate. This is a pre-filter: the authoritative gate is CI Sonar (`mvn verify sonar:sonar
+-Dsonar.qualitygate.wait=true`). For non-Java or personal projects, skip.
+
+`sonar-rules.md` is internal team material — cite rule codes (LANG-410, SPR-902); do not paste its
+prose or code examples verbatim into shared outputs.
+
+Only after this — report what was verified, the convention-gate result, and any residual risks.

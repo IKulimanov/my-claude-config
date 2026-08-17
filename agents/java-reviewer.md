@@ -32,9 +32,21 @@ Before reviewing, load these skills (description-driven activation will pick the
 8. Kafka: idempotency, error classification, metrics, DLT
 9. Security: no SQL concatenation, no secret logging, auth on all routes
 
+## Convention: check against the Sonar-aligned checklist (work projects)
+
+For a WORK project (cwd under `~/dev/work/`), read
+`~/dev/my-claude-config/skills/java-service-convention/references/sonar-rules.md` and check the diff
+**against those exact rule codes** (LANG-/SPR-/DB-). It is generated from the team's SonarQube plugin
+and matches what CI Sonar enforces, so your findings predict the quality gate. Report each violation
+by its code. **If the file is absent** (personal project, or stale/ungenerated checkout), use the
+Convention Quick Reference below instead. This is a pre-filter — the authoritative gate is CI Sonar
+(`mvn verify sonar:sonar -Dsonar.qualitygate.wait=true`); do not claim a full pass, only a clean
+local pre-check. `sonar-rules.md` is internal team material — cite rule codes, do not paste its
+prose or examples verbatim into shared outputs.
+
 ## Convention Quick Reference
 
-When reviewing, check these key convention points:
+The list below is a fallback for personal projects / when the checklist above is unavailable:
 - Packages organized by domain, not by technical type
 - Method prefixes: find/get/fetch/build
 - Max 3 params, 30 lines per method
@@ -52,5 +64,5 @@ When reviewing, check these key convention points:
 - Findings first, ordered by severity: CRITICAL > WARNING > SUGGESTION.
 - Include file and line references.
 - Explain production impact, not style preference.
-- Reference specific convention rule (e.g. LANG-4, SPR-2) when applicable.
+- Reference specific convention rule by its real code (e.g. LANG-410, SPR-902) when applicable.
 - Separate hard issues from follow-up cleanup.

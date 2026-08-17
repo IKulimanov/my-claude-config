@@ -1,0 +1,237 @@
+{
+  "schema_version": 1,
+  "week": "2026-W25",
+  "range": {
+    "from": "2026-06-13T00:00:00Z",
+    "to": "2026-06-20T00:00:00Z"
+  },
+  "generated_at": "2026-07-11T08:25:12Z",
+  "sessions": {
+    "total": 216,
+    "by_project": {
+      "business-corporate-selfcare": 5,
+      "business-m2m-gateway": 43,
+      "business-notification-core": 1,
+      "convention-java": 1,
+      "ivankulimanov": 134,
+      "lifeOS": 2,
+      "my-claude-config": 3,
+      "nur-toys": 1,
+      "task-manager": 2,
+      "teacher-pro": 24
+    }
+  },
+  "daily_sessions": {
+    "2026-06-13": 2,
+    "2026-06-14": 60,
+    "2026-06-15": 38,
+    "2026-06-16": 12,
+    "2026-06-17": 36,
+    "2026-06-18": 37,
+    "2026-06-19": 31
+  },
+  "active_days": 7,
+  "peak": {
+    "date": "2026-06-14",
+    "sessions": 60
+  },
+  "tokens": {
+    "input": 2438518,
+    "output": 18325016,
+    "cache_read": 2162283330,
+    "cache_write": 96661993,
+    "turns": 6222,
+    "by_project_top": [
+      {
+        "project": "business-m2m-gateway",
+        "input": 1876509,
+        "output": 13039933
+      },
+      {
+        "project": "teacher-pro",
+        "input": 263356,
+        "output": 3456524
+      },
+      {
+        "project": "business_m2m_gateway",
+        "input": 163803,
+        "output": 826193
+      },
+      {
+        "project": "my-claude-config",
+        "input": 78917,
+        "output": 774724
+      },
+      {
+        "project": "business-notification-core",
+        "input": 27514,
+        "output": 56311
+      }
+    ]
+  },
+  "models": {
+    "claude-fable-5": 2,
+    "claude-opus-4-7": 8,
+    "claude-opus-4-8": 15
+  },
+  "tools": {
+    "top": [
+      {
+        "name": "Read",
+        "count": 1897
+      },
+      {
+        "name": "Bash",
+        "count": 1653
+      },
+      {
+        "name": "Edit",
+        "count": 1047
+      },
+      {
+        "name": "Write",
+        "count": 305
+      },
+      {
+        "name": "TaskUpdate",
+        "count": 146
+      },
+      {
+        "name": "TaskCreate",
+        "count": 81
+      },
+      {
+        "name": "Agent",
+        "count": 61
+      },
+      {
+        "name": "AskUserQuestion",
+        "count": 42
+      },
+      {
+        "name": "WebFetch",
+        "count": 30
+      },
+      {
+        "name": "ExitPlanMode",
+        "count": 25
+      },
+      {
+        "name": "ToolSearch",
+        "count": 21
+      },
+      {
+        "name": "mcp__ccd_session__mark_chapter",
+        "count": 8
+      },
+      {
+        "name": "mcp__context7__query-docs",
+        "count": 7
+      },
+      {
+        "name": "WebSearch",
+        "count": 4
+      },
+      {
+        "name": "mcp__context7__resolve-library-id",
+        "count": 4
+      }
+    ],
+    "failures_total": 61,
+    "failures_by_tool": [
+      {
+        "name": "Bash",
+        "count": 34
+      },
+      {
+        "name": "Read",
+        "count": 27
+      }
+    ]
+  },
+  "skills": {
+    "top": [
+      {
+        "name": "(unknown)",
+        "count": 2
+      }
+    ]
+  },
+  "slash_commands": {
+    "top": [
+      {
+        "name": "/review",
+        "count": 11
+      },
+      {
+        "name": "/plan",
+        "count": 9
+      },
+      {
+        "name": "/arch",
+        "count": 1
+      },
+      {
+        "name": "/onboard",
+        "count": 1
+      }
+    ]
+  },
+  "subagents": {
+    "top": [
+      {
+        "name": "Explore",
+        "count": 38
+      },
+      {
+        "name": "general-purpose",
+        "count": 9
+      },
+      {
+        "name": "java-reviewer",
+        "count": 9
+      },
+      {
+        "name": "claude-code-guide",
+        "count": 3
+      },
+      {
+        "name": "Plan",
+        "count": 2
+      }
+    ]
+  },
+  "prompts": {
+    "count": 213,
+    "mean_length": 644,
+    "median_length": 194,
+    "slash_pct": 10.33,
+    "cyrillic_pct": 87.32
+  },
+  "plan_mode": {
+    "exit_plan_mode_count": 25
+  },
+  "tdd": {
+    "test_edits": 277,
+    "prod_edits": 1075,
+    "test_runs": 130
+  },
+  "blocks": {
+    "by_kind": {
+      "destructive": 4
+    },
+    "total": 4
+  },
+  "friction": {
+    "total": 2,
+    "by_keyword": {
+      "не то": 2
+    }
+  },
+  "enrichment": {
+    "ccusage": {
+      "available": false,
+      "reason": "disabled"
+    }
+  }
+}

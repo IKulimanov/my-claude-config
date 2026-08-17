@@ -1,6 +1,6 @@
 ---
 name: integration-patterns
-description: Use for Kafka, REST clients, secret handling, logging, correlation IDs, and service-to-service integration review in Java services.
+description: Use for Kafka, REST clients, secret handling, logging, correlation IDs, and service-to-service integration in Java services. Triggers on @KafkaListener/KafkaTemplate, producer/consumer, retry/DLQ/idempotency, Feign/RestClient/WebClient, timeouts, correlation-id, Vault secrets, structured logging.
 ---
 
 # Integration Patterns

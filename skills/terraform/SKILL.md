@@ -1,6 +1,7 @@
 ---
 name: terraform
-description: Use when writing or reviewing Terraform infrastructure code. Covers module structure, state management, variable and output patterns, resource naming, workspace usage, and best practices for provisioning cloud infrastructure.
+description: Use when writing or reviewing Terraform infrastructure code. Covers module structure, state management, variable and output patterns, resource naming, workspace usage, and best practices for provisioning cloud infrastructure. Triggers on .tf/.tfvars files, `terraform plan/apply`, modules, providers, remote state.
+paths: "**/*.tf,**/*.tfvars,**/*.tf.json"
 ---
 
 # Terraform

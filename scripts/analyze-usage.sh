@@ -9,7 +9,11 @@
 
 set -euo pipefail
 
-LOG_DIR="${CLAUDE_LOG_DIR:-$HOME/.claude/logs}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/usage-lib.sh
+. "$SCRIPT_DIR/lib/usage-lib.sh"
+
+LOG_DIR="$(usage_log_dir)"
 DAYS="${1:-0}"        # 0 = вся история
 PROJECT="${2:-}"      # пусто = все проекты
 
@@ -25,20 +29,9 @@ else
   SINCE="0000-00-00T00:00:00Z"
 fi
 
-# Helper: фильтр по времени и проекту.
-# Логи — строгий JSONL (одна запись на строку, гарантирует hook_log). Читаем
-# построчно через -R + fromjson?, чтобы единичная повреждённая строка
-# пропускалась, а не роняла весь отчёт.
+# Helper: фильтр по времени и проекту (общая логика в lib/usage-lib.sh).
 filter() {
-  local file="$1"
-  [ ! -f "$file" ] && return
-  if [ -n "$PROJECT" ]; then
-    jq -cR --arg since "$SINCE" --arg proj "$PROJECT" \
-      'fromjson? | select(.ts >= $since and .project == $proj)' "$file"
-  else
-    jq -cR --arg since "$SINCE" \
-      'fromjson? | select(.ts >= $since)' "$file"
-  fi
+  usage_filter_range "$1" "$SINCE" "" "$PROJECT"
 }
 
 bar() { printf '%*s\n' 60 '' | tr ' ' '─'; }
@@ -75,40 +68,52 @@ echo "▎Slash-команды"
 # Берём только первую строку значения и требуем форму команды (/token целиком):
 # защищает отчёт от старых повреждённых записей (многострочный промпт «протекал»
 # в slash_command) и от путей вроде /Users/... , попавших в поле.
-filter "$LOG_DIR/prompts.jsonl" | jq -r 'select(.slash_command != null and .slash_command != "") | (.slash_command | split("\n")[0]) | select(test("^/[A-Za-z][A-Za-z0-9_:-]*$"))' | sort | uniq -c | sort -rn | head -15 | awk '{printf "  %5d  %s\n", $1, $2}'
+filter "$LOG_DIR/prompts.jsonl" | jq -r --arg re "$USAGE_SLASH_RE" 'select(.slash_command != null and .slash_command != "") | (.slash_command | split("\n")[0]) | select(test($re))' | sort | uniq -c | sort -rn | head -15 | awk '{printf "  %5d  %s\n", $1, $2}'
 
 echo
 echo "▎Токены"
-STOPS_F=$(filter "$LOG_DIR/stops.jsonl")
-SUMMARY=$(echo "$STOPS_F" | jq -s '
-  {
-    sessions: length,
-    input_total: (map(.input_tokens) | add // 0),
-    output_total: (map(.output_tokens) | add // 0),
-    cache_read_total: (map(.cache_read) | add // 0),
-    cache_write_total: (map(.cache_write) | add // 0),
-    turns_total: (map(.turns) | add // 0)
-  }
-')
-echo "$SUMMARY" | jq -r '
-  "  sessions analyzed: \(.sessions)",
-  "  input:  \(.input_total) tokens",
-  "  output: \(.output_total) tokens",
-  "  cache_read:  \(.cache_read_total)",
-  "  cache_write: \(.cache_write_total)",
-  "  turns total: \(.turns_total)"
+# Строки stops.jsonl кумулятивны в рамках сессии (каждый Stop пересуммирует
+# весь транскрипт) — наивная сумма строк завышает расход на порядки.
+# Сумма сессии за период = (последний стоп в периоде) - (последний стоп до него).
+STOPS_SESS=$(
+  { [ -f "$LOG_DIR/stops.jsonl" ] && jq -cR 'fromjson? | select(.ts != null)' "$LOG_DIR/stops.jsonl"; } \
+  | jq -s --arg since "$SINCE" --arg proj "$PROJECT" '
+    [.[] | select($proj == "" or .project == $proj)]
+    | group_by(.session)
+    | map(
+        sort_by(.ts)
+        | last as $in_row
+        | (map(select(.ts < $since)) | last) as $before
+        | select($in_row.ts >= $since)
+        | {
+            project: ($in_row.project // "?"),
+            input:       (($in_row.input_tokens // 0) - ($before.input_tokens // 0)),
+            output:      (($in_row.output_tokens // 0) - ($before.output_tokens // 0)),
+            cache_read:  (($in_row.cache_read // 0)   - ($before.cache_read // 0)),
+            cache_write: (($in_row.cache_write // 0)  - ($before.cache_write // 0)),
+            turns:       (($in_row.turns // 0)        - ($before.turns // 0))
+          }
+      )'
+)
+echo "$STOPS_SESS" | jq -r '
+  "  sessions analyzed: \(length)",
+  "  input:  \(map(.input) | add // 0) tokens",
+  "  output: \(map(.output) | add // 0) tokens",
+  "  cache_read:  \(map(.cache_read) | add // 0)",
+  "  cache_write: \(map(.cache_write) | add // 0)",
+  "  turns total: \(map(.turns) | add // 0)"
 '
 
 echo
 echo "▎Топ-5 проектов по токенам (input+output)"
-echo "$STOPS_F" | jq -s '
+echo "$STOPS_SESS" | jq -r '
   group_by(.project)
-  | map({project:.[0].project, tokens: (map(.input_tokens + .output_tokens) | add)})
+  | map({project:.[0].project, tokens: (map(.input + .output) | add)})
   | sort_by(-.tokens)
   | .[0:5]
   | .[]
   | "  \(.tokens)\t\(.project)"
-' -r | awk -F'\t' '{printf "  %10s  %s\n", $1, $2}'
+' | awk -F'\t' '{printf "  %10s  %s\n", $1, $2}'
 
 echo
 echo "▎TDD-сигнал (правки/запуски тестов из tools.jsonl)"
@@ -116,8 +121,8 @@ echo "▎TDD-сигнал (правки/запуски тестов из tools.j
 # прод-файлов и как часто реально запускались тесты. Считаем по уже имеющимся
 # полям tools.jsonl (file_path / command) — отдельное логирование не нужно.
 TDD_F=$(filter "$LOG_DIR/tools.jsonl")
-TEST_RE='(Test|Tests)\.java$|_test\.go$|\.(test|spec)\.(ts|js|tsx|jsx)$|/(test|tests|__tests__)/'
-RUN_RE='mvn .*test|gradle.*test|gradlew.*test|go test|npm( run)? test|yarn test|pnpm test|vitest|jest|pytest'
+TEST_RE="$USAGE_TEST_RE"
+RUN_RE="$USAGE_RUN_RE"
 test_edits=$(echo "$TDD_F" | jq -rc --arg re "$TEST_RE" 'select(.phase=="pre" and (.tool=="Edit" or .tool=="Write" or .tool=="MultiEdit")) | (.input.file_path // "") | select(. != "" and test($re))' | grep -c '' || true)
 prod_edits=$(echo "$TDD_F" | jq -rc --arg re "$TEST_RE" 'select(.phase=="pre" and (.tool=="Edit" or .tool=="Write" or .tool=="MultiEdit")) | (.input.file_path // "") | select(. != "" and (test($re)|not))' | grep -c '' || true)
 test_runs=$(echo "$TDD_F" | jq -rc --arg re "$RUN_RE" 'select(.phase=="pre" and .tool=="Bash") | (.input.command // "") | select(. != "" and test($re))' | grep -c '' || true)

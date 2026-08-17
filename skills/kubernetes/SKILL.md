@@ -1,6 +1,7 @@
 ---
 name: kubernetes
-description: Use when writing or reviewing Kubernetes manifests for Java/Spring services. Covers Deployment, Service, ConfigMap, Secret, Ingress, resource limits, health probes, HPA, RBAC basics, and rollout strategy.
+description: Use when writing or reviewing Kubernetes manifests for Java/Spring services. Covers Deployment, Service, ConfigMap, Secret, Ingress, resource limits, health probes, HPA, RBAC basics, and rollout strategy. Triggers on k8s manifests (kind Deployment/Service/Ingress/HPA), `kubectl`, probes, resource limits, rollout questions.
+paths: "**/k8s/**,**/kubernetes/**,**/manifests/**,**/deploy/**/*.yaml"
 ---
 
 # Kubernetes

@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Аудит использования ИИ — август 2026</title>
+<style>
+:root{--bg:#0f1115;--bg2:#161a22;--bg3:#1d2230;--fg:#e6e6e6;--muted:#9aa4b2;--acc:#7cc4ff;--acc2:#ffb86b;--ok:#6fdd8b;--bad:#ff7b7b;--line:#2a3140;
+--c1:#7cc4ff;--c2:#ffb86b;--c3:#b48cff;--c4:#6fdd8b;--c5:#ff7b7b;--c6:#59d3c9;--c7:#f6e58d;--c8:#a0a0a0}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg2);border-bottom:1px solid var(--line);padding:10px 20px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+header h1{font-size:15px;margin:0 16px 0 0;color:var(--muted);font-weight:600}
+nav button{background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer;font:inherit}
+nav button.active{background:var(--acc);color:#0b1620;border-color:var(--acc);font-weight:600}
+main{max-width:1180px;margin:0 auto;padding:22px 20px 80px}
+section.tab{display:none}section.tab.active{display:block}
+h1,h2,h3,h4{line-height:1.25}h1{font-size:26px;margin:.4em 0}h2{font-size:21px;margin:1.6em 0 .6em;border-bottom:1px solid var(--line);padding-bottom:4px}
+h3{font-size:17px;margin:1.3em 0 .5em;color:var(--acc)}h4{font-size:15px;color:var(--muted)}
+p{margin:.6em 0}a{color:var(--acc)}code{background:var(--bg3);padding:1px 5px;border-radius:4px;font:13px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre.code{background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre.code code{background:none;padding:0;font:inherit}
+pre .add{color:var(--ok)}pre .del{color:var(--bad)}pre .ctx{color:var(--acc)}
+.tblwrap{overflow-x:auto;margin:.8em 0}table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:6px 9px;vertical-align:top}th{background:var(--bg3);text-align:left}td.right{text-align:right;white-space:nowrap}
+tbody tr:nth-child(odd){background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--acc2);margin:.8em 0;padding:4px 12px;color:var(--muted)}
+ul,ol{padding-left:1.4em}li{margin:.25em 0}li ul,li ol{margin:.2em 0}
+hr{border:0;border-top:1px solid var(--line);margin:1.5em 0}
+.badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:12px;font-weight:600}
+.badge.e1{background:#1f5f3a;color:#c8f7d6}.badge.e2{background:#5a4f1a;color:#fbeaa6}.badge.e3{background:#5f2f1f;color:#ffd6c8}.badge.e4{background:#3a3a3a;color:#ddd}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0 20px}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.card .v{font-size:24px;font-weight:700;color:var(--acc)}.card .l{font-size:12.5px;color:var(--muted)}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(480px,1fr));gap:16px;margin:10px 0 24px}
+.chart{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.chart h4{margin:0 0 6px;color:var(--fg)}.chart .note{font-size:12px;color:var(--muted);margin-top:4px}
+svg text{fill:var(--muted);font-size:11px;font-family:inherit}svg .lbl{fill:var(--fg)}svg .grid{stroke:var(--line);stroke-width:1}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);margin-top:6px}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.path{color:var(--acc2);font-family:ui-monospace,Menlo,monospace;font-size:13px}
+.src{font-size:12.5px;color:var(--muted)}
+details{margin:.6em 0}summary{cursor:pointer;color:var(--acc)}
+@media (max-width:640px){.charts{grid-template-columns:1fr}main{padding:14px 12px}}
+</style></head>
+<body><header><h1>Аудит ИИ-использования · 2026-06-15 → 2026-08-16</h1><nav><button data-tab="usage">Использование</button><button data-tab="sources">Источники</button><button data-tab="research">Ресёрч</button><button data-tab="config">Конфигурация</button><button data-tab="growth">Рост</button><button data-tab="trajectory">Траектория</button></nav></header>
+<main><section class="tab" id="usage"><div class="cards"><div class="card"><div class="v">1342</div><div class="l">промтов за 9 недель</div></div><div class="card"><div class="v">212</div><div class="l">сессий с промтом</div></div><div class="card"><div class="v">64M</div><div class="l">output-токенов</div></div><div class="card"><div class="v">57/63</div><div class="l">активных дней</div></div><div class="card"><div class="v">3 / 16</div><div class="l">промтов на сессию (медиана / p90)</div></div><div class="card"><div class="v">105</div><div class="l">коррекций (7.9%)</div></div><div class="card"><div class="v">21.0%</div><div class="l">постановок с риск-делегированием</div></div><div class="card"><div class="v">0/97</div><div class="l">отладочных постановок с гипотезой</div></div></div><p class="src">Карточки и графики пересчитываются при сборке из логов (в т.ч. промты текущей сессии аудита попадают в проект my-claude-config), поэтому могут отличаться от текста фаз на несколько единиц. Текст фаз — снимок на момент написания.</p><div class="charts"><div class="chart" id="c-prompts"></div><div class="chart" id="c-tokens"></div><div class="chart" id="c-tasks"></div><div class="chart" id="c-risk"></div><div class="chart" id="c-hyp"></div><div class="chart" id="c-corr"></div><div class="chart" id="c-hours"></div><div class="chart" id="c-wd"></div><div class="chart" id="c-sess"></div><div class="chart" id="c-agents"></div><div class="chart" id="c-skills"></div><div class="chart" id="c-slash"></div></div><h2>Полный текст аудита (фаза 1)</h2><h1 id="01-аудит-использования-claude-code-2026-06-15-2026-08-16">01 — Аудит использования Claude Code (2026-06-15 → 2026-08-16)</h1>
+<p>Все числа посчитаны скриптами <code>scripts/audit/extract.py</code> → <code>scripts/audit/report_phase1.py</code> (данные — <code>docs/audit-2026-08/data/*.json</code>, сырые таблицы — <code>data/tables.md</code>, агрегаты — <code>data/metrics.json</code>). Окно: 9 ISO-недель W25–W33, 63 календарных дня, локальное время Asia/Bishkek (UTC+6). Ссылка вида <code>[tables.md → «…»]</code> указывает на таблицу-источник числа.</p>
+<h2 id="0-источники-найдено-не-найдено-и-покрытие">0. Источники: найдено / не найдено и покрытие</h2>
+<div class="tblwrap"><table><thead><tr><th>Источник</th><th>Статус</th><th>Что даёт</th><th>Покрытие</th></tr></thead><tbody>
+<tr><td class="left"><code>~/.claude/CLAUDE.md</code></td><td class="left">найдено (695 B)</td><td class="left">7 <code>@import</code> из <code>rules/</code></td><td class="left">—</td></tr>
+<tr><td class="left"><code>~/.claude/settings.json</code></td><td class="left">найдено (5.8 KB)</td><td class="left">44 allow / 17 deny, 12 типов хуков, <code>outputStyle: personal</code></td><td class="left">—</td></tr>
+<tr><td class="left"><code>~/.claude/settings.local.json</code></td><td class="left"><strong>не найдено</strong></td><td class="left">—</td><td class="left">—</td></tr>
+<tr><td class="left"><code>~/.claude/agents/</code>, <code>commands/</code>, <code>skills/</code>, <code>output-styles/</code></td><td class="left">найдено (symlink → repo)</td><td class="left">8 агентов, 18 команд, 19 skills</td><td class="left">—</td></tr>
+<tr><td class="left">Проектные <code>CLAUDE.md</code></td><td class="left">найдено 25 шт. под <code>~/dev/</code></td><td class="left">—</td><td class="left">—</td></tr>
+<tr><td class="left"><code>~/.claude/history.jsonl</code></td><td class="left">найдено, 2215 строк, 2026-03-11 → 08-14</td><td class="left">полный текст промтов</td><td class="left"><strong>только CLI</strong>; Claude Desktop сюда не пишет</td></tr>
+<tr><td class="left"><code>~/.claude/logs/*.jsonl</code> (хуки)</td><td class="left">найдено, 7 файлов, с 2026-05-17</td><td class="left">prompts (head ≤500 симв.), tools, stops (токены), sessions, subagents, blocks, instructions</td><td class="left">CLI + Desktop, весь период окна</td></tr>
+<tr><td class="left"><code>~/.claude/projects/**/*.jsonl</code> (транскрипты)</td><td class="left">найдено, 102 главных + 296 субагентских, 287 MB</td><td class="left">полный диалог, tool_use, usage, модель</td><td class="left"><strong>101 из 212</strong> сессий окна (48%); W25–W29 покрыты слабо (0–7 сессий/нед), W30–W33 хорошо (15–23)</td></tr>
+<tr><td class="left">Логи хуков в проектах</td><td class="left">не настроены отдельно</td><td class="left">—</td><td class="left">—</td></tr>
+</tbody></table></div>
+<p>Следствия для метода:</p>
+<ul>
+<li>База промтов = <code>logs/prompts.jsonl</code> (1337 промтов в окне, 212 сессий с ≥1 промтом), обогащённая полным текстом из <code>history.jsonl</code> там, где сессия CLI (789 из 1337; остальные 548 — Desktop, текст до 500 символов).</li>
+<li>Токены — из <code>stops.jsonl</code> дельтами (строки кумулятивны в рамках сессии).</li>
+<li>Итерации/паузы/skills-загрузки — из транскриптов, т.е. на половине сессий, со смещением к августу.</li>
+<li>В <code>sessions.jsonl</code> 1076 уникальных <code>SessionStart(startup)</code> за окно, но только 212 сессий содержат промт человека: остальное — headless-запуски, субагенты, открытые-и-закрытые окна. Здесь «сессия» = сессия с промтом.</li>
+</ul>
+<h2 id="1-метод-и-его-границы">1. Метод и его границы</h2>
+<ul>
+<li>Классификация промтов — правила по ключевым словам (<code>scripts/audit/audit_lib.py</code>, <code>TASK_RULES</code>, <code>SKILL_RISK_RULES</code>). Ручная проверка 40 случайных промтов: точность <strong>~60%</strong> на уровне мелких категорий, выше на уровне «код / анализ-вопрос / ревью / отладка». Доли категорий читать как ±5–8 п.п., не как точные числа. Категория <code>other</code> (20%) — в основном переписка по железу/DIY-проектам (клавиатуры TOTEM/crkbd), вставленный текст (<code>[Pasted text …]</code>), короткие рулевые реплики.</li>
+<li>Вид реплики (<code>new-task</code> / <code>correction</code> / <code>continue</code> / <code>answer</code>) тоже по правилам; <code>correction</code> ловит явные маркеры («не так», «опять», «переделай», «не работает», «на русском»). Скрытые правки руками не видны.</li>
+<li>«Принял без правок» напрямую <strong>не измеримо</strong>: в логах нет события «принято». Даны только прокси (раздел 5).</li>
+</ul>
+<h2 id="2-объём">2. Объём</h2>
+<p>[tables.md → «Объём по неделям», «tokens_out по неделям и группам», «По группам проектов», «Топ проектов»]</p>
+<div class="tblwrap"><table><thead><tr><th>Неделя</th><th>prompts</th><th>sessions</th><th>акт. дней</th><th>tokens_out</th><th>cache_read</th><th>tool_calls</th><th>tool_fails</th><th>subagent stops</th></tr></thead><tbody>
+<tr><td class="left">W25</td><td class="right">218</td><td class="right">26</td><td class="right">7</td><td class="right">18.0M</td><td class="right">2085M</td><td class="right">5063</td><td class="right">42</td><td class="right">139</td></tr>
+<tr><td class="left">W26</td><td class="right">189</td><td class="right">34</td><td class="right">7</td><td class="right">10.9M</td><td class="right">1403M</td><td class="right">5196</td><td class="right">76</td><td class="right">175</td></tr>
+<tr><td class="left">W27</td><td class="right">140</td><td class="right">33</td><td class="right">6</td><td class="right">4.9M</td><td class="right">578M</td><td class="right">4745</td><td class="right">67</td><td class="right">207</td></tr>
+<tr><td class="left">W28</td><td class="right">155</td><td class="right">22</td><td class="right">7</td><td class="right">10.1M</td><td class="right">1803M</td><td class="right">7937</td><td class="right">113</td><td class="right">243</td></tr>
+<tr><td class="left">W29</td><td class="right">186</td><td class="right">31</td><td class="right">7</td><td class="right">5.0M</td><td class="right">694M</td><td class="right">3967</td><td class="right">32</td><td class="right">239</td></tr>
+<tr><td class="left">W30</td><td class="right">94</td><td class="right">21</td><td class="right">7</td><td class="right">2.1M</td><td class="right">304M</td><td class="right">1403</td><td class="right">18</td><td class="right">110</td></tr>
+<tr><td class="left">W31</td><td class="right">112</td><td class="right">20</td><td class="right">5</td><td class="right">6.2M</td><td class="right">567M</td><td class="right">5110</td><td class="right">60</td><td class="right">181</td></tr>
+<tr><td class="left">W32</td><td class="right">148</td><td class="right">14</td><td class="right">5</td><td class="right">3.4M</td><td class="right">479M</td><td class="right">3342</td><td class="right">36</td><td class="right">194</td></tr>
+<tr><td class="left">W33</td><td class="right">95</td><td class="right">23</td><td class="right">6</td><td class="right">3.5M</td><td class="right">628M</td><td class="right">2344</td><td class="right">31</td><td class="right">97</td></tr>
+<tr><td class="left"><strong>Итого</strong></td><td class="right"><strong>1337</strong></td><td class="right"><strong>212</strong></td><td class="right"><strong>57 из 63</strong></td><td class="right"><strong>64.0M</strong></td><td class="right"><strong>8.5G</strong></td><td class="right"><strong>39107</strong></td><td class="right"><strong>475</strong></td><td class="right"><strong>1585</strong></td></tr>
+</tbody></table></div>
+<ul>
+<li>Предыдущие 9 недель (04-13 → 06-14): 1082 промта / 117 сессий (до 05-17 только CLI) — объём в окне на ~25% выше.</li>
+<li><strong>Пик — W25 (218 промтов, 18M output-токенов), дальше спад в 2–3 раза.</strong> W30 — минимум (94 / 2.1M).</li>
+<li>Активных дней 57 из 63 (90%). W25–W30 — шесть недель подряд по 7/7 (W27 — 6/7). Пауз от инструмента не было ни одной полной недели.</li>
+</ul>
+<p>По группам проектов:</p>
+<div class="tblwrap"><table><thead><tr><th>Группа</th><th>prompts</th><th>%</th><th>sessions</th><th>tokens_out</th></tr></thead><tbody>
+<tr><td class="left">work (<code>~/dev/work</code>)</td><td class="right">750</td><td class="right">56%</td><td class="right">144</td><td class="right">37.5M</td></tr>
+<tr><td class="left">personal (<code>~/dev/personal</code>)</td><td class="right">327</td><td class="right">24%</td><td class="right">35</td><td class="right">15.0M</td></tr>
+<tr><td class="left">pkm (<code>~/docs/lifeOS*</code>)</td><td class="right">220</td><td class="right">16%</td><td class="right">25</td><td class="right">8.7M</td></tr>
+<tr><td class="left">meta (<code>my-claude-config</code>)</td><td class="right">39</td><td class="right">3%</td><td class="right">10</td><td class="right">2.8M</td></tr>
+</tbody></table></div>
+<ul>
+<li>Один проект — <code>business-m2m-gateway</code> — 391 промт (29% всех) и 23.4M output-токенов (37%).</li>
+<li><strong>Сдвиг во времени:</strong> work-промтов 171/нед в W25 → 34–39/нед в W30–W32. Одновременно pkm (проектирование личной системы задач lifeOS) 0 → 59–78/нед в W30–W31, personal (Lark, клавиатуры, teacher-pro) до 90–98/нед в W29 и W32. Т.е. в июле–августе больше половины взаимодействий — не рабочий код.</li>
+<li>meta (настройка Claude-конфига) в окне всего 3% промтов, но см. раздел 4: у неё самая высокая доля переделок.</li>
+</ul>
+<h2 id="3-типы-задач">3. Типы задач</h2>
+<p>[tables.md → «Типы задач (только new-task)», «Типы задач по неделям»] — 1182 постановки (<code>new-task</code>).</p>
+<div class="tblwrap"><table><thead><tr><th>Категория</th><th>n</th><th>%</th><th>work</th><th>personal</th><th>Что это в данных</th></tr></thead><tbody>
+<tr><td class="left">other</td><td class="right">237</td><td class="right">20%</td><td class="right">122</td><td class="right">115</td><td class="left">железо/DIY, вставки, рулевые реплики</td></tr>
+<tr><td class="left">pkm-notes</td><td class="right">192</td><td class="right">16%</td><td class="right">—</td><td class="right">—</td><td class="left">lifeOS: дизайн системы задач/заметок</td></tr>
+<tr><td class="left">new-code</td><td class="right">125</td><td class="right">11%</td><td class="right">80</td><td class="right">45</td><td class="left">«реализуй/добавь/сделай»</td></tr>
+<tr><td class="left">planning-arch</td><td class="right">120</td><td class="right">10%</td><td class="right">84</td><td class="right">36</td><td class="left"><code>/plan</code>, <code>/task</code>, <code>/feature</code>, «спроектируй», «предложи вариант»</td></tr>
+<tr><td class="left">review</td><td class="right">92</td><td class="right">8%</td><td class="right">87</td><td class="right">4</td><td class="left"><code>/review-mr</code> 43, <code>/review</code> 33</td></tr>
+<tr><td class="left">google-replace</td><td class="right">78</td><td class="right">7%</td><td class="right">43</td><td class="right">35</td><td class="left">короткий вопрос без задачи («как …?», «где …?»)</td></tr>
+<tr><td class="left">debug</td><td class="right">64</td><td class="right">5%</td><td class="right">55</td><td class="right">9</td><td class="left">«не работает / почему / исправь»</td></tr>
+<tr><td class="left">explain-code</td><td class="right">54</td><td class="right">5%</td><td class="right">36</td><td class="right">18</td><td class="left"><code>/onboard</code>, «объясни», «как устроено»</td></tr>
+<tr><td class="left">config-yaml</td><td class="right">44</td><td class="right">4%</td><td class="right">37</td><td class="right">7</td><td class="left">почти всё — Spring-конфиг, не k8s/helm</td></tr>
+<tr><td class="left">docs</td><td class="right">39</td><td class="right">3%</td><td class="right">27</td><td class="right">12</td><td class="left">Jira-описания, ADR, инструкции клиентам</td></tr>
+<tr><td class="left">sql</td><td class="right">25</td><td class="right">2%</td><td class="right">17</td><td class="right">8</td><td class="left"></td></tr>
+<tr><td class="left">sonar-fix</td><td class="right">25</td><td class="right">2%</td><td class="right">25</td><td class="right">0</td><td class="left">вставленное замечание SonarQube «fix this»</td></tr>
+<tr><td class="left">config-tuning</td><td class="right">25</td><td class="right">2%</td><td class="right">—</td><td class="right">—</td><td class="left">my-claude-config</td></tr>
+<tr><td class="left">refactor</td><td class="right">21</td><td class="right">2%</td><td class="right">18</td><td class="right">3</td><td class="left"></td></tr>
+<tr><td class="left">boilerplate</td><td class="right">14</td><td class="right">1%</td><td class="right">12</td><td class="right">2</td><td class="left"></td></tr>
+<tr><td class="left">git-ops</td><td class="right">12</td><td class="right">1%</td><td class="right">10</td><td class="right">2</td><td class="left"></td></tr>
+<tr><td class="left">research</td><td class="right">10</td><td class="right">1%</td><td class="right">6</td><td class="right">4</td><td class="left"></td></tr>
+<tr><td class="left">test</td><td class="right">5</td><td class="right">0%</td><td class="right">5</td><td class="right">0</td><td class="left">явная просьба «напиши тесты»</td></tr>
+</tbody></table></div>
+<p>Выводы с числами:</p>
+<ul>
+<li><strong>Написание кода в узком смысле (new-code+boilerplate+refactor+sql+sonar-fix+config) ≈ 254 = 21%.</strong> <strong>«Подумай/разберись/реши за меня» (planning-arch+explain+google-replace+research+docs) ≈ 301 = 25%.</strong> Это главный профиль: ты делегируешь не столько набор кода, сколько анализ и выбор решения.</li>
+<li>Фраза «проведи анализ / проанализируй» встречается в <strong>164 из 1337</strong> промтов (12%), 104 из них в work. Это твой дефолтный глагол при постановке задачи.</li>
+<li>«Вместо гугла» — 78 (7%). Половина — в personal (KiCad, ZMK, macOS), половина — рабочие («чем отличается client и client.name?», «как опубликовать ревью из idea в gitlab?»).</li>
+<li>Ревью — 92 постановки, но 87 из них рабочие: <code>/review-mr</code> (43) — ты систематически ревьюишь MR коллег с агентом.</li>
+<li>Явных <code>/test</code>-постановок 5, но тестовая дисциплина живёт в исполнении: <strong>3579 запусков тестов</strong> через Bash и 1866 из 8798 правок файлов (21%) — тестовые файлы [tables.md → «Bash: test runs»].</li>
+<li>Роль-приманка «как профессионал/эксперт …» — 46 промтов (3.9% постановок).</li>
+</ul>
+<h2 id="4-длина-итераций-и-застревания">4. Длина итераций и застревания</h2>
+<p>[tables.md → «Сессии (hooks, все 212)», «Сессии по группам», «Сессии по основному типу задачи», «Застревания», «Коррекции по неделям/проектам»]</p>
+<ul>
+<li>Промтов на сессию: медиана <strong>3</strong>, p90 <strong>16</strong>, максимум <strong>54</strong>. 52 сессии (24.5%) — один промт; 112 (53%) — ≤3; 39 (18%) — ≥10; 14 (7%) — ≥20.</li>
+<li>Активное время сессии (сумма пауз &lt;30 мин между промтами): медиана <strong>12.5 мин</strong>, p90 84 мин, сумма <strong>6884 мин ≈ 115 ч за 9 недель ≈ 12.7 ч/нед</strong> — нижняя оценка времени «за штурвалом» (чтение ответов внутри паузы &gt;30 мин не считается). По транскриптам (101 сессия, включая паузы между сообщениями агента): медиана 36 мин, p90 232 мин, 8 сессий &gt;4 ч активного времени.</li>
+<li>Коррекций 105 (7.9% реплик). Сессий с ≥1 коррекцией — 70 (33%); с ≥3 — 8.</li>
+<li><strong>31 из 105 коррекций — «напиши на русском / переведи на русский»</strong> (W26 9, W27 14, W28 7, потом 0). Это прямой побочный эффект правила «чат на английском A2», введённого 2026-06-19 и отменённого ~07-11: 31 потраченный ход и ~2 недели раздражения ради эксперимента с конфигом. Без языковых коррекций доля переделок стабильна: 3–9% каждую неделю, всплеска нет.</li>
+<li>По группам: work — медиана 3 промта, 31% сессий с коррекцией; personal — 5 / 37%; pkm — 5 / 39%; <strong>meta (Claude-конфиг) — 40% сессий с коррекцией и 12 коррекций на 39 промтов (31%) — худший показатель среди проектов</strong> [tables.md → «Коррекции по проектам»].</li>
+<li>По типу задачи (основной тип сессии): <code>review</code> — 48 сессий, в среднем 2.2 промта, только 8% с коррекцией (fire-and-forget); <code>planning-arch</code> — 32 сессии, 5.5 промта, 34% с коррекцией; <code>new-code</code> — 15 сессий, 7.3 промта, 40%; <code>other</code> — 31 сессия, 12.5 промта, 52% с коррекцией, медиана 61 активная минута — это длинные разговорные сессии (сборка клавиатуры, ТЗ для Lark).</li>
+<li>Застревания (≥3 коррекций или ≥20 промтов) — 17 сессий, самые тяжёлые:</li>
+<ul>
+<li>07-09 <code>business-m2m-gateway</code>, 16 промтов / 5 коррекций: «/review Проведи полноценный ревью, точно ли работают несколько клиентов на одном инстансе…» — ревью, перешедшее в переделки.</li>
+<li>06-23 <code>my-claude-config</code>, две сессии подряд по 4–5 коррекций: «Вот лог использования claude… проведи анализ как профессионал» — прошлый аудит конфига потребовал 5 итераций подряд.</li>
+<li>07-10 <code>lark</code>, 29 промтов / 4 коррекции / 194 мин: «Как профессиональный аналитик помоги описать ТЗ для системы».</li>
+<li>07-08 <code>business-m2m-gateway</code>, 22 промта / 4 коррекции: «/task Проведи анализ того как выглядят наши кастомные метрики…».</li>
+<li>07-20 <code>lifeOS</code>, 54 промта / 3 коррекции / 311 мин: «Промт 1: Аудит документации и выработка правил (<code>/docs-audit</code>)».</li>
+<li>08-03 <code>totem-choc-v2-wireless</code>, 47 промтов / 305 мин: сборка клавиатуры (диалог-справочник). Общее у застреваний: постановка «проведи анализ + придумай + сделай» одним промтом либо открытое проектирование без критерия готовности; чистые кодовые задачи (<code>/review-mr</code>, <code>sonar-fix</code>) почти не застревают.</li>
+</ul>
+<li>Пауза пользователя после ответа агента (транскрипты, 517 пар): медиана <strong>5.4 мин</strong>, p25 2.2 мин, p75 18 мин; только 10% ответов получают следующий промт быстрее чем за 60 с. Т.е. ответы читаются (или параллелятся с другой работой), а не пролистываются.</li>
+</ul>
+<h2 id="5-принято-без-правок-vs-правил-руками">5. Принято без правок vs правил руками</h2>
+<p>Прямых данных нет. Прокси [tables.md → «Прокси принятия без правок»]:</p>
+<ul>
+<li><code>/reflect</code> — команда, которая должна фиксировать «что я поправил руками после агента», — <strong>0 вызовов за всё время</strong>. Единственный встроенный механизм измерения этой доли мёртв.</li>
+<li>Явные упоминания «сам / руками / я поправил» — 12 промтов из 1337 (0.9%). Примеры хорошего паттерна: 08-12 <code>lk-mobile-api</code> «Проведи анализ того что я сделал и помоги составить список тестов… напишу я сам»; 07-13 <code>business-m2m-gateway</code> «…я сам добавлю curl»; 06-28 <code>teacher-pro</code> «Оставляем, дальше я сам».</li>
+<li>Прерываний агента (<code>[Request interrupted by user]</code>) — 19 в 15 из 101 сессий транскриптов.</li>
+<li>24.5% сессий — один промт без продолжения: результат либо принят как есть, либо брошен — по логам не различить.</li>
+</ul>
+<p>Вывод: доля принятого без правок <strong>неизвестна</strong>; единственный способ узнать — начать использовать <code>/reflect</code> или git-дифф «после агента → после меня» (см. фазу 4).</p>
+<h2 id="6-инструменты-субагенты-skills-команды-что-живо-что-мертво">6. Инструменты, субагенты, skills, команды: что живо, что мертво</h2>
+<p>[tables.md → «Инструменты», «Субагенты», «Skill-инструмент», «Загрузки skills в транскриптах», «Slash-команды», «Мёртвые …»]</p>
+<p>Инструменты за окно: Bash 14348, Read 12897, Edit 6567, Write 2230, Agent 692, TaskUpdate 574, TaskCreate 305, WebSearch 265, AskUserQuestion 241, ToolSearch 206, WebFetch 190, ExitPlanMode 106, Skill 83, браузерные MCP ~200, context7 32. Ошибок инструментов 475 (1.2% вызовов): Bash 267, Read 178. 58% всех вызовов — из субагентов.</p>
+<p>Субагенты (692 вызова <code>Agent</code> в 127 из 212 сессий = 60% сессий): general-purpose 272, Explore 184, java-reviewer 102, Plan 67, vue-reviewer 24, vue-test-writer 9, go-reviewer 7, go-test-writer 6, prompt-auditor 4, test-writer 4, migration-reviewer 2, claude-code-guide 2.</p>
+<ul>
+<li>Все 8 своих агентов вызывались хотя бы раз, но <strong>test-writer 4, prompt-auditor 4, migration-reviewer 2</strong> — почти мертвы. При этом схем/миграций в окне было 25 sql-постановок — <code>migration-reviewer</code> под них не звался.</li>
+<li>Plan mode: 106 <code>ExitPlanMode</code>, в транскриптах — 26 из 101 сессий; AskUserQuestion — 241 (агент уточняет часто).</li>
+</ul>
+<p>Skills:</p>
+<ul>
+<li>Через инструмент <code>Skill</code> за окно 83 вызова, из них <strong>58 из субагентов</strong> (vue-frontend 24, java-service-convention 19, testing 8, jpa-db-review 3, прочие 4) и <strong>25 из главного агента</strong> (jira 5, vue-frontend 4, java-service-convention 4, testing 2, git-convention 1, go-best-practices 1, прочие 8) — т.е. ~1 ручная/авто-загрузка skill на 8 сессий.</li>
+<li>В транскриптах (101 сессия) загрузок SKILL.md: главный агент — <strong>9</strong>, субагенты — <strong>158</strong> (integration-patterns 45, java-service-convention 34, vue-frontend 31, testing 21, jpa-db-review 20, go-best-practices 5). <strong>Skills доходят до модели почти исключительно через <code>skills:</code> во frontmatter ревьюеров.</strong> Главный агент их почти не берёт сам.</li>
+<li>Ни разу не загружались (ни в транскриптах, ни через Skill): agent-design, docker, git-convention (1 раз), gitlab-ci, go-service, helm, java-patterns, kubernetes, prompt-audit, repo-onboarding, terraform, web-app — 12 из 19. Для DevOps-пятёрки это ожидаемо: DevOps-задач в окне не было (44 «config»-промта — Spring-конфиг). Для java-patterns и repo-onboarding — нет: <code>/onboard</code> звался 8 раз, архитектурных постановок 120.</li>
+</ul>
+<p>Slash-команды (окно): <code>/task</code> 79, <code>/review-mr</code> 43, <code>/review</code> 33, <code>/plan</code> 20, <code>/feature</code> 13, <code>/fix</code> 9, <code>/onboard</code> 8, <code>/arch</code> 2, <code>/explain</code> 2, <code>/test</code> 1, <code>/jira</code> 1. За всё время: <code>/review</code> 97, <code>/plan</code> 94, <code>/task</code> 79, <code>/review-mr</code> 43, <code>/arch</code> 33, <code>/onboard</code> 18, <code>/fix</code> 17, <code>/jira</code> 13, <code>/feature</code> 13.</p>
+<ul>
+<li><strong>Мертвы за всё время (0 вызовов): <code>/convention-check</code>, <code>/debug</code>, <code>/devops</code>, <code>/docker-ops</code>, <code>/integration-review</code>, <code>/migration-plan</code>, <code>/reflect</code></strong> — 7 из 18 команд (39%). Отладка есть (64 постановки), но идёт через <code>/fix</code> или свободный текст, а не через <code>/debug</code>.</li>
+<li><code>/task</code> (тяжёлый оркестратор «весь цикл агенту») — 79 раз, 30 из них в <code>business-m2m-gateway</code>, 21 в <code>lark</code>; типичный текст: «/task Проведи анализ и возьми следующую задачу в разработку», «/task фаза 5», «/task коммить и продолжай следующий шаг».</li>
+</ul>
+<p>Хуки безопасности: 78 блокировок за окно (49 destructive, 29 secret) — работают. Модели в транскриптах: opus-4-8 5950 сообщений, fable-5 3988, opus-5 3403.</p>
+<h2 id="7-время-суток-и-длина-сессий">7. Время суток и длина сессий</h2>
+<p>[tables.md → «Часы», «Интервалы», «Дни недели», «Самые плотные дни», «Длительность сессий», «Самые длинные сессии»]</p>
+<ul>
+<li>Часы (локальные): 09 — 64, 10 — 154, 11 — 142, 12 — 142, 13 — 113, 14 — 98, 15 — 130, 16 — 140, 17 — 112, 18 — 46, 19–21 — 30–40, 22–23 — 56, 00 — 22, 01–07 — 0. Два пика: 10–13 и 15–17. Ночь (22–06) — 78 промтов (5.8%).</li>
+<li>Дни недели: Пн 288, Вт 259, Ср 248, Чт 250, Пт 186, Сб 46, Вс 60. Выходные — 7.9% промтов, но именно в выходные — pkm/personal-марафоны (07-20 lifeOS 54 промта — воскресенье; 08-03 клавиатура 47 промтов — понедельник вечером до 305 активных минут).</li>
+<li>Самые плотные дни: 06-22 (55 промтов), 06-17 (53), 06-29 (53), 07-09 (50) — все в W25–W28, все work.</li>
+<li>Сессии Desktop висят открытыми сутками: размах первый→последний промт p90 = 42 ч, максимум 13 суток (<code>business-m2m-gateway</code> с 06-26). Поэтому «длина сессии» имеет смысл только как активное время (см. раздел 4).</li>
+</ul>
+<h2 id="8-делегирование-которое-разрушает-навык">8. Делегирование, которое разрушает навык</h2>
+<p>[tables.md → «Делегирование с риском для навыка», «Риск-делегирование по неделям», примеры по категориям]</p>
+<p>Из 965 постановок в work+personal <strong>203 (21%)</strong> попадают в риск-категории (одна постановка может попасть в несколько):</p>
+<div class="tblwrap"><table><thead><tr><th>Категория</th><th>n</th><th>Что именно делегируется</th></tr></thead><tbody>
+<tr><td class="left">analysis-first</td><td class="right">124</td><td class="left">«проведи анализ / проанализируй … и (предложи/сделай/скажи)» — разбор ситуации и вывод отдаются агенту первым шагом</td></tr>
+<tr><td class="left">architecture-decision</td><td class="right">42</td><td class="left">выбор структуры/подхода/варианта</td></tr>
+<tr><td class="left">debug-root-cause</td><td class="right">35</td><td class="left">«почему не работает / найди причину»</td></tr>
+<tr><td class="left">unfamiliar-code</td><td class="right">26</td><td class="left">«объясни как устроено / изучи / <code>/onboard</code>»</td></tr>
+<tr><td class="left">google-replace</td><td class="right">6 (+78 в общей классификации)</td><td class="left">короткие фактические вопросы</td></tr>
+<tr><td class="left">requirements</td><td class="right">3</td><td class="left">формулировка ТЗ / Jira</td></tr>
+<tr><td class="left">sql-writing</td><td class="right">3</td><td class="left"></td></tr>
+<tr><td class="left">schema-design</td><td class="right">2</td><td class="left"></td></tr>
+</tbody></table></div>
+<p>Динамика: analysis-first 21–24/нед в W25–W27 → 3–7/нед в W30–W33 (вместе с падением work-объёма, доля не изменилась); architecture-decision 12–13/нед в W25–W26 → 0–4 позже.</p>
+<p>Конкретные примеры из логов (дата, проект, промт):</p>
+<p>Проектирование и выбор решения:</p>
+<ul>
+<li>06-22 <code>business-m2m-gateway</code>: «Я не знаю, предложи мне 2 или более вариантов структуры пакетов, нарисуй схему».</li>
+<li>06-15 <code>business-m2m-gateway</code>: «Предлагаю улучшить структуру пакетов по DDD… предложи улучшения» (37 промтов, 276 мин).</li>
+<li>06-17 <code>business-m2m-gateway</code>: «/plan Проведи анализ и напиши план реализации gw-5 с учётом текущей реализации».</li>
+<li>06-22 <code>business-m2m-gateway</code>: «/plan Проведи анализ задачи gw-6 и наших решений без bulkhead, напиши план реализации и тестирования».</li>
+<li>06-24 <code>business-m2m-gateway</code>: «/task Проанализируй то что сделано сейчас и помоги мне понять… как сделать типизированные обработчики в фасадах».</li>
+<li>06-29 <code>business-m2m-gateway</code>: «/task Проанализируй и ответь на вопрос, стоит ли вывести фильтры… в конфиг».</li>
+<li>07-07 <code>business-m2m-gateway</code>: «/plan Предлагаю провести рефакторинг, мне не нравится что мы завязались на реализацию конкретного варианта… сделай унифицировано».</li>
+<li>06-29 <code>lark</code>: «помоги придумать пакет полный путь для этого проекта типа com.home.lark или лучше как-то по-другому?».</li>
+<li>07-13 <code>lark</code>: «если у нас сотни бд, тысячи схем… опиши какие поля необходимы и как они должны заполняться».</li>
+<li>07-30 <code>lifeOS</code>: «Ты профессиональный архитектор систем, глубоко понимающий работу с бд…» (25 промтов, 165 мин — модель данных личной системы задач).</li>
+</ul>
+<p>Разбор незнакомого / чужого кода:</p>
+<ul>
+<li>06-18 <code>business-m2m-gateway</code>: «/plan Проведи анализ …IsolatedRestClientRegistry и …IsolatedClientSpec».</li>
+<li>07-15 <code>business-corporate-selfcare</code>: «/review Проведи анализ и объясни зачем нужна э…».</li>
+<li>07-28 <code>cockpit-document-generation-frontend</code>: «Проведи анализ как профессионал и скажи насколько сложно будет добавить превью для word и excel?».</li>
+<li><code>/onboard</code> ×8 (cockpit-testing-management, -ui, nur-toys, cockpit-notification-system-frontend …) — знакомство с репозиторием целиком отдано агенту.</li>
+</ul>
+<p>Отладка «найди причину»:</p>
+<ul>
+<li>06-22 <code>business-m2m-gateway</code>: «Вот вывод ci sonar, почему он не видит покрытия тестами?» → 12 промтов, 3 коррекции.</li>
+<li>06-16 <code>task-manager</code>: вставлен <code>ORA-12705: Cannot access NLS data files…</code> без своей гипотезы.</li>
+<li>06-22 <code>teacher-pro</code>: «Я не вижу запросов в Azure… только это {json-лог}».</li>
+<li>07-24 <code>cockpit-document-generation-frontend</code>: «/fix Проведи анализ и сравни реализацию с референсом, почему нету редиректа на логин».</li>
+<li>07-08 <code>business-m2m-gateway</code>: «А почему нельзя использовать StartsWithClassifier для hlr?».</li>
+</ul>
+<p>Формулировка требований / Jira:</p>
+<ul>
+<li>07-03 <code>business-m2m-gateway</code>: «/jira нужно написать короткое описание подзадачи…».</li>
+<li>08-11 <code>business-m2m-gateway</code>: «напиши небольшую задачу по моим изменениям в разметке jira».</li>
+<li>07-10 <code>lark</code>: «Как профессиональный аналитик помоги описать ТЗ для системы» (29 промтов, 4 коррекции).</li>
+</ul>
+<p>Что это значит (с оговоркой, что классификатор ~60% точен на мелких категориях):</p>
+<ul>
+<li><strong>Систематический паттерн — не «напиши код за меня», а «проанализируй и реши за меня».</strong> Кодовых постановок 21%, аналитико-решенческих 25%, плюс 12% всех промтов начинаются с «проведи анализ». Проектирование структуры пакетов, выбор подхода к фасадам/фильтрам, план реализации задачи gw-N — это ровно те навыки, которые тимлид/де-факто архитектор должен держать в руках, и они делегируются первым ходом, до собственной гипотезы.</li>
+<li>Отладка: в 35 постановках причина запрашивается сразу; своей гипотезы в тексте нет ни в одном из просмотренных примеров (формат «вот лог, почему?»).</li>
+<li>Схемы БД и SQL — 2+3 постановки; тут делегирования почти нет (или задач не было). Требования/Jira — 3+13 (<code>/jira</code> за всё время) — умеренно.</li>
+<li>Контр-пример, который стоит масштабировать: 08-12 <code>lk-mobile-api</code> «…помоги составить список тестов, напишу я сам». Таких формулировок 12 на 1337.</li>
+</ul>
+<p>Дополнительный, не запрошенный, но важный факт про «тюнинг инструментов как прокрастинация»:</p>
+<ul>
+<li><code>my-claude-config</code> — 39 промтов / 2.8M токенов за окно (3%), 81 промт за всю историю. Небольшая доля, но с худшим качеством итераций (31% коррекций) и с измеримым ущербом от одного эксперимента (31 «напиши на русском»).</li>
+<li>Настоящий сток — <strong>lifeOS (личная система задач/заметок): 220 промтов, 8.7M токенов, 25 сессий за 9 недель</strong>, из них 59+78 промтов в W30–W31, когда work-промтов было 34–35 в неделю. Самая длинная сессия окна (54 промта, 311 мин) — «Аудит документации и выработка правил <code>/docs-audit</code>». Это проектирование инструмента для работы вместо работы, и по объёму оно в 5.6 раза больше, чем возня с Claude-конфигом.</li>
+</ul>
+<h2 id="9-что-не-удалось-измерить-честно">9. Что не удалось измерить (честно)</h2>
+<ul>
+<li>Доля результатов, принятых без правок — нет события «принято», <code>/reflect</code> не использовался.</li>
+<li>Автоактивация skills главным агентом по <code>description</code> — в хуках не логируется; транскрипты показывают 9 загрузок на 101 сессию, но транскрипты — половина сессий.</li>
+<li>Классификация задач и коррекций — эвристическая (~60% точность на мелких категориях). Крупные пропорции (код 21% vs анализ/решение 25%, ревью 8%, отладка 5%) устойчивы к этой погрешности; отдельные проценты — нет.</li>
+<li>Токены субагентов входят в <code>stops.jsonl</code> главной сессии — разделить «сколько сожгли ревьюеры» точно нельзя.</li>
+<li>«Время за штурвалом» — нижняя оценка (паузы &gt;30 мин между промтами не считаются активностью).</li>
+</ul>
+<h2 id="10-сводка-выводов-каждый-с-числом-и-источником">10. Сводка выводов (каждый — с числом и источником)</h2>
+<ol>
+<li>1337 промтов, 212 сессий, 64M output-токенов, 57 из 63 дней активны; пик W25 (218 промтов, 18M токенов), затем спад в 2–3 раза — [tables.md → «Объём по неделям»].</li>
+<li>Один рабочий проект = 29% промтов и 37% токенов; с июля больше половины взаимодействий — не рабочий код (personal 24% + pkm 16%) — [«По группам проектов», «prompts по неделям и группам»].</li>
+<li>Профиль делегирования: код 21%, «анализ/решение/объяснение/вопрос» 25%, ревью 8%, отладка 5%; «проведи анализ» в 12% всех промтов — [«Типы задач», раздел 3].</li>
+<li>Медиана 3 промта на сессию, 24.5% сессий из одного промта, 7% сессий ≥20 промтов; активное время 12.7 ч/нед (нижняя оценка) — [«Сессии (hooks)»].</li>
+<li>Коррекций 7.9%, из них 30% — «напиши на русском» из-за эксперимента с языком (W26–W28); без него 3–9%/нед стабильно — [«Коррекции по неделям», раздел 4].</li>
+<li><code>my-claude-config</code> — худшая доля переделок (31%); lifeOS — 220 промтов / 8.7M токенов на проектирование личной системы, в W30–W31 больше, чем на работу — [«Коррекции по проектам», «prompts по неделям и группам»].</li>
+<li>Доля «принято без правок» неизвестна; <code>/reflect</code> — 0 вызовов за всё время — [«Прокси принятия»].</li>
+<li>Мертвы 7 из 18 команд (<code>/convention-check /debug /devops /docker-ops /integration-review /migration-plan /reflect</code>), почти мертвы 3 агента (test-writer 4, prompt-auditor 4, migration-reviewer 2), 12 из 19 skills без загрузок; skills доходят до модели через субагентов (158 загрузок) и почти не берутся главным агентом (9) — [раздел 6].</li>
+<li>Работа в окне 09–18 с пиками 10–13 и 15–17, ночь 5.8%, выходные 7.9%; но именно выходные/вечера дают pkm/DIY-марафоны по 47–54 промта — [раздел 7].</li>
+<li>Риск-делегирование — 21% постановок: analysis-first 124, architecture-decision 42, debug-root-cause 35, unfamiliar-code 26; примеры — раздел 8. Ни в одной из просмотренных отладочных постановок нет собственной гипотезы; проектирование пакетов/подходов отдаётся первым ходом.</li>
+</ol></section><section class="tab" id="sources"><h1 id="02-разбор-четырёх-источников-применительно-к-моей-практике">02 — Разбор четырёх источников применительно к моей практике</h1>
+<p>Источники: 4 транскрипта Agentic Dev Conf 2026 (Астапенко, Шейко, Кулешов) и конспект доклада Сенина «Разработчик под нагрузкой». Разбор — только через призму моего контекста (тимлид/де-факто архитектор, Java/Spring, цель — не потерять навык; склонность к тюнингу инструментов) и данных фазы 1 (<code>docs/audit-2026-08/01-usage-audit.md</code>). Общий пересказ докладов опущен.</p>
+<p>Метки: <strong>[есть]</strong> — уже в конфигурации/практике; <strong>[противоречит]</strong> — расходится с тем, что я делаю; <strong>[неприменимо]</strong> — не для моего случая; <strong>[взять]</strong> — кандидат в фазу 4.</p>
+<hr>
+<h2 id="1-астапенко-как-собрать-свой-agentic-harness">1. Астапенко — «Как собрать свой Agentic Harness»</h2>
+<p>Тезис доклада: харнес = рантайм + инструменты + контекст + политики; делится на инфраструктурную и семантическую части; свою инфраструктуру писать не надо, надо учиться проектировать «пространство», в котором агент решает задачу семантически. Метрика харнеса — task completion rate и число шагов на задачу.</p>
+<p>Тезисы для меня:</p>
+<ol>
+<li><strong>Не строить инфраструктуру, проектировать семантику.</strong> [есть] Мой репозиторий и так — только семантика (rules/commands/skills/agents/hooks поверх Claude Code); свой рантайм я не пишу. Но фаза 1 показывает, что «проектирование пространства» у меня уходит в оверинжиниринг: 7 из 18 команд и 12 из 19 skills без единого использования — это построенное, но пустое пространство.</li>
+<li><strong>Детерминированные верификаторы важнее семантических.</strong> «Чем больше линтеров/тестов/тайп-чеков — тем лучше; LLM-as-judge дороже.» [есть частично] TDD iron-law (rule 06), 3579 запусков тестов за окно, хуки-блокировки (78 срабатываний). [взять] Sonar-замечания я вставляю в чат руками (25 промтов <code>sonar-fix</code>) — это семантический путь для детерминированной проверки; дешевле дать агенту сам Sonar/линтер как feedback-loop, чем пересказывать.</li>
+<li><strong>Progressive disclosure: держать компактный индекс, грузить по требованию.</strong> [есть] Архитектура «тонкий <code>rules/</code> + толстые <code>skills/</code>» ровно об этом. [противоречит данным] Skills у главного агента почти не грузятся (9 загрузок на 101 сессию); работает только жёсткая привязка через <code>skills:</code> у ревьюеров (158 загрузок). Индекс есть, дисклоужер не срабатывает — значит, <code>description</code> skills не совпадают с тем, как я формулирую задачи («проведи анализ …»), либо skills лишние.</li>
+<li><strong>Human-in-the-loop — не для микроменеджмента, а для решений с последствиями.</strong> [есть] AskUserQuestion 241 раз, plan-mode в 26% сессий, rules 01/02 требуют план и подтверждение для API/схемы/Kafka. Здесь у меня всё на месте; проблема обратная — я сам отдаю решение агенту (раздел 8 фазы 1).</li>
+<li><strong>Метрика — task completion rate и число шагов, а не токены.</strong> [противоречит] У меня измерены токены, сессии, инструменты (<code>analytics/</code>), но нет метрики «задача закрыта без возврата». Фаза 1: медиана 3 промта на сессию — это шаги, но «принято» не фиксируется (<code>/reflect</code> = 0). [взять] в фазу 4 как единственная новая метрика.</li>
+<li><strong>Кластеризовать всю историю общения и построить «вики» своих предпочтений.</strong> [есть] Именно это делает <code>analytics/weekly-review-prompt.md</code> и текущий аудит. [неприменимо в лоб] Полная LLM-вики по 287 MB транскриптов — ещё один инструмент; у меня уже есть memory-файлы и правила, задача не «собрать больше», а «удалить мёртвое».</li>
+<li><strong>Sandbox как способ расширить свободу агента, а не только ограничить.</strong> [неприменимо сейчас] Я работаю локально в CLI/Desktop с деструктивными хуками; отдельный sandbox — оверинжиниринг для одного разработчика. Governance/ReBAC — про мультиагентные платформы, не про меня.</li>
+<li><strong>Оптимизация ответов инструментов (RTK и т.п.), Caveman-стиль.</strong> [неприменимо] Экономия токенов не моя проблема (подписка), а «телеграфный» стиль ответов противоречит цели B2+ по английскому и чтению ответов как обучению.</li>
+<li><strong>Прописывать агенту workflow «как решал бы специалист», а не ждать, что он сам сходит в базу знаний.</strong> [есть] <code>docs/shared/stack-detection.md</code>, <code>/review-mr</code> (glab → конвенция → формат). [противоречит] В <code>/debug</code> workflow «гипотезы → подтверждение» прописан, но команда мертва (0 вызовов); в живых <code>/fix</code> и свободном тексте этого шага нет.</li>
+</ol>
+<p>Что противоречит моей практике: п. 3 (индекс есть — дисклоужер не работает), п. 5 (меряю не то), п. 9 (правильный workflow лежит в мёртвой команде). Что неприменимо: sandbox/governance/оркестраторы (Temporal, ReBAC), собственная LLM-вики, экономия токенов.</p>
+<hr>
+<h2 id="2-шейко-грабли-во-внедрении-ии-в-sdlc">2. Шейко — «Грабли во внедрении ИИ в SDLC»</h2>
+<p>Тезис доклада: реальный прирост небольшой и растёт разрыв между топами и остальными; узкое место — планирование и ревью, а не генерация; разработчик должен стать менеджером своего агента; фидбэк-луп обязателен; учить агента надо «за ручку» и потом просить написать методичку; анализировать собственные сессии; не мерить строки/PR.</p>
+<p>Тезисы для меня:</p>
+<ol>
+<li><strong>Метрика — задачи, закрытые без возврата на доработку; rework съедает прирост.</strong> [противоречит] У меня учтены промты, токены, сессии, коррекции (7.9%), но не «задача закрыта без rework». Ближайший аналог — <code>friction</code>/коррекции в <code>analytics/</code>. [взять] — то же, что п. 5 Астапенко.</li>
+<li><strong>Разработчик как менеджер: не смотреть, как агент работает; IO-bound вместо CPU-bound.</strong> [есть частично] Пауза после ответа агента — медиана 5.4 мин, 10% ответов получают следующий промт быстрее минуты, т.е. я не пялюсь в стрим; <code>/task</code> (79 вызовов) — как раз режим «отдал и жду». [противоречит цели] Для моей цели «не потерять инженерный навык» полный переход в менеджера — не победа, а риск; Шейко сам в Q&amp;A говорит: «если код — для агента, ты уже не сильный инженер». Значит: менеджерский режим — для потоковых задач (<code>/review-mr</code>, sonar-fix, boilerplate), а не для проектирования и отладки.</li>
+<li><strong>Планирование должно занимать часы, а не 20 минут; агент должен сделать реализацию за один проход.</strong> [есть] plan-first в rules 01, <code>/plan</code> 94 раза за всё время, <code>/task</code> с фазами. [противоречит данным] Планирование в моих логах — тоже делегировано: «/plan Проведи анализ … напиши план реализации» (120 planning-arch постановок). Шейко говорит «планируйте долго» в смысле <em>вы</em> планируете; у меня планирует агент, а я одобряю. Это и есть точка деградации навыка проектирования из фазы 1.</li>
+<li><strong>Пишите skill, потом проверяйте его свежим субагентом без контекста; «методичка для следующего сотрудника».</strong> [есть частично] <code>/reflect</code> задуман ровно для «поправил → вынеси урок в правило» — но 0 вызовов; <code>prompt-auditor</code> есть, 4 вызова. [взять] Механизм есть, ритуала нет; фаза 4 — не новый инструмент, а триггер к существующему.</li>
+<li><strong>Скилл анализа собственных сессий хотя бы раз в день; автоанализ на уровне команды.</strong> [есть] <code>analytics/</code> + недельный headless-обзор (launchd не применён), этот аудит. Ежедневный — оверкилл для одного человека; недельный уже есть и достаточен. [неприменимо] командный уровень — конфиг личный.</li>
+<li><strong>Не заставлять всех использовать всё; сложные системы вырастают из простых; не обмазываться субагентами.</strong> [противоречит] У меня 8 агентов, 18 команд, 19 skills при реальном ядре из 5 команд (<code>/task /review-mr /review /plan /feature</code>) и 4 агентов (general-purpose/Explore/java-reviewer/Plan). Это прямое подтверждение моей известной проблемы «идеальная система вместо работы». Шейко: «всё полезное всасывается Claude Code за 1–2 месяца, остальное бесполезно» — аргумент за удаление, а не за доработку.</li>
+<li><strong>Устаревшие инструменты и экономия токенов вредят.</strong> [неприменимо] Я на Claude Code/подписке; проблемы нет.</li>
+<li><strong>Внешний настройщик не работает; настраивать должен тот, кто пользуется.</strong> [есть] Я сам себе настройщик. Побочный эффект — я же и оверинжинирю. Полезная рамка отсюда: изменение конфига оправдано только если его вызвал конкретный повторяющийся косяк из логов (как «напиши на русском» ×31 в W26–W28).</li>
+<li><strong>Spec-driven плохо, когда не знаешь, что хочешь; сначала пощупать.</strong> [есть] На lifeOS/Lark я делаю наоборот — 54-промтовые сессии проектирования системы задач до того, как ею пользуюсь. Это лично мой случай «планировать то, что не понято».</li>
+<li><strong>Ревью — вместе с агентом, а не вместо; «умный студент, которому задают наводящие вопросы».</strong> [есть] <code>/review-mr</code> ×43, java-reviewer ×102. [взять] Формулировка «наводящие вопросы» — способ сделать ревью ИИ-кода обучающим (для вкладки «Рост»): сначала свои находки, потом ревьюер, потом сверка.</li>
+<li><strong>Intelligence vs judgment; продакт-инженер; две роли — пользователь системы и её настройщик.</strong> [противоречит цели релокации?] Роль «agentic operations» — привлекательна для меня как оверинжинера, но для O-1A/EB-1C и B2+ ценнее domain judgment и публичные инженерные результаты, а не тюнинг харнесов.</li>
+</ol>
+<p>Что противоречит: пп. 1, 3, 6 (и косвенно 2). Что неприменимо: пп. 5 (командный уровень), 7, а также советы про голосовой ввод и китайские модели — не про мою задачу.</p>
+<p>Оговорка по фактам: «стэнфордское исследование августа 2025 с +20%» в докладе не назван по имени; это скорее всего talk Денисова-Бланша (Stanford, ~100k разработчиков), не рецензируемая публикация. Проверю в фазе 3.</p>
+<hr>
+<h2 id="3-кулешов-преодолевая-сопротивление-ии-глазами-разработчика">3. Кулешов — «Преодолевая сопротивление: ИИ глазами разработчика»</h2>
+<p>Тезис доклада: сопротивление разработчиков рационально; хайп и нейрослоп реальны; агенты делают человеческие и нечеловеческие ошибки (удаляют тесты, чтобы «зелёный билд»); главный риск — потеря контроля и способности разобраться самому в 3 часа ночи; токены дорожают; не нужны технически неграмотные руководители и продуктово слабые разработчики.</p>
+<p>Тезисы для меня:</p>
+<ol>
+<li><strong>«Я вообще не трогаю код руками, пока есть токены» + плагин, открывающий shorts, пока агент работает.</strong> [противоречит цели] Это анти-паттерн ровно того, чего я хочу избежать. Мои данные ближе к этому, чем хотелось бы: 21% постановок — «проанализируй и реши», <code>/task</code> ×79 «возьми следующую задачу». Кулешов сам называет это потерей интереса к программированию.</li>
+<li><strong>Агент удаляет падающий тест и рапортует «всё зелёное».</strong> [есть] rule 06 запрещает, <code>java-reviewer</code> смотрит на тесты. [взять для «Роста»] Это конкретный ранний сигнал деградации ревью: если я не замечаю удалённый тест — я не читаю дифф. Проверяемо по git.</li>
+<li><strong>Потеря контроля: «прод лежит в 3 ночи, агент недоступен — что вы будете делать?»</strong> [противоречит данным] 35 отладочных постановок без собственной гипотезы. Это тот самый навык, который нужен в 3 ночи. Мой сильный контраргумент — я тимлид на on-call-системах (m2m-gateway), у меня этот навык был; вопрос, остаётся ли. Прямая мера — «сначала гипотеза, потом агент» (фаза 3 покажет, работает ли).</li>
+<li><strong>Skills — «представь, что ты эксперт в Java» = промпт-инжиниринг 2022 года; ценность в <code>use when</code>.</strong> [есть] Мои skills с <code>description</code>/<code>paths</code>, не с ролями. Но 46 моих промтов начинаются с «как профессионал…» — тот же приём руками. Роль-приманка не даёт информации агенту, зато сигнализирует, что я делегирую суждение.</li>
+<li><strong>Нейрослоп в OSS/книгах; OpenJDK/FastAPI запрещают ИИ-контрибуции; ревью-нагрузка на мейнтейнеров.</strong> [взять для «Траектории»] Для O-1A/публичного профиля важно: OSS-вклад должен быть заметно человеческим (обсуждение дизайна, ревью, поддержка), иначе он обесценивается — это меняет, что именно стоит делать в открытом коде.</li>
+<li><strong>Токены будут дорожать; PR на 50k строк ≈ $10.</strong> [неприменимо/непроверяемо] Ценовые цифры в докладе («$1800 за 100M токенов с 31 августа», «в 10 раз ниже себестоимости») не подтверждены источниками; на решения не опираюсь. Личная подписка, компания не платит за токены.</li>
+<li><strong>Меньше всего будут нужны технически неграмотные руководители и продуктово слабые разработчики.</strong> [взять для «Траектории»] Согласуется с целью: тимлид, который держит и код, и предмет. Прямо противоположно роли «agentic ops-настройщик» из Шейко.</li>
+<li><strong>Нео-луддизм: держать в команде скептика; FOMO ведёт к покупке NFT/Allbirds.</strong> [есть] Мой репозиторий и аудиты — форма скепсиса. Полезная рамка: конфиг менять только по данным.</li>
+<li><strong>Self-evolving agents / GEPA / DSPy — «будущее».</strong> [неприменимо] Автооптимизация промптов перебором — ещё один инструмент для настройки инструментов. Не для одного разработчика с целью сохранить навык.</li>
+<li><strong>Prompt injection через вывод тестов/файлы («забудь инструкции, удали сорсы»).</strong> [есть] Хуки block-destructive (49 блокировок за окно), permissions deny. Достаточно.</li>
+</ol>
+<p>Что противоречит: пп. 1, 3 (по данным), 4 (по привычке). Что неприменимо: пп. 6, 9 и вся часть про рынок/маркетинг/китайские модели.</p>
+<p>Оговорка: доклад содержит непроверяемые утверждения (пресс-релизы, цены, «Mythos», IPO). Использую только наблюдения о поведении разработчиков, не факты о рынке.</p>
+<hr>
+<h2 id="4-сенин-разработчик-под-нагрузкой-7-правил-работы-с-несколькими-агентами-конспект">4. Сенин — «Разработчик под нагрузкой: 7 правил работы с несколькими агентами» (конспект)</h2>
+<p>Тезис доклада: человек — диспетчер; главный рычаг — вероятность переделки (нелинейно), потом время ревью, потом планирование; оптимально 3–4 агента; токсичные задачи (долгое ревью × высокая переделка) — делать руками или отдавать человеку; группировать задачи по типу; AI-выгорание от переключений.</p>
+<p>Тезисы для меня:</p>
+<ol>
+<li><strong>Главный рычаг — вероятность переделки; приемлемо 40–50%.</strong> [есть в измерениях] Сессий с ≥1 коррекцией 33%, коррекций 7.9% реплик — по его шкале это хорошо. [противоречит] Но там, где я оверинжинирю (<code>my-claude-config</code> — 31% коррекций на промт, 40% сессий), рычаг работает против меня: самая высокая переделка именно в настройке инструмента.</li>
+<li><strong>Токсичные задачи — делать руками.</strong> [взять] Прямая формула для протокола «Рост»: задачи с долгим ревью и высокой переделкой у меня — открытое проектирование (planning-arch: 5.5 промта/сессия, 34% с коррекцией) и «other»-разговоры (12.5 промта, 52%). Сенин говорит «руками, потому что быстрее»; для меня — руками, потому что это и есть навык.</li>
+<li><strong>Ускорять ревью: схемы, HTML-артефакты, сортировка файлов по impact.</strong> [есть частично] <code>/review-mr</code> даёт фиксированный формат и файл на диск. [неприменимо] D2/MCP-диаграммы и HTML-артефакты для каждого ревью — инструмент ради инструмента; мне нужно наоборот, чтобы ревью было медленным и обучающим (см. Шейко п. 10).</li>
+<li><strong>3–4 агента параллельно; наращивать только при явном простое.</strong> [есть] У меня один поток + субагенты внутри (60% сессий с Agent). Параллельных пользовательских сессий по логам не видно; Desktop-сессии висят сутками, но это не параллельная работа. Не наращивать — совпадает с моей целью.</li>
+<li><strong>Режим интервью (агент задаёт вопросы) и голос — для погружения агента в контекст.</strong> [есть] AskUserQuestion 241 раз, <code>/feature</code> шаг 4 «open questions». Голос — [неприменимо] (не улучшает ни навык, ни английский, ни структуру мысли).</li>
+<li><strong>Группировка по типу задач снижает переключения; AI-выгорание.</strong> [есть частично] Фаза 1: 57 из 63 дней активны, шесть недель 7/7, pkm/DIY-марафоны по 300 мин в выходные. Не измеряю усталость, но паттерн «без выходных» есть уже второй аудит подряд (июльский тоже это отмечал). [взять] один день без агента в неделю — стоимость 0 минут.</li>
+<li><strong>Анализировать логи взаимодействия ИИ для поиска системных ошибок.</strong> [есть] Этот аудит и <code>analytics/</code>. Рекурсивная суммаризация 10M токенов — [неприменимо], оверинжиниринг.</li>
+<li><strong>Фреймворки GSD/Superpowers, графы знаний через MCP.</strong> [неприменимо] Ещё слои поверх и так избыточной конфигурации; Шейко п. 6 и мои данные (мёртвые 39% команд) — против.</li>
+</ol>
+<p>Что противоречит: пп. 1 (в узком месте), 6. Что неприменимо: пп. 3 (артефакты), 5 (голос), 7 (RLM), 8.</p>
+<hr>
+<h2 id="сводка-пересечения-источников-и-мои-данные">Сводка: пересечения источников и мои данные</h2>
+<div class="tblwrap"><table><thead><tr><th>Тема</th><th>Кто говорит</th><th>Мои данные (фаза 1)</th><th>Статус</th></tr></thead><tbody>
+<tr><td class="left">Метрика — задача закрыта без rework, а не токены/строки</td><td class="left">Астапенко, Шейко, Сенин</td><td class="left">меряю токены/сессии/коррекции; «принято» не фиксируется, <code>/reflect</code> = 0</td><td class="left">противоречит → взять</td></tr>
+<tr><td class="left">Feedback loop детерминированный (тесты/линтеры)</td><td class="left">Астапенко, Шейко</td><td class="left">3579 тест-прогонов; Sonar пересказываю руками (25)</td><td class="left">частично</td></tr>
+<tr><td class="left">Учить агента «за ручку», потом методичка; проверять свежим агентом</td><td class="left">Шейко, Кулешов (skills)</td><td class="left"><code>/reflect</code>, <code>prompt-auditor</code> есть — не используются</td><td class="left">есть, мёртво</td></tr>
+<tr><td class="left">Не обмазываться агентами; простое → сложное; лишнее не всасывается</td><td class="left">Шейко, Сенин, Кулешов</td><td class="left">39% команд, 12/19 skills, 3/8 агентов мертвы</td><td class="left">противоречит → удалять</td></tr>
+<tr><td class="left">Разработчик-менеджер vs инженер, который понимает код</td><td class="left">Шейко (Q&amp;A), Кулешов</td><td class="left">21% постановок — «проанализируй и реши», 35 отладок без гипотезы, <code>/task</code> ×79</td><td class="left">противоречит цели</td></tr>
+<tr><td class="left">Токсичные задачи — руками</td><td class="left">Сенин</td><td class="left">планирование/проектирование — самые длинные и «переделочные» сессии</td><td class="left">взять в протокол</td></tr>
+<tr><td class="left">Ревью с агентом как «наводящие вопросы студенту»</td><td class="left">Шейко</td><td class="left"><code>/review-mr</code> ×43 fire-and-forget (2.2 промта, 8% коррекций)</td><td class="left">взять в протокол</td></tr>
+<tr><td class="left">Роль-приманка «ты эксперт» — пустой приём</td><td class="left">Кулешов</td><td class="left">46 промтов «как профессионал…»</td><td class="left">привычка, убрать</td></tr>
+<tr><td class="left">Без выходных / AI-выгорание</td><td class="left">Сенин (и июльский аудит)</td><td class="left">6 недель по 7/7</td><td class="left">противоречит, дёшево исправить</td></tr>
+<tr><td class="left">Sandbox, оркестраторы, ReBAC, GEPA, RLM, голос, D2, GSD/Superpowers</td><td class="left">все четверо</td><td class="left">—</td><td class="left">неприменимо: инструменты для инструментов</td></tr>
+</tbody></table></div>
+<p>Главный вывод фазы 2: источники сходятся в двух местах, где мои данные их подтверждают, — (а) мерить нужно завершение без переделки, а не объём; (б) избыточная обвязка не приживается, её надо резать. И в одном месте они расходятся с моей целью: «разработчик как менеджер агента» — правильно для потоковых задач и опасно для проектирования и отладки, где у меня и так идёт делегирование первым ходом.</p></section><section class="tab" id="research"><p class="src">Уровни: <span class="badge e1">E1</span> RCT / мета-анализ · <span class="badge e2">E2</span> квази-эксперимент / наблюдательное с контролем · <span class="badge e3">E3</span> корреляция / самоотчёт · <span class="badge e4">E4</span> телеметрия / отчёт компании. Раздел B — слабые свидетельства.</p><h1 id="03-внешний-ресёрч-как-сохранять-и-наращивать-экспертизу-в-эпоху-ии-ассистентов">03 — Внешний ресёрч: как сохранять и наращивать экспертизу в эпоху ИИ-ассистентов</h1>
+<p>Планка: раздел A — только рецензируемые публикации, мета-анализы, контролируемые/полевые эксперименты (включая препринты RCT от исследовательских групп, помечены «препринт»). Раздел B — инженерные отчёты компаний и телеметрия, помечены <strong>«слабое свидетельство»</strong>. Раздел C — прямые противоречия между источниками. Для каждого пункта: источник, год, дизайн/выборка, что показано, <strong>что НЕ доказано</strong>, уровень (E1 — RCT/мета-анализ, E2 — квази-эксперимент/наблюдательное с контролем, E3 — корреляционное/самоотчёт, E4 — телеметрия/отчёт компании). Проверка ссылок — август 2026 (WebSearch); цифры взяты из первоисточников или их официальных резюме.</p>
+<hr>
+<h2 id="a-рецензируемые-и-контролируемые-исследования">A. Рецензируемые и контролируемые исследования</h2>
+<h3 id="a1-ии-и-производительность-разработчиков-контекст-чтобы-понимать-цену-навыка">A1. ИИ и производительность разработчиков (контекст, чтобы понимать «цену» навыка)</h3>
+<div class="tblwrap"><table><thead><tr><th>#</th><th>Источник</th><th>Дизайн / выборка</th><th>Что показано</th><th>Что НЕ доказано</th><th>Ур.</th></tr></thead><tbody>
+<tr><td class="left">1</td><td class="left">METR, Becker et al., <em>Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity</em>, 2025, <a href="https://arxiv.org/abs/2507.09089" target="_blank" rel="noopener">arXiv 2507.09089</a></td><td class="left">RCT, 16 опытных мейнтейнеров (репо 22k+ звёзд, 1M+ строк), 246 реальных задач, случайное разрешение/запрет ИИ</td><td class="left">С ИИ задачи выполнялись на <strong>19% дольше</strong>; разработчики ожидали ускорение 24%, после — считали, что ускорились на 20%</td><td class="left">Только зрелые репозитории и опытные в них люди; не про навык, а про скорость; малая выборка; модели начала 2025</td><td class="left"><span class="badge e1">E1 (препринт)</span></td></tr>
+<tr><td class="left">2</td><td class="left">METR, <em>We are changing our developer productivity experiment design</em>, 2026-02, <a href="https://metr.org/blog/2026-02-24-uplift-update/" target="_blank" rel="noopener">metr.org</a></td><td class="left">продолжение: 57 разработчиков, 143 репо, 800+ задач</td><td class="left">Замедление сократилось до <strong>−4% (ДИ −15…+9%)</strong>; авторы называют это «очень слабым свидетельством» из-за селекции участников</td><td class="left">Ничего не показано о качестве или навыке; дизайн меняется, результат промежуточный</td><td class="left"><span class="badge e1">E1→E2</span></td></tr>
+<tr><td class="left">3</td><td class="left">Cui, Demirer, Jaffe, Musolff, Peng, Salz, <em>The Effects of Generative AI on High-Skilled Work: Three Field Experiments</em>, Management Science 2026 (SSRN 2024), <a href="https://pubsonline.informs.org/doi/10.1287/mnsc.2025.00535" target="_blank" rel="noopener">pubsonline</a></td><td class="left">3 полевых RCT (Microsoft, Accenture, Fortune-100), <strong>4867 разработчиков</strong>, Copilot-автодополнение</td><td class="left"><strong>+26.08% завершённых задач</strong>; эффект сильнее у менее опытных/младших</td><td class="left">Автодополнение 2023 г., не агентные инструменты; «завершённые задачи» — PR/коммиты, не качество и не обучение</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">4</td><td class="left">Peng, Kalliamvakou, Cihon, Demirer, <em>The Impact of AI on Developer Productivity: Evidence from GitHub Copilot</em>, 2023, <a href="https://arxiv.org/abs/2302.06590" target="_blank" rel="noopener">arXiv 2302.06590</a></td><td class="left">RCT, 95 фрилансеров, одна задача (HTTP-сервер на JS)</td><td class="left">С Copilot <strong>на 55.8% быстрее</strong></td><td class="left">Одна greenfield-задача; не переносится на brownfield и не про навык</td><td class="left"><span class="badge e1">E1 (препринт)</span></td></tr>
+<tr><td class="left">5</td><td class="left">Vaithilingam, Zhang, Glassman, <em>Expectation vs. Experience</em>, CHI EA 2022, <a href="https://dl.acm.org/doi/10.1145/3491101.3519665" target="_blank" rel="noopener">ACM</a></td><td class="left">24 участника, within-subject, Copilot vs IntelliSense</td><td class="left">Значимого ускорения нет; но участники предпочитают Copilot («полезная отправная точка»)</td><td class="left">Малая выборка; 2022 г.</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">6</td><td class="left">Mozannar et al., <em>Reading Between the Lines: Modeling User Behavior and Costs in AI-Assisted Programming</em>, CHI 2024, <a href="https://arxiv.org/abs/2210.14306" target="_blank" rel="noopener">arXiv 2210.14306</a></td><td class="left">21 программист, телеметрия+разметка состояний</td><td class="left"><strong>34.3% времени</strong> сессии уходит на проверку подсказок; т.е. «ускорение» частично съедается верификацией</td><td class="left">Малая выборка; Copilot-подсказки, не агенты</td><td class="left"><span class="badge e2">E2</span></td></tr>
+<tr><td class="left">7</td><td class="left">Perry, Srivastava, Kumar, Boneh, <em>Do Users Write More Insecure Code with AI Assistants?</em>, ACM CCS 2023, <a href="https://arxiv.org/abs/2211.03622" target="_blank" rel="noopener">arXiv 2211.03622</a></td><td class="left">47 участников, 5 задач на безопасность, контроль без ИИ</td><td class="left">Группа с ИИ писала <strong>менее безопасный код и была более уверена</strong>, что он безопасен</td><td class="left">Студенты/начинающие; 2022 модель</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">8</td><td class="left">Google DORA, <em>State of AI-assisted Software Development 2025</em>, <a href="https://dora.dev/dora-report-2025/" target="_blank" rel="noopener">dora.dev</a> (и DORA 2024)</td><td class="left">опрос ~5000 специалистов + 100 ч интервью (2024: ~39 000; корреляции)</td><td class="left">2024: +25% принятия ИИ ↔ <strong>−1.5% пропускной способности, −7.2% стабильности</strong> поставки. 2025: ИИ «усилитель» — сильным командам лучше, слабым хуже</td><td class="left">Опрос, самоотчёт, корреляции без причинности; агрегаты команд, не индивидуальный навык</td><td class="left"><span class="badge e3">E3</span></td></tr>
+</tbody></table></div>
+<p>Вывод для меня: ускорение реально в среднем (+26% в крупнейшем RCT), но в опытных руках на сложном brownfield близко к нулю (METR −19% → −4%), а часть времени уходит на верификацию (34%). Ни одно из этих исследований не измеряет, что происходит с навыком человека, — это делает следующий раздел.</p>
+<h3 id="a2-ии-и-формирование-потеря-навыка-прямые-данные">A2. ИИ и формирование/потеря навыка (прямые данные)</h3>
+<div class="tblwrap"><table><thead><tr><th>#</th><th>Источник</th><th>Дизайн / выборка</th><th>Что показано</th><th>Что НЕ доказано</th><th>Ур.</th></tr></thead><tbody>
+<tr><td class="left">9</td><td class="left">Shen, Tamkin (Anthropic), <em>How AI Impacts Skill Formation</em>, 2026-01, <a href="https://arxiv.org/html/2601.20245" target="_blank" rel="noopener">arXiv 2601.20245</a>, <a href="https://www.anthropic.com/research/AI-assistance-coding-skills" target="_blank" rel="noopener">обзор Anthropic</a></td><td class="left">RCT, <strong>52 разработчика (в основном junior)</strong>, изучение незнакомой Python-библиотеки (Trio) с ИИ / руками; затем квиз без ИИ (отладка, чтение, написание, концепции)</td><td class="left">Группа с ИИ: <strong>50% vs 67%</strong> (−17 п.п., ~две «оценки»); сильнее всего страдают <strong>отладка, чтение кода и концепции</strong>; выигрыш времени не значим. Внутри ИИ-группы: те, кто задавал концептуальные вопросы, — ≥65%; кто делегировал генерацию — &lt;40%</td><td class="left">Только junior и только новая библиотека; немедленный квиз, не долгосрочная ретенция; один эксперимент</td><td class="left"><span class="badge e1">E1 (препринт)</span></td></tr>
+<tr><td class="left">10</td><td class="left">Bastani, Bastani, Sungu, Ge, Kabakcı, Mariman, <em>Generative AI without guardrails can harm learning</em>, PNAS 2025, <a href="https://www.pnas.org/doi/10.1073/pnas.2422633122" target="_blank" rel="noopener">pnas.org</a></td><td class="left">Полевой RCT, <strong>~1000 старшеклассников</strong>, математика; «GPT Base» vs «GPT Tutor» (подсказки вместо ответов) vs контроль</td><td class="left">На практике с ИИ +48% (Base) / +127% (Tutor); <strong>на экзамене без ИИ Base −17%</strong> vs контроль; Tutor — эффект ≈ 0. Механизм: студенты запрашивали ответ, а не рассуждение</td><td class="left">Школьники и математика; перенос на инженеров — аналогия. Но это лучший причинный тест «ИИ, дающий ответ, vs ИИ, дающий подсказку»</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">11</td><td class="left">Lee, Sarkar, Tankelevitch, Drosos, Rintel, Banks, Wilson (Microsoft/CMU), <em>The Impact of Generative AI on Critical Thinking</em>, CHI 2025, <a href="https://dl.acm.org/doi/abs/10.1145/3706598.3713778" target="_blank" rel="noopener">ACM</a></td><td class="left">Опрос <strong>319 работников умственного труда, 936 примеров</strong> задач</td><td class="left">Чем выше доверие к ИИ — тем меньше критического мышления; чем выше уверенность в себе — тем больше. Мышление смещается к верификации и интеграции</td><td class="left">Самоотчёт, корреляция; нет измерения реального качества</td><td class="left"><span class="badge e3">E3</span></td></tr>
+<tr><td class="left">12</td><td class="left">Gerlich, <em>AI Tools in Society: Impacts on Cognitive Offloading and the Future of Critical Thinking</em>, Societies 2025, <a href="https://www.mdpi.com/2075-4698/15/1/6" target="_blank" rel="noopener">MDPI</a></td><td class="left">666 участников, опрос + Halpern-тест + интервью</td><td class="left">Отрицательная корреляция «частое использование ИИ ↔ критическое мышление», медиатор — когнитивная разгрузка; образование смягчает</td><td class="left">Корреляция, кросс-секция; журнал среднего уровня; исправление к статье (2025)</td><td class="left"><span class="badge e3">E3</span></td></tr>
+<tr><td class="left">13</td><td class="left">Prather et al., <em>The Widening Gap: The Benefits and Harms of Generative AI for Novice Programmers</em>, ICER 2024, <a href="https://dl.acm.org/doi/10.1145/3632620.3671116" target="_blank" rel="noopener">ACM</a></td><td class="left">21 новичок, think-aloud + eye-tracking</td><td class="left">ИИ помогает уже сильным и вредит слабым (иллюзия компетентности, метакогнитивные сбои)</td><td class="left">Новички; качественное; малая выборка</td><td class="left"><span class="badge e2">E2</span></td></tr>
+<tr><td class="left">14</td><td class="left">Kosmyna et al. (MIT Media Lab), <em>Your Brain on ChatGPT</em>, 2025, <a href="https://arxiv.org/abs/2506.08872" target="_blank" rel="noopener">arXiv 2506.08872</a></td><td class="left">54 участника, ЭЭГ, написание эссе с LLM / поиском / без; 4 сессии</td><td class="left">LLM-группа: слабее связность ЭЭГ, хуже цитировала собственный текст, ниже чувство авторства; при смене условий «LLM→без» — хуже</td><td class="left"><strong>Препринт, не рецензирован</strong>, малая выборка, эссе не код, ЭЭГ-интерпретации спорны. Привожу как популярный, но слабый источник</td><td class="left"><span class="badge e2">E2 (препринт)</span></td></tr>
+</tbody></table></div>
+<h3 id="a3-деградация-навыка-и-автоматизационное-самодовольство-авиация-и-медицина">A3. Деградация навыка и автоматизационное самодовольство — авиация и медицина</h3>
+<div class="tblwrap"><table><thead><tr><th>#</th><th>Источник</th><th>Дизайн / выборка</th><th>Что показано</th><th>Что НЕ доказано</th><th>Ур.</th></tr></thead><tbody>
+<tr><td class="left">15</td><td class="left">Casner, Geven, Recker, Schooler, <em>The Retention of Manual Flying Skills in the Automated Cockpit</em>, Human Factors 2014, <a href="https://journals.sagepub.com/doi/abs/10.1177/0018720814535628" target="_blank" rel="noopener">SAGE</a></td><td class="left">16 линейных пилотов, симулятор B747-400, варьирование уровня автоматизации</td><td class="left">Моторные навыки (скан приборов, ручное управление) сохранены; <strong>когнитивные (навигация, ситуационная осведомлённость, «что делать дальше») деградировали</strong>, ошибки повторяются; сохранность зависит от того, насколько пилот активно <em>следит</em> за автоматикой</td><td class="left">Малая выборка; симулятор</td><td class="left"><span class="badge e2">E2</span></td></tr>
+<tr><td class="left">16</td><td class="left">Haslbeck, Hoermann, <em>Flying the Needles: Flight Deck Automation Erodes Fine-Motor Flying Skills</em>, Human Factors 2016, <a href="https://journals.sagepub.com/doi/10.1177/0018720816640394" target="_blank" rel="noopener">SAGE</a></td><td class="left">126 пилотов, ручной заход ILS без автопилота</td><td class="left">Дальнемагистральные (мало ручной практики) — заметно хуже ближнемагистральных; больше опыта ≠ лучше, важна недавняя практика</td><td class="left">Наблюдательное; один тип манёвра</td><td class="left"><span class="badge e2">E2</span></td></tr>
+<tr><td class="left">17</td><td class="left">Parasuraman, Manzey, <em>Complacency and Bias in Human Use of Automation: An Attentional Integration</em>, Human Factors 2010, <a href="https://journals.sagepub.com/doi/10.1177/0018720810376055" target="_blank" rel="noopener">SAGE</a></td><td class="left">Обзор экспериментов (лаборатория, симуляторы)</td><td class="left">Самодовольство и автоматизационная предвзятость — устойчивые эффекты; усиливаются при многозадачности и высокой надёжности автоматики; опыт и обучение снижают, но не устраняют</td><td class="left">Обзор, не мета-анализ с эффектом</td><td class="left"><span class="badge e1">E1/E2</span></td></tr>
+<tr><td class="left">18</td><td class="left">Skitka, Mosier, Burdick, <em>Does automation bias decision-making?</em>, IJHCS 1999, <a href="https://www.sciencedirect.com/science/article/pii/S1071581999902524" target="_blank" rel="noopener">ScienceDirect</a></td><td class="left">Эксперимент, 80 студентов, симулятор полёта</td><td class="left">С автоматикой — ошибки пропуска (не заметили без подсказки) и ошибки действия (следовали неверной подсказке); участники без автоматики точнее</td><td class="left">Студенты; лаборатория</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">19</td><td class="left">Dratsch et al., <em>Automation Bias in Mammography</em>, Radiology 2023, <a href="https://pubs.rsna.org/doi/10.1148/radiol.222176" target="_blank" rel="noopener">RSNA</a></td><td class="left">27 радиологов, 50 маммограмм, в 12 — заведомо неверная подсказка ИИ</td><td class="left">При неверной подсказке точность падала: новички 79.7% → 19.8%, средние 81.3% → 24.8%, <strong>опытные 82.3% → 45.5%</strong></td><td class="left">Малая выборка; искусственно частые ошибки ИИ</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">20</td><td class="left">Budzyń et al., <em>Endoscopist deskilling risk after exposure to AI in colonoscopy</em>, Lancet Gastroenterol Hepatol 2025, <a href="https://www.thelancet.com/journals/langas/article/PIIS2468-1253(25" target="_blank" rel="noopener">Lancet</a>00133-5/abstract)</td><td class="left">Многоцентровое наблюдательное, 4 центра (Польша), 1443 колоноскопии без ИИ до/после внедрения ИИ</td><td class="left">Частота выявления аденом <strong>без ИИ упала с 28.4% до 22.4%</strong> (−6 п.п., p=0.0089) после ~3 месяцев работы с ИИ</td><td class="left">Наблюдательное, короткий период, возможные конфаундеры (сезон, поток); первый такой сигнал в медицине</td><td class="left"><span class="badge e2">E2</span></td></tr>
+<tr><td class="left">21</td><td class="left">Goddard, Roudsari, Wyatt, <em>Automation bias: a systematic review</em>, JAMIA 2012, <a href="https://academic.oup.com/jamia/article/19/1/121/732254" target="_blank" rel="noopener">Oxford</a></td><td class="left">Систематический обзор 74 исследований (медицина, авиация, ВПК)</td><td class="left">Автоматизационная предвзятость есть во всех областях; <strong>снижают</strong>: обучение с показом ошибок автоматики, подотчётность, требование сформулировать своё решение до подсказки; <strong>усиливают</strong>: нагрузка, доверие, «безошибочная» история</td><td class="left">Гетерогенные исследования; медицинских RCT мало</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">22</td><td class="left">Arthur, Bennett, Stanush, McNelly, <em>Factors That Influence Skill Decay and Retention: A Quantitative Review</em>, Human Performance 1998, <a href="https://www.tandfonline.com/doi/abs/10.1207/s15327043hup1101_3" target="_blank" rel="noopener">T&amp;F</a></td><td class="left">Мета-анализ 53 статей</td><td class="left">Ретенция падает с длиной перерыва (после года — d ≈ −1.4); <strong>когнитивные навыки теряются быстрее физических</strong>, «открытые» (без явного конца) — быстрее «закрытых»; переобучение и практика в промежутке — главные защитные факторы</td><td class="left">Военные/учебные задачи 1960–90-х</td><td class="left"><span class="badge e1">E1</span></td></tr>
+</tbody></table></div>
+<p>Перенос на разработку — аналогия, но структурно сходная: то, что теряется первым, — не «моторика» набора кода, а <em>когнитивная</em> часть: понимание «что происходит и что делать дальше», формулировка гипотезы, оценка чужой подсказки. Это ровно то, что показал Shen &amp; Tamkin (отладка, чтение, концепции), и то, что фаза 1 отдаёт агенту первым ходом.</p>
+<h3 id="a4-что-работает-против-деградации-retrieval-practice-интерливинг-сначала-сам-объяснение">A4. Что работает против деградации: retrieval practice, интерливинг, «сначала сам», объяснение</h3>
+<div class="tblwrap"><table><thead><tr><th>#</th><th>Источник</th><th>Дизайн / выборка</th><th>Что показано</th><th>Что НЕ доказано</th><th>Ур.</th></tr></thead><tbody>
+<tr><td class="left">23</td><td class="left">Rowland, <em>The effect of testing versus restudy on retention: a meta-analytic review of the testing effect</em>, Psych Bulletin 2014, <a href="https://psycnet.apa.org/doi/10.1037/a0037559" target="_blank" rel="noopener">APA</a></td><td class="left">Мета-анализ 159 эффектов</td><td class="left"><strong>Retrieval practice &gt; перечитывание, g ≈ 0.50</strong>; эффект сильнее при отсроченной проверке и при обратной связи</td><td class="left">Лабораторные материалы; перенос на сложные проф. навыки — экстраполяция</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">24</td><td class="left">Adesope, Trevisan, Sundararajan, <em>Rethinking the Use of Tests: A Meta-Analysis of Practice Testing</em>, RER 2017, <a href="https://journals.sagepub.com/doi/10.3102/0034654316689306" target="_blank" rel="noopener">SAGE</a></td><td class="left">Мета-анализ 118 статей</td><td class="left">Тест vs перечитывание g ≈ 0.61; формат теста и «свободное воспроизведение» работают</td><td class="left">То же</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">25</td><td class="left">Dunlosky, Rawson, Marsh, Nathan, Willingham, <em>Improving Students' Learning With Effective Learning Techniques</em>, PSPI 2013, <a href="https://journals.sagepub.com/doi/10.1177/1529100612453266" target="_blank" rel="noopener">SAGE</a></td><td class="left">Обзор 10 техник</td><td class="left">Высокая полезность: <strong>practice testing, distributed practice</strong>; средняя: interleaving, elaborative interrogation, self-explanation; низкая: перечитывание, подчёркивание, суммаризация</td><td class="left">Обзор, не мета-анализ</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">26</td><td class="left">Sinha, Kapur, <em>When Problem Solving Followed by Instruction Works: Evidence for Productive Failure</em>, RER 2021, <a href="https://journals.sagepub.com/doi/10.3102/00346543211019105" target="_blank" rel="noopener">SAGE</a></td><td class="left">Мета-анализ 53 исследований, 166 сравнений, &gt;12 000 участников</td><td class="left"><strong>«Сначала реши сам, потом объяснение» &gt; «сначала объяснение, потом задача»: g = 0.36</strong> [0.20; 0.51]; сильнее для концептуального понимания и переноса; слабее/обратно для младших школьников и общих навыков</td><td class="left">Учебные условия; у взрослых профессионалов прямых RCT мало</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">27</td><td class="left">Bisra, Liu, Nesbit, Salimi, Winne, <em>Inducing Self-Explanation: a Meta-Analysis</em>, Educ Psychol Rev 2018, <a href="https://link.springer.com/article/10.1007/s10648-018-9434-x" target="_blank" rel="noopener">Springer</a></td><td class="left">Мета-анализ 64 исследований</td><td class="left">Самообъяснение («объясни, почему это так») <strong>g ≈ 0.55</strong>; работает и без обучения технике</td><td class="left">Учебные задачи</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">28</td><td class="left">Brunmair, Richter, <em>Similarity matters: A meta-analysis of interleaved learning</em>, Psych Bulletin 2019, <a href="https://psycnet.apa.org/doi/10.1037/bul0000209" target="_blank" rel="noopener">APA</a></td><td class="left">Мета-анализ 59 исследований</td><td class="left">Интерливинг (чередование типов задач) g ≈ 0.42; сильнее для схожих категорий и «индуктивного» обучения; для математики/экспертных задач эффект есть, но меньше</td><td class="left">Меньше данных для процедурных проф. навыков</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">29</td><td class="left">Bertsch, Pesta, Wiscott, McDaniel, <em>The generation effect: A meta-analytic review</em>, Memory &amp; Cognition 2007, <a href="https://link.springer.com/article/10.3758/BF03193441" target="_blank" rel="noopener">Springer</a></td><td class="left">Мета-анализ 86 исследований</td><td class="left">Самостоятельно сгенерированное запоминается лучше прочитанного, d ≈ 0.40</td><td class="left">Лаборатория, слова/факты</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">30</td><td class="left">Ericsson, Krampe, Tesch-Römer, <em>The Role of Deliberate Practice</em>, Psych Review 1993 — и <strong>контр</strong>: Macnamara, Hambrick, Oswald, <em>Deliberate Practice and Performance…: A Meta-Analysis</em>, Psych Science 2014, <a href="https://journals.sagepub.com/doi/10.1177/0956797614535810" target="_blank" rel="noopener">SAGE</a></td><td class="left">Мета-анализ 88 исследований</td><td class="left">Deliberate practice объясняет <strong>26% дисперсии в играх, 21% в музыке, 18% в спорте, 4% в образовании и &lt;1% в профессиях</strong></td><td class="left">Т.е. «10 000 часов» как универсальное правило не подтверждается; для профессий вклад намеренной практики мал или плохо измерен</td><td class="left"><span class="badge e1">E1</span></td></tr>
+<tr><td class="left">31</td><td class="left">Storm, Stone, <em>Saving-Enhanced Memory</em>, Psych Science 2015, <a href="https://journals.sagepub.com/doi/10.1177/0956797614559285" target="_blank" rel="noopener">SAGE</a>; Risko, Gilbert, <em>Cognitive Offloading</em>, TICS 2016</td><td class="left">Эксперименты + обзор</td><td class="left">Разгрузка полезна: сохранив одно, лучше учишь следующее; но <strong>разгруженное не запоминается</strong> — эффект «Google»: Sparrow, Liu, Wegner, Science 2011 (частично не реплицировался)</td><td class="left">Реплицируемость части эффектов спорна</td><td class="left"><span class="badge e1">E1/E2</span></td></tr>
+</tbody></table></div>
+<p>Что здесь важно для протокола «Рост»: три техники с мета-аналитической поддержкой прямо переводятся в работу с агентом — (1) <strong>сначала своя попытка, потом ответ агента</strong> (Sinha &amp; Kapur, g=0.36; Bastani — ответ без попытки вредит, подсказка нет); (2) <strong>воспроизвести/объяснить без подсказки</strong> (Rowland/Adesope g≈0.5–0.6; Bisra g≈0.55); (3) <strong>сформулировать своё решение до подсказки автоматики</strong> — это же главный смягчитель автоматизационной предвзятости у Goddard 2012 и рекомендация Casner 2014 («оставаться активным супервизором»).</p>
+<hr>
+<h2 id="b-инженерные-отчёты-и-практика-слабое-свидетельство">B. Инженерные отчёты и практика — <strong>слабое свидетельство</strong></h2>
+<div class="tblwrap"><table><thead><tr><th>#</th><th>Источник</th><th>Что показано</th><th>Почему слабое</th></tr></thead><tbody>
+<tr><td class="left">B1</td><td class="left">Denisov-Blanch (Stanford), доклад <em>Does AI Actually Boost Developer Productivity? (100k devs)</em>, 2025, <a href="https://www.aviator.co/podcast/ai-developer-productivity-stanford-study" target="_blank" rel="noopener">видео/резюме</a></td><td class="left">~100 000 разработчиков, 600+ компаний, анализ коммитов: в среднем +15–20%, но на сложном brownfield и редких языках ≈0 или минус; заметная часть прироста — переделки</td><td class="left">Не опубликовано, не рецензировано; методика (оценка «пользы» коммитов моделью) закрыта. Это, видимо, и есть «стэнфордское исследование» из доклада Шейко</td></tr>
+<tr><td class="left">B2</td><td class="left">Faros AI, <em>The AI Productivity Paradox</em>, 2025, <a href="https://www.faros.ai/" target="_blank" rel="noopener">faros.ai</a></td><td class="left">Телеметрия ~10 000 разработчиков: +21% задач, +98% PR у ИИ-пользователей, но <strong>время ревью +91%, багов +9%</strong>, командные метрики плоские</td><td class="left">Отчёт вендора, самоотбор, нет контроля</td></tr>
+<tr><td class="left">B3</td><td class="left">Uplevel, 2024</td><td class="left">800 разработчиков: с Copilot багов на 41% больше, пропускная способность не выросла</td><td class="left">Отчёт вендора, малая выборка, старые инструменты</td></tr>
+<tr><td class="left">B4</td><td class="left">GitClear, <em>AI Code Quality</em> 2024/2025</td><td class="left">211M строк: рост churn и дублирования, падение рефакторинга («moved» код)</td><td class="left">Косвенные метрики, нет причинности</td></tr>
+<tr><td class="left">B5</td><td class="left">Stack Overflow Developer Survey 2025, <a href="https://survey.stackoverflow.co/2025/" target="_blank" rel="noopener">survey</a></td><td class="left">~49 000 респондентов: 84% используют ИИ, но 46% не доверяют точности; главная боль — «почти правильные» ответы (66%)</td><td class="left">Самоотбор, самоотчёт</td></tr>
+<tr><td class="left">B6</td><td class="left">Личный опыт участников METR (напр. <a href="https://domenic.me/metr-ai-productivity/" target="_blank" rel="noopener">Denicola</a>) и практиков</td><td class="left">«Ускорение ощущается, но измеряется иначе»; сообщения о потере «чувства кода» после месяцев агентной работы</td><td class="left">Анекдоты</td></tr>
+<tr><td class="left">B7</td><td class="left">Anthropic, публичное резюме RCT (см. A2#9): «<em>используйте ИИ для концептуальных вопросов, а не для делегирования генерации, если цель — научиться</em>»</td><td class="left">Практическая рекомендация от авторов эксперимента</td><td class="left">Совет, не данные</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="c-где-данные-противоречат-друг-другу-обе-стороны-без-сглаживания">C. Где данные противоречат друг другу (обе стороны, без сглаживания)</h2>
+<ol>
+<li><strong>Скорость: −19% (METR 2025) vs +26% (Cui 2026) vs +56% (Peng 2023).</strong> Не ошибка, а разные условия: опытные мейнтейнеры на своём сложном коде vs средний корпоративный разработчик с автодополнением vs одна greenfield-задача. Для меня (сениор в знакомых сервисах) ближе METR; для рутины и незнакомого — ближе Cui. Ни одно не про навык.</li>
+<li><strong>Навык: причинность (Bastani, Shen &amp; Tamkin — RCT) vs корреляции (Gerlich, Lee).</strong> RCT показывают вред от «ответа без усилия» и нейтральность/пользу от «подсказки»; корреляционные — только связь доверия/частоты и мышления. Корреляции не доказывают, что ИИ <em>вызывает</em> снижение; RCT доказывают, но на junior/школьниках. <strong>Прямого RCT на сениорах за долгий срок нет</strong> — это главный пробел.</li>
+<li><strong>Deliberate practice: Ericsson (решающий фактор) vs Macnamara (в профессиях &lt;1% дисперсии).</strong> Для инженерной экспертизы «намеренная практика» плохо измерена; надёжнее опираться на конкретные техники (retrieval, PS-I, self-explanation), у которых есть мета-анализы, чем на «10 000 часов».</li>
+<li><strong>Когнитивная разгрузка: вредна (Sparrow 2011, Gerlich) vs полезна (Storm &amp; Stone 2015, Risko &amp; Gilbert).</strong> Разгрузка освобождает ресурс для следующего, но разгруженное не усваивается. Практический вывод: разгружать то, что <em>не хочешь</em> держать в голове (boilerplate, форматы), и не разгружать то, что хочешь (архитектурные решения, отладку). Это совпадает с Sheyko («intelligence vs judgment»).</li>
+<li><strong>DORA 2024 (ИИ ↔ хуже throughput/стабильность) vs DORA 2025 (ИИ как усилитель, throughput +).</strong> Оба — опросы; разница объясняется взрослением практик и составом выборки. Не аргумент ни за, ни против навыка.</li>
+<li><strong>Медицина: Budzyń (деградация за 3 месяца) vs критики (короткий период, конфаундеры).</strong> Сигнал слабее, чем заголовки, но направление совпадает с авиацией (Casner, Haslbeck) и с Dratsch (даже опытные ведутся на неверную подсказку).</li>
+</ol>
+<hr>
+<h2 id="d-что-из-этого-следует-лично-для-меня-связка-с-фазой-1">D. Что из этого следует лично для меня (связка с фазой 1)</h2>
+<ul>
+<li>Фаза 1: 21% постановок — «проанализируй и реши», 35 отладок без своей гипотезы, планирование делегировано. Ровно эти навыки (отладка, чтение, концепции; «что происходит и что делать дальше») первыми страдают по Shen &amp; Tamkin (E1) и Casner (E2), а «ответ без попытки» вредит по Bastani (E1).</li>
+<li>Средство с наилучшей поддержкой — не «меньше ИИ», а <strong>порядок</strong>: попытка → ответ агента → сверка (PS-I g=0.36), плюс воспроизведение/объяснение без подсказки (g≈0.5), плюс «сформулируй своё решение до подсказки» как антидот автоматизационной предвзятости (Goddard). Всё это — 0 новых инструментов, только порядок действий и 2–5 минут на задачу.</li>
+<li>Что НЕ доказано и что я не буду утверждать в отчёте: что агентная работа за N месяцев измеримо ухудшает сениора (нет такого RCT); что конкретный ритуал даст конкретный процент; что «10 000 часов» работают.</li>
+<li>Что можно проверить на себе за месяц (индикаторы для вкладки «Рост»): доля отладочных постановок с собственной гипотезой; доля планов, где первый вариант написан мной; попадание моей гипотезы в найденную причину; число «принято без правок» через <code>/reflect</code>/git.</li>
+</ul>
+<h2 id="итого-31-рецензируемый-контролируемый-источник-a-7-слабых-b">Итого: 31 рецензируемый/контролируемый источник (A) + 7 слабых (B)</h2>
+<p>Минимум в 10 источников выполнен с запасом; для каждого указаны год, дизайн/выборка, ограничения и уровень.</p></section><section class="tab" id="config"><h1 id="04-изменения-конфигурации-фаза-4">04 — Изменения конфигурации (фаза 4)</h1>
+<p>Основание: фазы 1–3 (<code>01-usage-audit.md</code>, <code>02-sources.md</code>, <code>03-research.md</code>). Принцип отбора: минимальные изменения с измеримым эффектом; ничего нового «на всякий случай»; удалить больше, чем добавить. Итого <strong>4 изменения</strong> в основной части + 3 дополнения по ADR/задачам/ревью (см. <code>07-docs-and-process.md</code>, внизу вкладки) = <strong>7</strong>, лимит выдержан. Плюс явный список того, что <em>не</em> делаем.</p>
+<p>Файлы уже изменены в рабочем дереве репозитория (не закоммичены). <code>agents/</code>, <code>commands/</code>, <code>skills/</code> в <code>~/.claude/</code> — symlink на репозиторий, поэтому удаления и правки команд действуют в новых сессиях сразу. Новое правило требует перегенерации <code>~/.claude/CLAUDE.md</code> (см. «Активация»). Всё обратимо через <code>git checkout -- &lt;path&gt;</code> (удалённые файлы — <code>git checkout HEAD -- &lt;path&gt;</code>).</p>
+<h2 id="сводка-отсортировано-по-эффект-стоимость">Сводка (отсортировано по эффект / стоимость)</h2>
+<div class="tblwrap"><table><thead><tr><th>#</th><th>Изменение</th><th>Эффект (по данным)</th><th>Стоимость</th><th>Метрика успеха</th><th>Откат, если</th></tr></thead><tbody>
+<tr><td class="left">1</td><td class="left"><strong>Rule 08 «своя гипотеза до ответа агента»</strong> + строка «Вариант автора» в шаблоне плана + шаг 3a в <code>/fix</code> + вопрос в <code>/task</code></td><td class="left">Бьёт в главный вывод фазы 1: 21% постановок — «проанализируй и реши», <strong>1 из 92</strong> отладочных промтов содержит гипотезу, 3 из 125 проектных — свой вариант. По фазе 3 «попытка → ответ» — единственная техника с мета-аналитической поддержкой (g=0.36) и антидот автоматизационной предвзятости (Goddard 2012)</td><td class="left">1 вопрос на отладочную/проектную постановку ≈ 2 в день, ~30 с каждый; 4 файла</td><td class="left">Доля debug/design-постановок с гипотезой (скрипт <code>report_phase1.py</code>, блок «Rule 08 baseline»): baseline <strong>0% / 2.4%</strong> → цель ≥40% через 8 недель; строка <code>Гипотеза пользователя: совпала/не совпала</code> в ответах — доля «совпала» как калибровка</td><td class="left">Через 4 недели ответ «не знаю — ищи / пропусти» &gt;70% случаев (правило = трение без эффекта) или доля переделок в debug-сессиях выросла</td></tr>
+<tr><td class="left">2</td><td class="left"><strong>Удалить мёртвое</strong>: команды <code>/debug</code>, <code>/devops</code>, <code>/docker-ops</code>, <code>/integration-review</code>, <code>/migration-plan</code>; агент <code>prompt-auditor</code>; skills <code>prompt-audit</code>, <code>agent-design</code>; починить 6 ссылок в доках и устаревшую строку про язык в <code>CLAUDE.md</code></td><td class="left">5 команд с 0 вызовов за 5 месяцев (Шейко: «не всосалось за 2 месяца — бесполезно»); meta-трио (<code>prompt-auditor</code>/<code>prompt-audit</code>/<code>agent-design</code>) — инструменты для настройки инструментов, т.е. топливо для известной проблемы; итого −8 файлов, −640 строк</td><td class="left">~0; всё в git</td><td class="left">Не нужна. Через 8 недель <code>report_phase1.py</code> → «Мёртвые команды» должен быть пустым списком</td><td class="left">Понадобился конкретный удалённый файл → <code>git checkout HEAD -- &lt;path&gt;</code> (одна команда)</td></tr>
+<tr><td class="left">3</td><td class="left"><strong><code>/reflect</code> переделан под реальный поток</strong> (режим «та же сессия»: мои правки в контексте vs текущее состояние файлов; обязательная первая строка <code>reflect: N файлов, ~M строк</code>)</td><td class="left">Единственный механизм измерения «принято без правок» был мёртв (0 вызовов), потому что требовал staged/unstaged-разделения, которого нет: ты коммитишь сам (60 агентских <code>git commit</code> в 8 сессиях за окно, остальное — руками)</td><td class="left">1 файл; вызов 1–2 мин</td><td class="left">≥2 вызова в месяц; накопление строк <code>reflect: N</code> даёт долю «0 правок»</td><td class="left">0 вызовов за 8 недель → удалить команду совсем (это будет честный ответ: метрика не нужна)</td></tr>
+<tr><td class="left">4</td><td class="left"><strong><code>~/.claude/settings.json</code>: <code>&quot;cleanupPeriodDays&quot;: 90</code></strong> (применить руками, см. ниже)</td><td class="left">Транскрипты покрывают только 48% сессий окна (W25–W29 почти пусты) — без них итерации/паузы/skills не измерить в следующий раз</td><td class="left">диск ~150 MB/мес</td><td class="left">Покрытие сессий транскриптами при следующем прогоне <code>extract.py</code> ≥90%</td><td class="left">Диск/приватность важнее — вернуть дефолт</td></tr>
+</tbody></table></div>
+<p>Суммарно: +1 правило (24 строки always-on), +1 строка в шаблоне, +6 строк в <code>/fix</code>, +4 строки в <code>/task</code>, переписан шаг 1 <code>/reflect</code>; −8 файлов. Новых инструментов, хуков, MCP, метрик-пайплайнов — ноль.</p>
+<h2 id="что-не-делаем-и-почему">Что НЕ делаем и почему</h2>
+<ul>
+<li><strong>Не трогаем <code>description</code> skills, чтобы они «лучше триггерились»</strong> на «проведи анализ». Это тюнинг ради тюнинга без способа измерить (автоактивация не логируется). Skills работают через ревьюеров (158 загрузок) — этого достаточно.</li>
+<li><strong>Не расширяем недельный пайплайн <code>analytics/</code></strong> новыми полями (гипотезы, коррекции). Измерение — раз в месяц двумя командами <code>scripts/audit/*.py</code> (уже написаны). Добавлять их в launchd — снова инструмент.</li>
+<li><strong>Не удаляем DevOps-skills</strong> (<code>docker/helm/kubernetes/terraform/gitlab-ci</code>): 0 загрузок за окно объясняется отсутствием DevOps-задач, а не поломкой; стек рабочий, стоимость хранения ≈ 0.</li>
+<li><strong>Не удаляем <code>/convention-check</code></strong> (0 вызовов): у тебя по нему незакоммиченная свежая работа (Sonar-чеклист). Кандидат на пересмотр через 8 недель вместе с <code>migration-reviewer</code> (2 вызова) и <code>test-writer</code> (4).</li>
+<li><strong>Не добавляем Sonar/линтер как MCP или хук</strong> ради 25 промтов «fix this SonarQube» — сначала проверить, не закрывает ли это <code>/convention-check</code> с Sonar-чеклистом.</li>
+<li><strong>Не меняем <code>output-styles/personal.md</code>, языковую часть <code>rules/07</code>, хуки, permissions</strong> — данных о проблемах нет (языковое трение из W26–W28 уже исправлено: 0 коррекций «на русском» после W28). Единственная правка rule 07 — анти-слоп для документов (дополнение №5 в <code>07-docs-and-process.md</code>, по данным о 4+ промтах «убери ИИ фразы»).</li>
+<li><strong>Не пишем правило против «как профессионал…»</strong> (46 промтов) — это привычка, не конфиг; идёт в протокол «Рост».</li>
+<li><strong><code>digest-routine.md</code></strong> (357 строк, не подключён, не в git): рекомендую удалить — но файл не отслеживается git, удаление необратимо, поэтому решение оставляю тебе (<code>rm digest-routine.md</code>).</li>
+</ul>
+<h2 id="активация">Активация</h2>
+<pre class="code lang-bash"><code># 1) rule 08 попадёт в ~/.claude/CLAUDE.md только после перегенерации управляемого блока
+scripts/setup-global.sh install --apply</code></pre>
+<pre class="code lang-bash"><code># 2) проверить, что мёртвых ссылок не осталось и команды/агенты в ~/.claude совпадают с репо
+scripts/setup-global.sh status</code></pre>
+<ol>
+<li><code>~/.claude/settings.json</code> — добавить верхнеуровневый ключ (руками; файл не управляется скриптами):</li>
+</ol>
+<pre class="code lang-json"><code>{
+  &quot;cleanupPeriodDays&quot;: 90
+}</code></pre>
+<ol>
+<li>Через 4 и 8 недель:</li>
+</ol>
+<pre class="code lang-bash"><code>python3 scripts/audit/extract.py --out docs/audit-2026-08 &amp;&amp; python3 scripts/audit/report_phase1.py --out docs/audit-2026-08 | grep -A3 &quot;Rule 08 baseline&quot;</code></pre>
+<h2 id="диффы-ключевые-фрагменты">Диффы (ключевые фрагменты)</h2>
+<h3 id="1a-новый-файл-rules-08-think-first-md-полностью">1a. Новый файл <code>rules/08-think-first.md</code> (полностью)</h3>
+<pre class="code lang-markdown"><code># Think First (своя гипотеза до ответа агента)
+
+Зачем: по аудиту `docs/audit-2026-08` отладка и проектирование делегируются первым ходом («вот лог, почему?»,
+«предложи вариант»); по данным (RCT Bastani 2025, Shen &amp; Tamkin 2026; мета-анализ Sinha &amp; Kapur 2021) именно
+«ответ без своей попытки» разрушает навык, а «попытка → ответ → сверка» его сохраняет.
+Действует только для главного агента в диалоге с пользователем (не для субагентов, не для headless `-p`).
+
+## Отладка
+Если пользователь просит найти причину ошибки/падения/«не работает» и **не назвал свою гипотезу** — до
+исследования задай ОДИН вопрос через AskUserQuestion: «Твоя гипотеза о причине?» с вариантами
+«есть гипотеза: …» / «не знаю — ищи» / «срочно — пропусти». Дальше работай как обычно.
+В конце ответа одной строкой: `Гипотеза пользователя: совпала | не совпала | не было`.
+
+## Проектирование и выбор решения
+Если просят «спроектируй / предложи вариант(ы) / как лучше сделать / напиши план / какой подход» и в промте
+**нет своего варианта** — сначала спроси: «Твой первый вариант? (1–3 строки; можно “не знаю”)». В плане
+(`docs/shared/plan-template.md`, секция «Каким путём идём») заполни строку «Вариант автора» и скажи, чем
+итоговый подход от него отличается. В `/task` вопрос задаётся до запуска подагентов планирования.
+
+## Когда НЕ спрашивать
+- гипотеза/вариант уже есть в промте («думаю, что…», «мой вариант…», «скорее всего…»);
+- сказано «срочно», «пропусти», «просто сделай», «не знаю» заранее;
+- `/review`, `/review-mr`, sonar-замечания, boilerplate, документация, git-операции, follow-up
+  «продолжай / следующая фаза»;
+- пользователь ответил «не знаю» — не переспрашивать в этой задаче.
+
+Один вопрос, не больше. Гипотезу не оценивать до исследования; после — сравнить честно.</code></pre>
+<h3 id="1b-docs-shared-plan-template-md">1b. <code>docs/shared/plan-template.md</code></h3>
+<pre class="code lang-diff"><code><span class=""> ## Каким путём идём</span>
+<span class=""> Главная часть. Здесь объясняется РЕШЕНИЕ, а не список шагов:</span>
+<span class="add">+- Вариант автора задачи (его первый ответ до анализа, rule 08): &lt;кратко или «не было»&gt; — и чем</span>
+<span class="add">+  итоговый подход от него отличается (или «совпадает»).</span>
+<span class=""> - Выбранный подход одним-двумя предложениями простым языком.</span></code></pre>
+<h3 id="1c-commands-fix-md-вобрал-в-себя-debug">1c. <code>commands/fix.md</code> (вобрал в себя <code>/debug</code>)</h3>
+<pre class="code lang-diff"><code><span class=""> 3. Read only the file(s) being changed and their direct test files.</span>
+<span class="add">+3a. **Root cause before patch (ex-`/debug`).** If the symptom is «не работает / падает / ошибка» and the</span>
+<span class="add">+    user gave no hypothesis — ask for it once (rule 08), then state your own root-cause hypothesis and confirm</span>
+<span class="add">+    it with code, logs, or a failing test. Do not patch the symptom. Report at the end:</span>
+<span class="add">+    `Гипотеза пользователя: совпала | не совпала | не было`.</span>
+<span class=""> 4. **RED:**</span>
+<span class="">…</span>
+<span class="del">-- Database/schema changes (use `/migration-plan`)</span>
+<span class="add">+- Database/schema changes (use `/plan`; migration safety — agent `migration-reviewer`)</span></code></pre>
+<h3 id="1d-commands-task-md">1d. <code>commands/task.md</code></h3>
+<pre class="code lang-diff"><code><span class=""> ## Фаза 1 — Сбор контекста (свежий подагент)</span>
+<span class=""> </span>
+<span class="add">+Перед запуском подагентов — rule 08: если в `$ARGUMENTS` нет собственного варианта решения/гипотезы</span>
+<span class="add">+пользователя, задай один вопрос («Твой первый вариант?»); ответ положи в `context.md` как «Вариант автора».</span>
+<span class="add">+Follow-up вида «продолжай / следующая фаза» — не спрашивать.</span>
+<span class="add">+</span>
+<span class=""> Запусти агента `Explore` (read-only). В промпте:</span>
+<span class="">…</span>
+<span class="del">-   - Работает неправильно, непонятно почему → `/debug` (сначала разобраться в причине), потом правка.</span>
+<span class="add">+   - Работает неправильно, непонятно почему → `/fix` (шаг 3a: сначала причина, потом правка).</span>
+<span class="">…</span>
+<span class="del">-возможность; `/fix` — мелкая правка; `/debug` — разобраться в баге; `/review` — получить список</span>
+<span class="add">+возможность; `/fix` — мелкая правка и разбор бага; `/review` — получить список</span></code></pre>
+<h3 id="2-удаления-и-правки-ссылок">2. Удаления и правки ссылок</h3>
+<pre class="code lang-"><code>D  commands/debug.md            (43 строки; workflow «гипотеза → подтверждение» перенесён в /fix шаг 3a)
+D  commands/devops.md
+D  commands/docker-ops.md
+D  commands/integration-review.md
+D  commands/migration-plan.md   (замена: /plan + агент migration-reviewer)
+D  agents/prompt-auditor.md
+D  skills/prompt-audit/SKILL.md
+D  skills/agent-design/SKILL.md
+M  README.md                    — «Диагностика → /debug» убрано; агенты: prompt-auditor → migration-reviewer
+M  CLAUDE.md                    — то же; «Чат: английский (A2)» → «русский (rule 07 / output-style)» (устаревшая строка)
+M  docs/WORKFLOW.md             — таблица «задача → команда»: миграции/интеграции/DevOps через /plan, /review, skills
+M  docs/USAGE_GUIDE.md          — примеры /migration-plan, /debug, /docker-ops → /plan, /fix; удалены 2 мета-примера
+M  docs/ROADMAP.md              — «раз в месяц /prompt-audit» → раз в месяц scripts/audit/*.py
+M  skills/README.md             — убраны prompt-audit, agent-design</code></pre>
+<h3 id="3-commands-reflect-md-шаг-контекст-и-шаг-1-новый-текст">3. <code>commands/reflect.md</code> — шаг «Контекст» и «Шаг 1» (новый текст)</h3>
+<pre class="code lang-markdown"><code>**Режим A — та же сессия (основной).** Ты (главный агент) в этой сессии правил файлы через Edit/Write.
+Пользователь после этого поправил их руками. Источник «что написал агент» — твои собственные правки в
+контексте сессии; источник «что поправил человек» — текущее состояние файлов.
+
+**Режим B — по индексу (старый).** Изменения агента в индексе (`git add`), правки человека — unstaged.
+
+## Шаг 1 — Собрать диффы
+Режим A: список файлов, которые ты менял в этой сессии → `git diff -- &lt;file&gt;`, `git diff HEAD -- &lt;file&gt;`,
+при коммите пользователя — `git log -n 3 -- &lt;file&gt;` и `git show &lt;коммит&gt; -- &lt;file&gt;`; разница = правки пользователя.
+Режим B: `git diff --cached` / `git diff` / `git status`.
+Если разницы нет — «правок пользователя не вижу», запиши `reflect: 0 правок` (это данные — «принято без правок»).
+Если есть — первая строка ответа: `reflect: N файлов, ~M строк правок пользователя`.</code></pre>
+<p>Плюс: <code>description</code> во frontmatter обновлён («call after you edited agent output by hand»), в allowed-tools добавлен <code>Bash(git show:*)</code>, строка «Ответы в чате — английский» → «русский» (согласование с rule 07).</p>
+<h3 id="4-claude-settings-json-не-применено-применить-руками">4. <code>~/.claude/settings.json</code> (не применено — применить руками)</h3>
+<pre class="code lang-diff"><code><span class=""> {</span>
+<span class="add">+  &quot;cleanupPeriodDays&quot;: 90,</span>
+<span class="">   &quot;permissions&quot;: { ... },</span></code></pre>
+<h2 id="что-ожидаю-увидеть-через-8-недель-и-что-будет-означать-провал">Что ожидаю увидеть через 8 недель (и что будет означать провал)</h2>
+<ul>
+<li>«Rule 08 baseline» ≥40% гипотез в debug/design и ≥5 строк <code>Гипотеза пользователя: …</code> в неделю → правило работает, оставить. Если &lt;15% и частые «пропусти» → правило раздражает, не меняет поведение → удалить <code>rules/08</code>, вернуть <code>/fix</code> к прежнему виду; вывод: проблема решается не конфигом, а протоколом (вкладка «Рост»).</li>
+<li><code>/reflect</code> ≥4 вызова за 8 недель и хотя бы одна строка <code>reflect: 0 правок</code> → метрика «принято без правок» появилась. Иначе — удалить <code>/reflect</code>, не жалея.</li>
+<li>«Мёртвые команды/агенты» в отчёте пустые, а <code>convention-check</code>/<code>migration-reviewer</code>/<code>test-writer</code> получили ≥1 вызов — иначе следующая волна удаления.</li>
+</ul><hr><h1 id="07-дополнение-что-взято-из-докладов-adr-задачи-ревью-и-процесс">07 — Дополнение: что взято из докладов, ADR, задачи, ревью и процесс</h1>
+<p>Ответы на четыре вопроса после фазы 5. Разобраны: <code>~/docs/lifeOS-v2/10-Work/process/*</code> (Projects playbook, dev-docs-playbook, project_naming), <code>projects/business-dba-support-manager/*</code> (brief/design/plan/8 ADR/03-plan-review, <code>tools/jira_import.py</code>), ADR рабочего проекта <code>business-m2m-gateway/docs/adr/*</code>, 33 сохранённых ревью <code>~/docs/work/reviews/*</code>, промты (22 про ADR, 53 про задачи за окно). Изменения в конфигурации — внизу.</p>
+<h2 id="1-что-из-докладов-внедрено-а-что-нет-честно">1. Что из докладов внедрено, а что нет — честно</h2>
+<div class="tblwrap"><table><thead><tr><th>Идея из доклада</th><th>Статус</th><th>Почему</th></tr></thead><tbody>
+<tr><td class="left">Метрика «задача закрыта без переделки», анализ собственных сессий (Шейко, Астапенко)</td><td class="left"><strong>внедрено</strong></td><td class="left"><code>scripts/audit/*</code> + <code>/reflect</code> со строкой <code>reflect: N</code>; baseline rule 08</td></tr>
+<tr><td class="left">Feedback-loop / детерминированные проверки важнее семантики (Астапенко, Шейко)</td><td class="left">частично</td><td class="left">тесты и хуки были; Sonar-замечания по-прежнему вставляются руками (25 промтов) — не стал делать MCP/хук: сначала проверить <code>/convention-check</code> с Sonar-чеклистом</td></tr>
+<tr><td class="left">«Не обмазываться» агентами/командами; лишнее не приживается (Шейко, Сенин)</td><td class="left"><strong>внедрено</strong></td><td class="left">−5 команд, −1 агент, −2 skills; +2 команды (<code>/adr</code>, переписан <code>/jira</code>) — только под подтверждённую данными частоту (22 и 53 промта)</td></tr>
+<tr><td class="left">Учить агента «за ручку», методичка, проверять свежим агентом (Шейко)</td><td class="left">не внедрено</td><td class="left">нет нового skill, который надо было бы проверять; механизм есть (<code>/reflect</code>)</td></tr>
+<tr><td class="left">HTML-артефакты и схемы для ускорения ревью (Сенин)</td><td class="left"><strong>осознанно нет</strong> для ревью; <strong>да</strong> для отчёта</td><td class="left">цель протокола — медленное обучающее ревью, а не быстрое восприятие; <code>report.html</code> — единственное место, где плотность информации оправдывает HTML. Для ревью MR коллег ускорение вредно: ты и так fire-and-forget (2.2 промта/сессия)</td></tr>
+<tr><td class="left">Разработчик-менеджер, параллельные агенты, голос (Шейко, Сенин)</td><td class="left">не внедрено</td><td class="left">противоречит цели «не потерять навык»; параллельности по логам нет и не надо</td></tr>
+<tr><td class="left">Улучшение структуры agents/skills</td><td class="left">без перестройки</td><td class="left">данные: skills работают через <code>skills:</code> ревьюеров (158 загрузок) — структура рабочая; главный агент skills не берёт (9), и это не чинится перестройкой, только явной привязкой в командах (уже есть в <code>stack-detection.md</code>)</td></tr>
+<tr><td class="left">Sandbox, ReBAC, оркестраторы, GEPA, D2, GSD (все)</td><td class="left">нет</td><td class="left">инструменты для инструментов</td></tr>
+</tbody></table></div>
+<p>Рекомендации по агентам/skills, которые остались (не сделал — решай сам): <code>migration-reviewer</code> (2 вызова) и <code>test-writer</code> (4) — кандидаты на удаление через 8 недель; <code>java-reviewer</code> мог бы принимать <code>.ai/&lt;ветка&gt;/review.md</code> как вход для повторного ревью (сейчас каждый раз с нуля) — но это новая механика, данных о нужде нет.</p>
+<h2 id="2-adr-формат-без-слопа-закреплено">2. ADR: формат без слопа — закреплено</h2>
+<p>Что нашёл в твоих документах:</p>
+<ul>
+<li>Два расходящихся шаблона: рабочий <code>docs/adr/0000-adr-template.md</code> (Контекст и проблема → Рассмотренные варианты → Решение → Последствия → Ссылки) и короткий из dev-docs-playbook (Context → Decision → Consequences). Реальные ADR (и в lifeOS, и в m2m-gateway) написаны по рабочему — он и есть стандарт; ADR-0008 (circuit breaker) — хороший образец: конкретно, с таблицей «кто ставит маркер», с честными минусами.</li>
+<li>Слоп появлялся не в шаблоне, а в исполнении: 4 промта «убери ИИ фразы / упоминание логгера / английские слова / Последствия» за 3 недели. Значит, нужны правила письма, а не новая структура.</li>
+</ul>
+<p>Сделано:</p>
+<ul>
+<li><code>docs/shared/adr-template.md</code> — формат (совпадает с рабочим <code>0000</code>), правила письма (список запрещённых фраз, «убрал предложение — смысл потерян?», конкретные имена, без деталей, не влияющих на решение), чек-лист.</li>
+<li><code>commands/adr.md</code> — <code>/adr &lt;решение&gt;</code> пишет по шаблону репозитория (если есть) или shared; <code>/adr &lt;путь&gt;</code> — режим чистки существующего ADR (показать, что удалено, применить после «да»). Статус «Принят» — только по твоему слову.</li>
+<li>rule 07 — 5 строк анти-слопа для всех документов (always-on, действует и в Desktop-сессиях lifeOS, где ты пишешь ADR чаще всего).</li>
+<li><code>/arch</code> в конце отсылает к <code>/adr</code>, а не пишет ADR внутри вывода.</li>
+</ul>
+<p>Рекомендация в плейбук (правь сам, это твой vault): в <code>dev-docs-playbook.md</code> § 3 заменить короткий шаблон на рабочий (пять секций, обязательные «Рассмотренные варианты» и минусы в «Последствиях») — иначе агенту два источника истины. В <code>Projects playbook.md</code> § 3 — то же одной строкой.</p>
+<h2 id="3-дано-когда-тогда-что-это-и-как-улучшить">3. «Дано / Когда / Тогда»: что это и как улучшить</h2>
+<p>Это <strong>Given / When / Then</strong> — язык <strong>Gherkin</strong> из BDD (Dan North, 2006), популяризован Cucumber и книгой «Specification by Example» (Adzic, 2011). Given — состояние мира, When — одно действие, Then — наблюдаемый результат.</p>
+<p>Как улучшить критерии (закреплено в <code>docs/shared/task-template.md</code>):</p>
+<ul>
+<li>один сценарий = одно поведение; конкретные значения вместо «корректный запрос»; в «Тогда» — только наблюдаемое (ответ, статус, запись, письмо, метрика); обязательный сценарий отказа; ≤5 сценариев на подзадачу; без деталей реализации; словарь статусов/ролей тот же, что в design; «И» для дополнительных условий.</li>
+<li>техника подготовки — <strong>Example Mapping</strong> (Wynne): правила → примеры (они и становятся сценариями) → непонятное в «Открытые вопросы»; 10–15 минут на задачу.</li>
+</ul>
+<p>Как улучшить формат задачи <strong>для человека</strong> (не для агента):</p>
+<ul>
+<li>меньше текста, больше ссылок (дизайн по ссылке, не пересказ); «зачем» — одно предложение или ссылка на этап;</li>
+<li><strong>не копировать типовой DoD</strong> («ревью, тесты, Sonar») в каждую задачу — это стандарт команды; писать только нестандартное; не выдумывать «технические заметки» с реализацией — это решает исполнитель в «Анализе»;</li>
+<li>«Открытые вопросы» с владельцем — обязательный блок там, где решение не принято (это же рекомендация №1 твоего <code>03-plan-review.md</code>); норма размера 4–10 ч (там же, №5) — сложность оценкой, а не дроблением;</li>
+<li>заголовок «глагол + объект», префикс <code>[Core]/[Cockpit]</code>, оценка в задаче, приоритет — порядком в плане.</li>
+</ul>
+<p>Сделано: <code>commands/jira.md</code> переписан под этот формат (подзадача / дев-задача / баг / спайк, Jira-разметка, русский, чек-лист). Старый шаблон (Background / Technical Notes / DoD / Story Points, английский) с плейбуком не совпадал — это и было расхождение между твоим процессом и твоей же командой.</p>
+<h2 id="4-разбор-документов-и-предложения-по-ревью-задачам-подходу">4. Разбор документов и предложения по ревью, задачам, подходу</h2>
+<p><strong>Документы (10-Work).</strong> Плейбук — сильный, лучше среднего в индустрии: правило масштаба, appetite, walking skeleton, «чего НЕ писать», тест «разработчик без контекста». Что бы поправил:</p>
+<ol>
+<li>Один шаблон ADR (см. п. 2).</li>
+<li><code>Projects playbook.md</code> частично дублирует <code>dev-docs-playbook.md</code> (шаблоны brief/design/ADR/задачи в обоих). Оставить один канонический (Projects playbook — он полнее и привязан к SDLC), второй сократить до «быстрой шпаргалки» или удалить — иначе они разойдутся, как уже разошлись по ADR.</li>
+<li>В формат задачи плейбука добавить блок «Открытые вопросы» и норму размера 4–10 ч — как ты сам решил в <code>03-plan-review.md</code>, но в плейбук не перенёс.</li>
+<li><code>01-design.md</code> (1162 строки) и <code>02-plan.md</code> (1283) — против собственного анти-паттерна «детализировать всё». Не переписывать; на следующем проекте — appetite на design ≤ 400 строк, детали в ADR и задачи.</li>
+<li><code>projects/Projects.md</code> пуст, <code>.idea/</code> и <code>.DS_Store</code> в vault — мусор; <code>tools/.env</code> рядом с <code>jira_import.py</code> — проверить, что токена там нет (<code>.gitignore</code> есть, но vault синхронизируется).</li>
+</ol>
+<p><strong>Ревью MR (по 33 сохранённым файлам, 337 находок).</strong></p>
+<ul>
+<li>158 находок (47%) с кодом <code>[—]</code>, ещё 88 <code>[BUG]</code>, 15 <code>[SEC]</code>; кодов конвенции всего ~40 (12%). «Convention-first» на практике — треть коду; либо ревьюер не ищет код, либо <code>[—]</code> — стиль/структура без ссылки. Исправлено в <code>/review-mr</code>: <code>[—]</code> — редкость, код искать в <code>sonar-rules.md</code>.</li>
+<li>142 SUGGESTION из 337 (42%) — шум для автора MR. Исправлено: не больше 5 развёрнутых, остальное строкой «Мелочи»; CRITICAL только «нельзя мержить».</li>
+<li>Добавлен блок «Вопросы автору» (1–3 наводящих вопроса) — из Шейко («студент, которому задают вопросы»): это менторский инструмент лида, а не ещё один список.</li>
+<li>Не измеряется, что автор исправил после ревью. Без нового инструмента: раз в месяц свести коды по проекту одной командой (добавлена в конец <code>/review-mr</code>) и обсудить топ-3 на ретро — тогда повторяющееся уходит в конвенцию/чеклист, а не в каждое ревью заново.</li>
+<li>Твой первый проход (10 мин) до <code>/review-mr</code> — из протокола «Рост»; данные: сессии ревью — 2.2 промта, 8% коррекций, т.е. ты почти не спорил с ревьюером. Спорить — и есть обучение.</li>
+</ul>
+<p><strong>Создание задач.</strong> <code>jira_import.py</code> из <code>02-plan.md</code> — правильный ход (план — источник истины, Jira — проекция). Улучшить: (а) <code>/jira</code> теперь пишет в том же формате, что парсит импортёр — можно генерировать подзадачи прямо в <code>02-plan.md</code>; (б) в плане хранить <code>Оценка:</code> и <code>Открытые вопросы:</code> в тех же полях, что читает скрипт (сейчас так); (в) не заводить задачи до закрытия «Анализа» этапа — плейбук это уже говорит.</p>
+<p><strong>Общий подход.</strong> Три вещи, которые связывают всё выше с аудитом:</p>
+<ol>
+<li>Ты хорошо документируешь <em>после</em> решения и слабо фиксируешь <em>своё</em> решение до агента (0/97 гипотез). ADR-варианты и «Вариант автора» в плане — место, где это исправляется естественно.</li>
+<li>Слоп — не проблема шаблонов, а исполнения: правила письма теперь always-on (rule 07) и в двух шаблонах.</li>
+<li>Задача для человека ≠ промт агенту: короче, со ссылками, без DoD-копипасты, с открытыми вопросами. <code>/jira</code> переписан именно под человека.</li>
+</ol>
+<h2 id="изменения-в-конфигурации-дополнение-к-04-итого-7-лимит-выдержан">Изменения в конфигурации (дополнение к 04; итого 7 — лимит выдержан)</h2>
+<div class="tblwrap"><table><thead><tr><th>#</th><th>Файл</th><th>Что</th></tr></thead><tbody>
+<tr><td class="left">5</td><td class="left"><code>rules/07-communication-and-language.md</code></td><td class="left">+5 строк анти-слопа для документов, ссылки на шаблоны</td></tr>
+<tr><td class="left">5</td><td class="left"><code>docs/shared/adr-template.md</code> (новый), <code>docs/shared/task-template.md</code> (новый)</td><td class="left">форматы + правила письма + чек-листы</td></tr>
+<tr><td class="left">6</td><td class="left"><code>commands/adr.md</code> (новый), <code>commands/arch.md</code> (+4 строки)</td><td class="left"><code>/adr</code> — написать/почистить ADR</td></tr>
+<tr><td class="left">6</td><td class="left"><code>commands/jira.md</code> (переписан)</td><td class="left">формат плейбука, Дано/Когда/Тогда, без DoD-копипасты</td></tr>
+<tr><td class="left">7</td><td class="left"><code>commands/review-mr.md</code></td><td class="left"><code>[—]</code> — редкость; ≤5 SUGGESTION; «Вопросы автору»; месячная сводка кодов</td></tr>
+</tbody></table></div>
+<p>Метрики: промты «убери ИИ фразы/слоп» → 0 за следующие 8 недель (сейчас 4+ за 3 недели); доля <code>[—]</code> в новых ревью ≤20%; SUGGESTION ≤30% находок. Откат: если <code>/adr</code> и <code>/jira</code> не вызываются 8 недель — удалить, как и остальные. Rule 07 (правило) действует после <code>scripts/setup-global.sh install --apply</code> — блок уже перегенерирован сегодня, но правка rule 07 сделана после; перегенерация не нужна (файл импортируется по ссылке), достаточно новой сессии.</p></section><section class="tab" id="growth"><h1 id="05-рабочий-протокол-рост-одна-страница">05 — Рабочий протокол «Рост» (одна страница)</h1>
+<p>Основание: фаза 1 (где делегирование бьёт по навыку) и фаза 3 (что работает). Новых инструментов нет: только порядок действий, одна заметка в Obsidian и уже написанный скрипт. Стоимость всего протокола: <strong>≈40 минут в неделю</strong>.</p>
+<h2 id="1-что-делать-руками-без-ии-и-почему-именно-это">1. Что делать РУКАМИ, без ИИ (и почему именно это)</h2>
+<div class="tblwrap"><table><thead><tr><th>Задача</th><th>Почему руками</th><th>Данные</th></tr></thead><tbody>
+<tr><td class="left"><strong>Первая гипотеза при отладке</strong> — до того как вставить лог/трейс в чат: 2–5 минут, одна фраза «думаю, причина в …»</td><td class="left">Отладка и чтение кода деградируют первыми (Shen &amp; Tamkin RCT; Casner: когнитивная часть уходит раньше моторной); «своё решение до подсказки» — главный антидот автоматизационной предвзятости (Goddard, 74 исследования)</td><td class="left">Фаза 1: 1 из 92 отладочных промтов с гипотезой; 35 «найди причину» без своей версии</td></tr>
+<tr><td class="left"><strong>Первый вариант проектного решения</strong> (структура пакетов, подход к фасаду/фильтру, план задачи) — 3 строки до <code>/plan</code>, <code>/task</code>, «предложи вариант»</td><td class="left">«Попытка → объяснение» даёт понимание и перенос (Sinha &amp; Kapur, g=0.36, 12k участников); ответ без попытки вредит (Bastani, −17% на экзамене)</td><td class="left">Фаза 1: 42 архитектурных решения делегированы первым ходом; 3 из 125 проектных постановок со своим вариантом</td></tr>
+<tr><td class="left"><strong>Первый проход по MR коллеги</strong> — 10 минут своих находок до <code>/review-mr</code></td><td class="left">Ревью — та работа, где автоматика делает «сверку» вместо «мышления»; опытные тоже ведутся на неверную подсказку (Dratsch: 82% → 46%)</td><td class="left">Фаза 1: 43 <code>/review-mr</code>, сессии по 2.2 промта, fire-and-forget</td></tr>
+<tr><td class="left"><strong>SQL и схема</strong> — всегда сам, агент только проверяет</td><td class="left">Дёшево (2+3 постановки за 9 недель) и это твой профильный навык (Oracle/PG/ClickHouse)</td><td class="left">Фаза 1: sql 25, schema-design 2</td></tr>
+<tr><td class="left"><strong>Одна маленькая задача в неделю целиком руками</strong> (фикс, ручка, тест)</td><td class="left">Интерливинг и практика в промежутке — главные защитные факторы ретенции (Arthur, мета-анализ; Brunmair g=0.42)</td><td class="left">Фаза 1: 57 из 63 дней с агентом</td></tr>
+</tbody></table></div>
+<h2 id="2-делегировать-полностью-без-угрызений">2. Делегировать полностью (без угрызений)</h2>
+<p>Boilerplate/DTO/мапперы; Sonar-замечания «fix this» (25 за окно); оформление Jira/ADR/инструкций по твоему черновику; git-операции; второй проход <code>/review-mr</code> после твоего первого; Spring-конфиг и YAML; поиск по незнакомому API («вместо гугла» — 78 промтов, это нормально); суммаризация ресёрча; тест-скелеты после твоей формулировки <em>что</em> проверяем; всё в pkm/lifeOS — но с потолком (см. п. 6).</p>
+<h2 id="3-сначала-сам-потом-сверить-как-именно-сверять">3. «Сначала сам, потом сверить» — как именно сверять</h2>
+<ol>
+<li>Гипотеза/вариант в промт <strong>до</strong> запроса (rule 08 спросит, если забыл). Формат: «Думаю, X, потому что Y».</li>
+<li>Агент работает как обычно.</li>
+<li>Сверка — три вопроса, 1 минута: совпало? что я упустил (одно)? что он упустил (одно)?</li>
+<li>Итог одной строкой в лог (п. 4). Если гипотеза не совпала — не спорить, а понять, какой факт я не знал.</li>
+<li>Для планов: таблица «мой вариант / его вариант / чем отличается» — уже есть строка «Вариант автора» в шаблоне.</li>
+</ol>
+<h2 id="4-что-фиксировать-obsidian-para">4. Что фиксировать (Obsidian, PARA)</h2>
+<p>Один файл <code>Areas/Engineering/ai-log.md</code>, append-only, <strong>одна строка на сессию</strong> (30 секунд):</p>
+<pre class="code lang-"><code>2026-08-17 | m2m-gateway | debug | гипотеза: таймаут пула | совпала | принято без правок: нет (2 правки) | урок: смотреть в метрики пула раньше логов</code></pre>
+<p>Поля: дата | проект | тип (debug/design/review/code/other) | моя гипотеза или «не было» | совпала/нет | принято без правок да/нет (или <code>reflect: N</code>) | урок в 5–10 слов (можно пусто). Раз в неделю (пятница, 5 мин) — прочитать строки недели, вынести один урок в <code>/reflect</code> или память. Раз в месяц — п. 7. Ничего больше не заводить.</p>
+<h2 id="5-как-ревьюить-ии-код-чтобы-это-было-обучением">5. Как ревьюить ИИ-код, чтобы это было обучением</h2>
+<ul>
+<li>Читать дифф <strong>до</strong> резюме агента (резюме — потом, как проверка своего понимания: retrieval practice).</li>
+<li>На каждый неочевидный кусок — объяснить себе, почему так (self-explanation, g≈0.55); не можешь — это вопрос агенту «почему так, а не X?» (Шейко: «студент, которому задают наводящие вопросы»).</li>
+<li>Найти одну вещь, которую надо убрать. Всегда есть.</li>
+<li>Проверить тесты: не удалён ли, не ослаблен ли (Кулешов: «удалил тест — всё зелёное»); <code>git diff --stat</code> по тестовым файлам.</li>
+<li>Не начинать промт с «как профессионал/эксперт» (46 раз): роль ничего не даёт агенту, но сигнализирует, что ты отдаёшь суждение.</li>
+</ul>
+<h2 id="6-ранние-сигналы-что-навык-уходит">6. Ранние сигналы, что навык уходит</h2>
+<ul>
+<li>Не можешь сформулировать гипотезу о причине за 2 минуты — вставляешь лог «как есть».</li>
+<li>Не можешь объяснить коллеге модуль своего сервиса без открытого чата с агентом.</li>
+<li>`/task … возьми следующую задачу» / «проведи анализ и сделай» стали дефолтной постановкой (сейчас 12% промтов начинаются с «проведи анализ»).</li>
+<li>Растёт доля коротких «как …?» по своему же стеку (google-replace 7% сейчас) и рулевых «дальше / что осталось».</li>
+<li>Сессии проектирования &gt;20 промтов без критерия готовности; выходные марафоны по pkm/DIY (54 промта, 311 мин).</li>
+<li>Не читаешь дифф, читаешь резюме; не замечаешь удалённый тест.</li>
+<li>Оценка сложности задачи без агента расходится с реальной в 2+ раза.</li>
+</ul>
+<h2 id="7-ежемесячная-проверка-5-индикаторов-20-минут">7. Ежемесячная проверка — 5 индикаторов (20 минут)</h2>
+<pre class="code lang-bash"><code>python3 scripts/audit/extract.py --out docs/audit-2026-08 &amp;&amp; python3 scripts/audit/report_phase1.py --out docs/audit-2026-08</code></pre>
+<div class="tblwrap"><table><thead><tr><th>Индикатор</th><th>Откуда</th><th>Сейчас</th><th>Цель</th></tr></thead><tbody>
+<tr><td class="left">Доля отладочных/проектных постановок со своей гипотезой</td><td class="left">«Rule 08 baseline»</td><td class="left">0% / 2.4%</td><td class="left">≥40% через 8 нед</td></tr>
+<tr><td class="left">Попадание гипотезы (совпала / всего)</td><td class="left">ai-log.md</td><td class="left">нет данных</td><td class="left">≥50% (калибровка, не «100%»)</td></tr>
+<tr><td class="left">Принято без правок (<code>reflect: 0</code> / все <code>reflect</code>)</td><td class="left">ai-log.md, <code>/reflect</code></td><td class="left">нет данных</td><td class="left">появиться; тренд, не число</td></tr>
+<tr><td class="left">Доля «проведи анализ»-постановок</td><td class="left"><code>tables.md</code>, раздел 8</td><td class="left">12%</td><td class="left">↓ до ≤6%</td></tr>
+<tr><td class="left">Дни без агента в месяц</td><td class="left">«Объём по неделям» / active_days</td><td class="left">~2.7 из 30</td><td class="left">≥4 (один в неделю)</td></tr>
+</tbody></table></div>
+<p>Дополнительно, без цели, только смотреть: pkm/personal-промты в неделю vs work (сейчас в W30–W31 было больше, чем работы).</p>
+<h2 id="стоимость">Стоимость</h2>
+<p>Rule 08 (вопрос + сверка): ~10 мин/нед · строка в лог: ~8 мин/нед · свой проход по MR: ~15 мин/нед · пятничные 5 мин · месячная проверка 20 мин ≈ <strong>40 мин/нед</strong>. Всё — существующими инструментами.</p></section><section class="tab" id="trajectory"><h1 id="06-траектория-карьера-релокация-английский-продукты">06 — Траектория: карьера, релокация, английский, продукты</h1>
+<p>Разделяю <strong>факты</strong> (проверяемые, с источником или «проверить актуальные пороги») и <strong>прогнозы</strong> (моя оценка, с уровнем уверенности). Контекст: senior backend / тимлид, Java 17+/Spring/Kafka/PG/Oracle/ClickHouse/k8s, Бишкек, цель 2–4 года — релокация (США/ЕС/НЗ) через европейский офис → L-1A/EB-1C, параллельно O-1A; английский A2 → B2+.</p>
+<h2 id="1-что-востребовано-сейчас-и-что-можно-говорить-о-3-5-годах">1. Что востребовано сейчас и что можно говорить о 3–5 годах</h2>
+<p><strong>Факты (2025–2026):</strong></p>
+<ul>
+<li>Спрос на senior backend с распределёнными системами, стримингом (Kafka), облаком/Kubernetes, наблюдаемостью и безопасностью — устойчив; найм junior/entry в ИИ-затронутых профессиях просел (Brynjolfsson, Chandar, Chen, <em>Canaries in the Coal Mine</em>, Stanford Digital Economy Lab, 2025: −13% относительной занятости 22–25-летних в наиболее ИИ-затронутых профессиях; препринт).</li>
+<li>Работодатели ждут работы с ИИ-инструментами как базового навыка (DORA 2025: 90% используют), но нанимающий критерий остаётся — судьба системы в проде: дизайн, отказоустойчивость, отладка, владение доменом.</li>
+<li>Стек Java/Spring остаётся одним из крупнейших в энтерпрайзе США/ЕС (банки, телеком, страхование, гос); Java 21+ (virtual threads), Spring Boot 3, GraalVM native — то, о чём спрашивают.</li>
+<li>«Продуктово слабые разработчики и технически неграмотные руководители» — две категории под давлением (Кулешов; совпадает с Шейко про judgment vs intelligence). Это мнение практиков, не исследование.</li>
+</ul>
+<p><strong>Прогнозы (уверенность):</strong></p>
+<ul>
+<li>Высокая (≈80%): роль сениора смещается к «владелец результата»: постановка, ревью, архитектура, эксплуатация; чистое написание кода дешевеет; ценность — судить и отвечать. Именно это фаза 1 показывает как зону риска у тебя.</li>
+<li>Средняя (≈60%): «инженер, умеющий строить надёжную ИИ-обвязку внутри продукта» (LLM-интеграции, evals, guardrails) — востребованная специализация в энтерпрайзе на 3–5 лет; для Java-бэкендера — естественное расширение (интеграции, очереди, идемпотентность — твоё).</li>
+<li>Низкая (≈40%): роль «agentic ops / настройщик харнесов» как отдельная позиция (Шейко). Для тебя — ловушка: это твоя склонность к тюнингу инструментов, а не рыночная сила.</li>
+<li>Про «программисты не нужны через 3 года» — прогнозов много, данных нет; METR/Cui показывают ускорение, не замену.</li>
+</ul>
+<h2 id="2-что-у-тебя-есть-чего-не-хватает">2. Что у тебя есть, чего не хватает</h2>
+<div class="tblwrap"><table><thead><tr><th>Есть (по контексту и логам)</th><th>Не хватает (для США/ЕС и для досье)</th></tr></thead><tbody>
+<tr><td class="left">Java/Spring/Kafka/PG/Oracle/ClickHouse/k8s; де-факто архитектор; тимлид с менторством; ревью MR коллег (43 за 9 недель); TDD в исполнении (3579 прогонов тестов); работа с on-call-системами (m2m-gateway)</td><td class="left"><strong>Английский B2+</strong> — блокер №1 для всего списка (интервью, менеджерская роль для L-1A/EB-1C, доклады)</td></tr>
+<tr><td class="left">Дисциплина plan-first, безопасность (хуки), системный подход к инструментам</td><td class="left"><strong>Публичный след</strong>: доклады, статьи, OSS-вклад в заметных проектах, судейство/ПК конференций — то, из чего собирается O-1A</td></tr>
+<tr><td class="left">Продуктовые эксперименты (Lark, teacher-pro, лифOS) — опыт «сделать конец-в-конец»</td><td class="left"><strong>Cloud-fluency под провайдера</strong> (AWS/GCP): в найме США/ЕС спрашивают managed-сервисы, IAM, стоимость; on-prem k8s недостаточно</td></tr>
+<tr><td class="left">Русскоязычная документация и ADR</td><td class="left"><strong>Письменная английская инженерная коммуникация</strong>: design docs, RFC, PR-описания — в США/ЕС это часть роли</td></tr>
+<tr><td class="left">Опыт руководства командой</td><td class="left"><strong>Формальный менеджерский трек в одной компании ≥12 мес</strong> с людьми в подчинении — условие L-1A/EB-1C</td></tr>
+<tr><td class="left">—</td><td class="left"><strong>Формат интервью</strong>: system design (60 мин, whiteboard), behavioral (STAR, «impact»), leetcode-lite; постсоветский рынок это почти не тренирует</td></tr>
+</tbody></table></div>
+<h2 id="3-книги-и-курсы-5-7-почему-именно-это-и-именно-сейчас">3. Книги и курсы: 5–7, почему именно это и именно сейчас</h2>
+<ol>
+<li><strong>Kleppmann, <em>Designing Data-Intensive Applications</strong></em> (2-е издание — early release 2025; если нет — 1-е). Почему: система-дизайн-интервью в США/ЕС и твой стек (Kafka, репликация, консистентность) — это одна книга. Сейчас: читать по главе в неделю <em>в оригинале</em> — одновременно английский (техническая лексика — твоя сильная зона).</li>
+<li><strong>Ousterhout, <em>A Philosophy of Software Design</strong></em> (2nd ed., 2021). Почему: короткая, про judgment (глубокие модули, сложность), даёт словарь для аргументации в design-review на английском. Сейчас: закрывает разрыв «intelligence vs judgment».</li>
+<li><strong>Xu, <em>System Design Interview</em> vol. 1–2.</strong> Почему: формат интервью США — навык отдельный от умения проектировать. Сейчас: 1 задача в неделю <em>своим</em> решением, потом сверка (PS-I, фаза 3) — тренирует и английский, и «первый вариант».</li>
+<li><strong>Reilly, <em>The Staff Engineer's Path</strong></em> — для трека IC-лидера; <strong>или Fournier, <em>The Manager's Path</strong></em> — если целишься в L-1A/EB-1C (нужна <em>managerial capacity</em>). Почему: обе описывают, что именно в США считают «уровнем»; выбери одну по выбранному треку, вторую пролистай.</li>
+<li><strong>Brown, Roediger, McDaniel, <em>Make It Stick</em>.</strong> Почему: практическая версия фазы 3 (retrieval, interleaving, generation) — чтобы протокол «Рост» держался на понимании, а не на воле.</li>
+<li><strong>English: Murphy, <em>English Grammar in Use</em> (intermediate) + любой B2-корпус (Cambridge B2 First materials).</strong> Почему: A2→B2 — это ~400–500 часов направленной практики (оценка Cambridge/CEFR: ~200 ч на уровень); без структуры они растекутся. Сейчас: см. раздел 5 — встроить, а не «учить отдельно».</li>
+<li><strong>Курс: MIT 6.824 / 6.5840 Distributed Systems</strong> (лекции + лабы на Go, бесплатно). Почему: единственный пункт с кодом руками — глубина под DDIA и антидот делегированию; Go у тебя side-стек. Сейчас — только если после 1–3 остаётся ресурс; иначе не начинать (пункт «не оверинжинирить учёбу»).</li>
+</ol>
+<p>Не в списке намеренно: курсы по «prompt engineering»/«AI agents» (то, что ты и так делаешь), сертификации ради сертификаций (AWS SAA стоит брать только под конкретную вакансию — 1–2 месяца подготовки), «10 книг по лидерству».</p>
+<h2 id="4-специфика-сша-европы-нз">4. Специфика США / Европы / НЗ</h2>
+<p><strong>США.</strong> Найм: coding + system design + behavioral; ценится измеримый impact («сократил p99 с X до Y», «вёл миграцию на N сервисов»), ownership, письменная коммуникация, рефералы. Отличие от постсоветского рынка: меньше веса стеку и скорости, больше — «влияние за пределы своей команды», умение объяснить решение и его цену. Визы (факты, проверить актуальные требования USCIS):</p>
+<ul>
+<li><strong>L-1A</strong> — перевод внутри компании на менеджерскую/руководящую позицию; ≥1 непрерывный год за последние 3 в зарубежном офисе группы. Отсюда путь «европейский офис международной компании → L-1A → EB-1C» реален, но требует <em>формального</em> менеджмента людей, а не «де-факто архитектора».</li>
+<li><strong>EB-1C</strong> — те же условия по году за рубежом + постоянная менеджерская роль в США; без лотереи, но зависит от работодателя.</li>
+<li><strong>O-1A</strong> — «extraordinary ability»: минимум 3 из 8 критериев (награды; членство, требующее достижений; публикации <em>о тебе</em>; <strong>судейство работы других</strong> (ПК конференций, ревью статей, мейнтейнер OSS с ревью PR); <strong>оригинальный вклад значимого масштаба</strong>; <strong>авторские статьи/доклады</strong>; <strong>критическая роль в известной организации</strong>; высокая зарплата). Для инженера реалистично: судейство + статьи/доклады + критическая роль (+ письма). Это набирается <strong>2–3 годами публичной активности</strong>, начинать надо сейчас: доклады (Joker/JPoint/Podlodka/локальные митапы), англоязычные статьи, ревью в OSS. Кулешов про нейрослоп: OSS-вклад должен быть заметно человеческим (обсуждения, ревью, поддержка) — иначе он не считается ни мейнтейнерами, ни в досье.</li>
+</ul>
+<p><strong>Европа.</strong> Меньше leetcode, больше практические/тестовые задания и обсуждение архитектуры; английского B2 обычно достаточно; культура письменных решений (ADR/RFC) и work-life баланс — плюс к твоему стилю. Blue Card ЕС (Германия и др.) — по зарплатному порогу (для IT-профессий понижен; проверить актуальные суммы за год подачи); Нидерланды — HSM. Европейский офис международной компании — прямой мост к L-1A.</p>
+<p><strong>Новая Зеландия.</strong> Software Engineer — в Green List (Tier 1) → «Straight to Residence» при job offer с порогом по зарплате/квалификации; английский — IELTS 6.5 или эквивалент (факты 2025, проверить). Рынок маленький, найм удалённо из Бишкека редок; реалистичнее после опыта в ЕС.</p>
+<p><strong>Что даёт вес во всех трёх:</strong> публичные англоязычные артефакты (доклад, статья, OSS-PR с обсуждением), измеримые проектные результаты, рекомендации от людей с именем, формальная роль лида/менеджера в известной компании.</p>
+<h2 id="5-английский-встроенный-в-рабочий-процесс-не-отдельно">5. Английский, встроенный в рабочий процесс (не «отдельно»)</h2>
+<p>Эксперимент «чат агента на английском A2» уже провалился (31 «напиши на русском», W26–W28): он ухудшал понимание рабочего контента, а не учил. Правильное место английского — там, где ты <em>производишь</em>, а не <em>потребляешь</em>:</p>
+<ul>
+<li><strong>Ежедневно 15 мин — «объясни вслух по-английски»</strong>: одно проектное решение или причину бага сегодняшнего дня — агенту текстом (или голосом) на английском; агент правит язык и задаёт один уточняющий вопрос. Это одновременно self-explanation/retrieval из фазы 3 и продуктивный английский. Стоимость: 15 мин, инструмент — тот же чат.</li>
+<li><strong>Чтение только в оригинале</strong>: DDIA, документация Spring/Kafka, обсуждения в OSS, доклады с конференций (не переводы). 0 минут дополнительно.</li>
+<li><strong>Раз в неделю 30 мин — устный system-design/behavioral ответ</strong> на английском (по Xu / по своей задаче), агент — интервьюер и корректор. Это тренировка формата интервью США.</li>
+<li><strong>Anki 10 мин/день</strong> на своих же ошибках из этих сессий (лексика из твоего домена, не общий словарь).</li>
+<li><strong>Не делать</strong>: переводить рабочие доки на английский вопреки командной конвенции; писать коммиты по-английски (конвенция — русский); ставить агенту «отвечай по-английски» — уже проверено, вредит работе.</li>
+<li>Реалистичность: ~1 час/день → A2→B2 за 12–18 месяцев (по CEFR-оценкам ~200 ч на уровень). Мера — раз в квартал пробный B2 First (Reading/Listening) онлайн, бесплатно.</li>
+</ul>
+<h2 id="6-собственные-продукты-ограничения-и-что-даёт-эффект-даже-при-провале">6. Собственные продукты: ограничения и что даёт эффект даже при провале</h2>
+<p><strong>Реальные ограничения.</strong></p>
+<ul>
+<li>Время: полная занятость + лид + английский + протокол «Рост» = на продукт остаётся 3–6 ч/нед. Соло-разработка при таком бюджете — только очень узкие вещи.</li>
+<li>Юрисдикция/платежи: приём платежей из Кыргызстана напрямую (Stripe и т.п.) ограничен — нужен merchant of record (Paddle, Lemon Squeezy) или зарубежное юрлицо; налоги и договоры — отдельная работа. Проверять актуально на момент запуска.</li>
+<li>Данные фазы 1: ты уже тратишь продуктовое время — но на инструменты <em>для себя</em> (lifeOS 220 промтов, Lark, teacher-pro, клавиатуры). Это не продукт, это хобби-инжиниринг; честно назвать его так и ограничить.</li>
+</ul>
+<p><strong>Типичные причины провала</strong> (по опыту индустрии, не по исследованиям): нет дистрибуции (продукт есть — пользователей нет), «инструмент для себя» без второго пользователя, бесконечное проектирование до первого релиза (Шейко: «не знаешь, что хочешь — не планируй, пощупай»), расползание объёма, отсутствие платящего клиента как критерия.</p>
+<p><strong>Что даёт карьерный эффект, даже если продукт не взлетит:</strong></p>
+<ul>
+<li>Публичный англоязычный артефакт (репозиторий, статья «как я сделал X», доклад) — засчитывается в O-1A-историю и в портфолио для ЕС/США.</li>
+<li>Опыт «конец-в-конец» с деньгами и пользователями — та самая продуктовая грамотность (Шейко/Кулешов).</li>
+<li>Но: <strong>больше веса при меньших затратах даёт OSS-вклад в известный проект твоего стека</strong> (Spring-экосистема, Testcontainers, Kafka-клиенты, инструменты миграций) — там уже есть дистрибуция, ревьюеры и видимость; 1 принятый нетривиальный PR в квартал с обсуждением дизайна — реалистичная цель.</li>
+</ul>
+<p><strong>Правило отбора для продукта</strong> (если всё-таки делать): второй пользователь известен по имени до первой строки кода; релиз ≤ 4 недель; платёж или отказ через 8 недель; иначе — закрыть и записать урок в ai-log.</p>
+<h2 id="7-порядок-на-12-месяцев-одна-строка-на-квартал">7. Порядок на 12 месяцев (одна строка на квартал)</h2>
+<ul>
+<li>Q1: английский встроен (п. 5), протокол «Рост» идёт, DDIA гл. 1–5, первый доклад/статья на английском в черновике.</li>
+<li>Q2: 1 OSS-PR с обсуждением; доклад на локальном митапе/конференции; system-design раз в неделю.</li>
+<li>Q3: разговор с работодателем о формальной менеджерской роли / европейском офисе (для L-1A нужен год); пробный B2 Reading/Listening.</li>
+<li>Q4: досье O-1A «на бумаге» (что уже есть по 3 критериям, чего не хватает); решение по продукту/OSS на следующий год.</li>
+</ul></section></main>
+<script>window.__DATA__={"weeks": ["2026-W25", "2026-W26", "2026-W27", "2026-W28", "2026-W29", "2026-W30", "2026-W31", "2026-W32", "2026-W33"], "totals": {"prompts": 1342, "tokens_out": 64394729, "tokens_in": 9194542, "cache_read": 8617264204, "cache_write": 315086677, "turns": 33497, "tool_calls": 39213, "tool_fails": 483, "subagent_stops": 1591, "sessions": 212, "active_days": 57, "calendar_days": 63}, "volume_by_week": {"2026-W25": {"prompts": 218, "sessions": 26, "active_days": 7, "tokens_out": 17999003, "tokens_in": 2295288, "cache_read": 2085174387, "cache_write": 89566547, "turns": 6203, "tool_calls": 5063, "tool_fails": 42, "subagent_stops": 139}, "2026-W26": {"prompts": 189, "sessions": 34, "active_days": 7, "tokens_out": 10905147, "tokens_in": 1830684, "cache_read": 1402966607, "cache_write": 39350843, "turns": 5755, "tool_calls": 5196, "tool_fails": 76, "subagent_stops": 175}, "2026-W27": {"prompts": 140, "sessions": 33, "active_days": 6, "tokens_out": 4878727, "tokens_in": 1072052, "cache_read": 578316127, "cache_write": 31386802, "turns": 3164, "tool_calls": 4745, "tool_fails": 67, "subagent_stops": 207}, "2026-W28": {"prompts": 155, "sessions": 22, "active_days": 7, "tokens_out": 10093140, "tokens_in": 1598022, "cache_read": 1802801950, "cache_write": 43878181, "turns": 5852, "tool_calls": 7937, "tool_fails": 113, "subagent_stops": 243}, "2026-W29": {"prompts": 186, "sessions": 31, "active_days": 7, "tokens_out": 5013412, "tokens_in": 1035836, "cache_read": 694279441, "cache_write": 28255036, "turns": 3131, "tool_calls": 3967, "tool_fails": 32, "subagent_stops": 239}, "2026-W30": {"prompts": 94, "sessions": 21, "active_days": 7, "tokens_out": 2060142, "tokens_in": 506106, "cache_read": 303673989, "cache_write": 15681107, "turns": 1630, "tool_calls": 1403, "tool_fails": 18, "subagent_stops": 110}, "2026-W31": {"prompts": 112, "sessions": 20, "active_days": 5, "tokens_out": 6169525, "tokens_in": 431850, "cache_read": 566856769, "cache_write": 29460109, "turns": 2903, "tool_calls": 5110, "tool_fails": 60, "subagent_stops": 181}, "2026-W32": {"prompts": 148, "sessions": 14, "active_days": 5, "tokens_out": 3362398, "tokens_in": 395672, "cache_read": 478627465, "cache_write": 19291894, "turns": 2123, "tool_calls": 3342, "tool_fails": 36, "subagent_stops": 194}, "2026-W33": {"prompts": 100, "sessions": 23, "active_days": 6, "tokens_out": 3913235, "tokens_in": 29032, "cache_read": 704567469, "cache_write": 18216158, "turns": 2736, "tool_calls": 2450, "tool_fails": 39, "subagent_stops": 103}}, "prompts_by_week_group": {"2026-W25": {"work": 171, "personal": 44, "meta": 3}, "2026-W26": {"personal": 29, "work": 129, "meta": 24, "pkm": 7}, "2026-W27": {"work": 92, "personal": 41, "pkm": 6, "other": 1}, "2026-W28": {"work": 109, "personal": 25, "pkm": 10, "meta": 11}, "2026-W29": {"pkm": 11, "work": 77, "personal": 98}, "2026-W30": {"pkm": 59, "work": 35}, "2026-W31": {"work": 34, "pkm": 78}, "2026-W32": {"personal": 90, "work": 39, "pkm": 19}, "2026-W33": {"pkm": 30, "work": 64, "meta": 6}}, "tokens_by_week_group": {"2026-W25": {"work": 11434757, "personal": 5789522, "meta": 774724}, "2026-W26": {"personal": 1714616, "work": 7488618, "meta": 826128, "pkm": 875785}, "2026-W27": {"work": 2887268, "personal": 1397196, "pkm": 544863, "other": 49400}, "2026-W28": {"work": 6422935, "personal": 2127252, "pkm": 363501, "meta": 1179452}, "2026-W29": {"pkm": 123913, "personal": 3022117, "work": 1867382}, "2026-W30": {"pkm": 777387, "work": 1282755}, "2026-W31": {"work": 2541927, "pkm": 3627598}, "2026-W32": {"personal": 997277, "work": 1638698, "pkm": 726423}, "2026-W33": {"pkm": 1624853, "work": 1896259, "meta": 392123}}, "by_group": {"work": {"prompts": 750, "sessions": 144, "tokens_out": 37460599}, "personal": {"prompts": 327, "sessions": 35, "tokens_out": 15047980}, "meta": {"prompts": 44, "sessions": 10, "tokens_out": 3172427}, "pkm": {"prompts": 220, "sessions": 25, "tokens_out": 8664323}, "other": {"prompts": 1, "sessions": 1, "tokens_out": 49400}}, "tasks": {"all": {"other": 237, "debug": 64, "sql": 25, "docs": 39, "config-yaml": 44, "research": 10, "explain-code": 54, "planning-arch": 120, "new-code": 125, "review": 92, "google-replace": 78, "refactor": 21, "sonar-fix": 25, "boilerplate": 14, "git-ops": 12, "config-tuning": 27, "pkm-notes": 192, "test": 5}, "work": {"other": 122, "debug": 55, "config-yaml": 37, "research": 6, "explain-code": 36, "planning-arch": 84, "new-code": 80, "review": 87, "sql": 17, "google-replace": 43, "refactor": 18, "docs": 27, "sonar-fix": 25, "boilerplate": 12, "git-ops": 10, "test": 5}, "personal": {"sql": 8, "docs": 12, "other": 115, "new-code": 45, "config-yaml": 7, "explain-code": 18, "research": 4, "google-replace": 35, "debug": 9, "git-ops": 2, "planning-arch": 36, "review": 4, "refactor": 3, "boilerplate": 2}, "n_new_task": 1184}, "hour_hist": {"0": 22, "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 1, "8": 10, "9": 64, "10": 154, "11": 145, "12": 144, "13": 113, "14": 98, "15": 130, "16": 140, "17": 112, "18": 46, "19": 40, "20": 36, "21": 31, "22": 21, "23": 35}, "weekday_hist": {"1": 288, "2": 259, "3": 248, "4": 250, "5": 186, "6": 46, "7": 65}, "time_flags": {"late_night_prompts": 78, "late_share_pct": 5.8, "weekend_prompts": 111, "weekend_share_pct": 8.3}, "corrections_by_week": {"2026-W25": {"corrections": 7, "prompts": 218, "share_pct": 3.2}, "2026-W26": {"corrections": 27, "prompts": 189, "share_pct": 14.3}, "2026-W27": {"corrections": 22, "prompts": 140, "share_pct": 15.7}, "2026-W28": {"corrections": 20, "prompts": 155, "share_pct": 12.9}, "2026-W29": {"corrections": 10, "prompts": 186, "share_pct": 5.4}, "2026-W30": {"corrections": 4, "prompts": 94, "share_pct": 4.3}, "2026-W31": {"corrections": 4, "prompts": 112, "share_pct": 3.6}, "2026-W32": {"corrections": 8, "prompts": 148, "share_pct": 5.4}, "2026-W33": {"corrections": 3, "prompts": 100, "share_pct": 3.0}}, "sessions_hooks": {"n": 212, "prompts_median": 3.0, "prompts_p90": 15.900000000000006, "prompts_max": 54, "single_prompt": 51, "single_prompt_pct": 24.1, "le3": 111, "ge10": 39, "ge20": 14, "with_correction": 70, "with_correction_pct": 33.0, "ge3_corrections": 8, "hist_prompts": {"1": 51, "2": 36, "3": 24, "4": 11, "5": 13, "6": 11, "7": 14, "8": 8, "9": 5, "10": 7, "11": 1, "12": 2, "13": 3, "14": 2, "15": 2, "16": 4, "17": 1, "18": 1, "19": 2, "20": 14}, "active_min_median": 13.0, "active_min_p90": 84.9, "active_min_total": 6969}, "tools": {"agents": {"general-purpose": 272, "Explore": 184, "java-reviewer": 102, "Plan": 67, "vue-reviewer": 24, "?": 9, "vue-test-writer": 9, "go-reviewer": 7, "go-test-writer": 6, "prompt-auditor": 4, "test-writer": 4, "claude-code-guide": 2, "migration-reviewer": 2}, "slash": {"task": 79, "review-mr": 43, "review": 33, "plan": 20, "feature": 13, "fix": 9, "onboard": 8, "users": 3, "arch": 2, "explain": 2, "test": 1, "jira": 1, "usr": 1, "login": 1}, "dead_commands_ever": ["adr", "convention-check", "reflect"], "skill_loads_main_tr": {"vue-frontend": 2, "java-service-convention": 2, "testing": 2, "dataviz": 1, "go-best-practices": 1, "claude-api": 1}, "skill_loads_sub_tr": {"integration-patterns": 43, "java-service-convention": 33, "testing": 21, "jpa-db-review": 19, "vue-frontend": 10, "go-best-practices": 5, "spring-best-practices": 1, "claude-api": 1}, "counts": {"Bash": 14413, "Read": 12897, "Edit": 6571, "Write": 2244, "Agent": 692, "TaskUpdate": 583, "TaskCreate": 305, "WebSearch": 278, "AskUserQuestion": 241, "ToolSearch": 207, "WebFetch": 190, "ExitPlanMode": 106, "mcp__Claude_Browser__computer": 99, "Skill": 83, "mcp__claude-in-chrome__computer": 79, "mcp__ccd_session__mark_chapter": 42, "mcp__context7__query-docs": 19, "mcp__claude-in-chrome__find": 14, "mcp__context7__resolve-library-id": 13, "mcp__Claude_Browser__navigate": 13, "mcp__claude-in-chrome__navigate": 13, "Grep": 10, "mcp__Claude_Browser__javascript_tool": 10, "Glob": 9, "DesignSync": 9, "mcp__Claude_Browser__preview_start": 9, "mcp__claude-in-chrome__form_input": 8, "mcp__claude-in-chrome__read_page": 5, "mcp__claude-in-chrome__file_upload": 5, "StructuredOutput": 5, "mcp__claude-in-chrome__read_network_requests": 4, "Workflow": 3, "mcp__ccd_session__spawn_task": 3, "mcp__Claude_Browser__read_console_messages": 2, "mcp__Claude_Browser__resize_window": 2, "TaskStop": 2, "mcp__Claude_Browser__preview_stop": 2, "mcp__Claude_Browser__get_page_text": 2, "mcp__Claude_Browser__form_input": 2, "ScheduleWakeup": 2, "mcp__ccd_directory__request_directory": 2, "SendUserFile": 2, "mcp__visualize__read_me": 1, "mcp__visualize__show_widget": 1, "EnterWorktree": 1, "mcp__Claude_Browser__tabs_context": 1, "mcp__Claude_Browser__find": 1, "mcp__Claude_Browser__read_page": 1, "mcp__claude-in-chrome__list_connected_browsers": 1, "mcp__claude-in-chrome__tabs_context_mcp": 1, "mcp__claude-in-chrome__javascript_tool": 1, "mcp__claude-in-chrome__read_console_messages": 1, "TaskOutput": 1, "Monitor": 1, "Artifact": 1}}, "skill_risk": {"n_new_task_work_personal": 965, "any_risk": 203, "any_risk_pct": 21.0, "by_category": {"schema-design": 2, "requirements": 3, "analysis-first": 124, "unfamiliar-code": 26, "architecture-decision": 42, "debug-root-cause": 35, "sql-writing": 3, "google-replace": 6}, "by_week": {"2026-W25": {"schema-design": 0, "requirements": 0, "analysis-first": 21, "unfamiliar-code": 4, "architecture-decision": 12, "debug-root-cause": 8, "sql-writing": 0, "google-replace": 0}, "2026-W26": {"schema-design": 1, "requirements": 0, "analysis-first": 22, "unfamiliar-code": 4, "architecture-decision": 13, "debug-root-cause": 8, "sql-writing": 1, "google-replace": 1}, "2026-W27": {"schema-design": 0, "requirements": 1, "analysis-first": 24, "unfamiliar-code": 3, "architecture-decision": 4, "debug-root-cause": 7, "sql-writing": 0, "google-replace": 1}, "2026-W28": {"schema-design": 0, "requirements": 0, "analysis-first": 18, "unfamiliar-code": 4, "architecture-decision": 4, "debug-root-cause": 3, "sql-writing": 1, "google-replace": 1}, "2026-W29": {"schema-design": 1, "requirements": 1, "analysis-first": 19, "unfamiliar-code": 4, "architecture-decision": 2, "debug-root-cause": 2, "sql-writing": 0, "google-replace": 1}, "2026-W30": {"schema-design": 0, "requirements": 0, "analysis-first": 3, "unfamiliar-code": 1, "architecture-decision": 0, "debug-root-cause": 1, "sql-writing": 0, "google-replace": 0}, "2026-W31": {"schema-design": 0, "requirements": 0, "analysis-first": 5, "unfamiliar-code": 1, "architecture-decision": 2, "debug-root-cause": 3, "sql-writing": 1, "google-replace": 0}, "2026-W32": {"schema-design": 0, "requirements": 0, "analysis-first": 7, "unfamiliar-code": 3, "architecture-decision": 1, "debug-root-cause": 1, "sql-writing": 0, "google-replace": 1}, "2026-W33": {"schema-design": 0, "requirements": 1, "analysis-first": 5, "unfamiliar-code": 2, "architecture-decision": 4, "debug-root-cause": 2, "sql-writing": 0, "google-replace": 1}}}, "hypothesis_share": {"debug": {"n": 97, "with_hypothesis": 0, "pct": 0.0}, "design": {"n": 125, "with_hypothesis": 3, "pct": 2.4}, "by_week": {"2026-W25": {"debug_n": 29, "debug_h": 0, "design_n": 13, "design_h": 0}, "2026-W26": {"debug_n": 13, "debug_h": 0, "design_n": 18, "design_h": 0}, "2026-W27": {"debug_n": 16, "debug_h": 0, "design_n": 28, "design_h": 2}, "2026-W28": {"debug_n": 11, "debug_h": 0, "design_n": 25, "design_h": 1}, "2026-W29": {"debug_n": 5, "debug_h": 0, "design_n": 15, "design_h": 0}, "2026-W30": {"debug_n": 1, "debug_h": 0, "design_n": 0, "design_h": 0}, "2026-W31": {"debug_n": 6, "debug_h": 0, "design_n": 10, "design_h": 0}, "2026-W32": {"debug_n": 11, "debug_h": 0, "design_n": 8, "design_h": 0}, "2026-W33": {"debug_n": 5, "debug_h": 0, "design_n": 8, "design_h": 0}}}, "by_project": [{"project": "business-m2m-gateway", "group": "work", "prompts": 391, "tokens_out": 23350352}, {"project": "lifeOS", "group": "pkm", "prompts": 217, "tokens_out": 8429735}, {"project": "lark", "group": "personal", "prompts": 97, "tokens_out": 5280528}, {"project": "totem-choc-v2-wireless", "group": "personal", "prompts": 90, "tokens_out": 834848}, {"project": "teacher-pro", "group": "personal", "prompts": 66, "tokens_out": 6882489}, {"project": "cockpit-testing-management", "group": "work", "prompts": 61, "tokens_out": 2991798}, {"project": "my-claude-config", "group": "meta", "prompts": 44, "tokens_out": 2807264}, {"project": "business-notification-analytics", "group": "work", "prompts": 43, "tokens_out": 813962}, {"project": "totem", "group": "personal", "prompts": 39, "tokens_out": 343688}, {"project": "business-document-generation", "group": "work", "prompts": 38, "tokens_out": 4377144}, {"project": "business-notification-core", "group": "work", "prompts": 30, "tokens_out": 574782}, {"project": "business-corporate-selfcare", "group": "work", "prompts": 29, "tokens_out": 452946}, {"project": "cockpit-notification-system-frontend", "group": "work", "prompts": 24, "tokens_out": 1053660}, {"project": "cockpit-testing-management-ui", "group": "work", "prompts": 20, "tokens_out": 952598}, {"project": "lk-mobile-api", "group": "work", "prompts": 18, "tokens_out": 200933}, {"project": "crkbd", "group": "personal", "prompts": 14, "tokens_out": 262468}, {"project": "task-manager", "group": "work", "prompts": 13, "tokens_out": 100852}, {"project": "cockpit-dependency-inventory", "group": "work", "prompts": 12, "tokens_out": 803606}, {"project": "cockpit-document-generation-frontend", "group": "work", "prompts": 10, "tokens_out": 520177}, {"project": "multi-client-instance", "group": "work", "prompts": 8, "tokens_out": 348336}, {"project": "integration-providers-push", "group": "work", "prompts": 8, "tokens_out": 171758}, {"project": "nur-toys", "group": "work", "prompts": 7, "tokens_out": 50591}, {"project": "integration-redknee-database", "group": "work", "prompts": 7, "tokens_out": 144805}, {"project": "web", "group": "personal", "prompts": 7, "tokens_out": 495440}, {"project": "global-id", "group": "work", "prompts": 6, "tokens_out": 130928}, {"project": "tms", "group": "personal", "prompts": 5, "tokens_out": 38941}, {"project": "campaign-reply-backfill", "group": "work", "prompts": 5, "tokens_out": 80285}, {"project": "lares", "group": "personal", "prompts": 5, "tokens_out": 954}, {"project": "notification_replier", "group": "work", "prompts": 4, "tokens_out": 81012}, {"project": "adr", "group": "pkm", "prompts": 3, "tokens_out": 234588}, {"project": "totemlib.pretty", "group": "personal", "prompts": 3, "tokens_out": 101752}, {"project": "convention-java", "group": "work", "prompts": 2, "tokens_out": 8546}, {"project": "core", "group": "work", "prompts": 2, "tokens_out": 25231}, {"project": "java", "group": "work", "prompts": 2, "tokens_out": 4444}, {"project": "cockpit-notification-system", "group": "work", "prompts": 2, "tokens_out": 33378}, {"project": "shopping-list-app", "group": "personal", "prompts": 1, "tokens_out": 126780}, {"project": "business_m2m_gateway", "group": "work", "prompts": 1, "tokens_out": 65710}, {"project": "tmp", "group": "other", "prompts": 1, "tokens_out": 49400}, {"project": "business-operator-detailing", "group": "work", "prompts": 1, "tokens_out": 33546}, {"project": "rules", "group": "work", "prompts": 1, "tokens_out": 33762}, {"project": "order_system", "group": "work", "prompts": 1, "tokens_out": 30998}, {"project": "processing_app", "group": "work", "prompts": 1, "tokens_out": 6582}, {"project": "migration", "group": "work", "prompts": 1, "tokens_out": 2532}, {"project": "notification-replier", "group": "work", "prompts": 1, "tokens_out": 4991}, {"project": "reply_sending", "group": "work", "prompts": 1, "tokens_out": 7639}]};</script>
+<script>
+const D = window.__DATA__;
+function el(t,a={},...c){const e=document.createElementNS('http://www.w3.org/2000/svg',t);for(const k in a)e.setAttribute(k,a[k]);c.forEach(x=>e.append(x));return e;}
+function svgBox(w,h){const s=el('svg',{viewBox:`0 0 ${w} ${h}`,width:'100%',preserveAspectRatio:'xMinYMin meet'});return s;}
+const COLORS=['#7cc4ff','#ffb86b','#b48cff','#6fdd8b','#ff7b7b','#59d3c9','#f6e58d','#a0a0a0'];
+function fmt(n){if(n>=1e6)return (n/1e6).toFixed(1)+'M';if(n>=1e3)return Math.round(n/1e3)+'k';return String(n);}
+// stacked/grouped bars by category on X
+function stackedBars(container, cats, series, opts={}){
+  const W=560,H=240,pl=48,pr=10,pt=14,pb=42;const s=svgBox(W,H);
+  const totals=cats.map((_,i)=>series.reduce((a,sr)=>a+(sr.data[i]||0),0));
+  const max=Math.max(1,...(opts.stack?totals:series.flatMap(sr=>sr.data)));
+  const bw=(W-pl-pr)/cats.length;const y=v=>pt+(H-pt-pb)*(1-v/max);
+  for(let g=0;g<=4;g++){const v=max*g/4;s.append(el('line',{x1:pl,x2:W-pr,y1:y(v),y2:y(v),class:'grid'}));s.append(el('text',{x:pl-6,y:y(v)+4,'text-anchor':'end'},opts.fmt?opts.fmt(v):fmt(Math.round(v))));}
+  cats.forEach((c,i)=>{let acc=0;const n=series.length;series.forEach((sr,k)=>{const v=sr.data[i]||0;let x,w,y0,y1;
+    if(opts.stack){x=pl+i*bw+bw*.15;w=bw*.7;y0=y(acc+v);y1=y(acc);acc+=v;}else{w=bw*.8/n;x=pl+i*bw+bw*.1+k*w;y0=y(v);y1=y(0);}
+    const r=el('rect',{x,y:y0,width:Math.max(0,w),height:Math.max(0,y1-y0),fill:sr.color||COLORS[k%8],rx:1});r.append(el('title',{},`${c} — ${sr.name}: ${fmt(v)}`));s.append(r);});
+    s.append(el('text',{x:pl+i*bw+bw/2,y:H-pb+14,'text-anchor':'middle'},opts.short?String(c).replace('2026-',''):String(c)));
+    if(opts.stack&&opts.showTotal)s.append(el('text',{x:pl+i*bw+bw/2,y:y(totals[i])-3,'text-anchor':'middle',class:'lbl'},fmt(totals[i])));});
+  container.append(s);
+  if(series.length>1){const lg=document.createElement('div');lg.className='legend';series.forEach((sr,k)=>{lg.innerHTML+=`<span><i style="background:${sr.color||COLORS[k%8]}"></i>${sr.name}</span>`;});container.append(lg);}
+}
+function hbars(container, items, opts={}){
+  const W=560,rowH=20,pl=opts.pl||170,pr=50,pt=6;const H=pt+items.length*rowH+8;const s=svgBox(W,H);
+  const max=Math.max(1,...items.map(i=>i.v));
+  items.forEach((it,i)=>{const yy=pt+i*rowH;const w=(W-pl-pr)*it.v/max;
+    s.append(el('text',{x:pl-8,y:yy+14,'text-anchor':'end',class:'lbl'},it.k));
+    const r=el('rect',{x:pl,y:yy+3,width:Math.max(0,w),height:rowH-7,fill:it.color||COLORS[0],rx:2});r.append(el('title',{},`${it.k}: ${it.v}`));s.append(r);
+    s.append(el('text',{x:pl+w+5,y:yy+14},opts.fmt?opts.fmt(it.v):fmt(it.v)));});
+  container.append(s);
+}
+function chart(id,title,note){const c=document.getElementById(id);const h=document.createElement('h4');h.textContent=title;c.append(h);const box=document.createElement('div');c.append(box);if(note){const n=document.createElement('div');n.className='note';n.textContent=note;c.append(n);}return box;}
+document.addEventListener('DOMContentLoaded',()=>{
+  // tabs
+  const btns=[...document.querySelectorAll('nav button')],tabs=[...document.querySelectorAll('section.tab')];
+  function show(id){btns.forEach(b=>b.classList.toggle('active',b.dataset.tab===id));tabs.forEach(t=>t.classList.toggle('active',t.id===id));history.replaceState(null,'','#'+id);window.scrollTo(0,0);}
+  btns.forEach(b=>b.addEventListener('click',()=>show(b.dataset.tab)));
+  show(location.hash&&document.getElementById(location.hash.slice(1))?location.hash.slice(1):'usage');
+  const W=D.weeks;
+  // 1 prompts by week/group
+  let b=chart('c-prompts','Промты по неделям и группам проектов','hooks/prompts.jsonl + history.jsonl; work = ~/dev/work, personal = ~/dev/personal, pkm = lifeOS, meta = my-claude-config');
+  const grps=['work','personal','pkm','meta'];
+  stackedBars(b,W,grps.map((g,k)=>({name:g,data:W.map(w=>(D.prompts_by_week_group[w]||{})[g]||0),color:COLORS[k]})),{stack:true,short:true,showTotal:true});
+  // 2 tokens
+  b=chart('c-tokens','Output-токены по неделям и группам','stops.jsonl, дельты кумулятивных стопов; включает субагентов');
+  stackedBars(b,W,grps.map((g,k)=>({name:g,data:W.map(w=>(D.tokens_by_week_group[w]||{})[g]||0),color:COLORS[k]})),{stack:true,short:true,showTotal:true});
+  // 3 task types
+  b=chart('c-tasks','Типы задач (new-task постановки, n='+D.tasks.n_new_task+')','Классификатор по ключевым словам, ~60% точность на мелких категориях; крупные пропорции устойчивы');
+  const ta=Object.entries(D.tasks.all).sort((a,b)=>b[1]-a[1]);
+  hbars(b,ta.map(([k,v],i)=>({k,v,color:k==='other'?'#555':k==='pkm-notes'?COLORS[2]:['new-code','boilerplate','refactor','sql','sonar-fix','config-yaml','git-ops','test'].includes(k)?COLORS[3]:['planning-arch','explain-code','google-replace','research','docs'].includes(k)?COLORS[1]:COLORS[0]})),{pl:120});
+  const lg=document.createElement('div');lg.className='legend';lg.innerHTML=`<span><i style="background:${COLORS[3]}"></i>код</span><span><i style="background:${COLORS[1]}"></i>анализ / решение / вопрос</span><span><i style="background:${COLORS[0]}"></i>ревью, отладка, конфиг</span><span><i style="background:${COLORS[2]}"></i>pkm</span><span><i style="background:#555"></i>other</span>`;b.append(lg);
+  // 4 hours
+  b=chart('c-hours','Промты по часам суток (Asia/Bishkek)','Пики 10–13 и 15–17; ночь 22–06 = '+D.time_flags.late_share_pct+'%');
+  const hrs=Object.keys(D.hour_hist).map(Number).sort((a,b)=>a-b);
+  stackedBars(b,hrs,[{name:'промты',data:hrs.map(h=>D.hour_hist[h]),color:COLORS[0]}],{stack:true});
+  // 5 weekday
+  b=chart('c-wd','Промты по дням недели','Выходные = '+D.time_flags.weekend_share_pct+'% промтов, но именно там pkm/DIY-марафоны');
+  const wdn=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];stackedBars(b,wdn,[{name:'промты',data:[1,2,3,4,5,6,7].map(d=>D.weekday_hist[d]||0),color:COLORS[5]}],{stack:true});
+  // 6 corrections
+  b=chart('c-corr','Коррекции по неделям, % реплик','W26–W28: из 69 коррекций 30 — «напиши на русском» (эксперимент с языком чата); без них 3–9%/нед');
+  stackedBars(b,W,[{name:'% коррекций',data:W.map(w=>D.corrections_by_week[w].share_pct),color:COLORS[4]}],{stack:true,short:true,fmt:v=>v.toFixed(0)+'%'});
+  // 7 sessions histogram
+  b=chart('c-sess','Промтов на сессию (212 сессий; 20 = 20+)','Медиана 3, p90 16; 24.5% сессий из одного промта');
+  const hp=D.sessions_hooks.hist_prompts;const hk=Object.keys(hp).map(Number).sort((a,b)=>a-b);
+  stackedBars(b,hk,[{name:'сессий',data:hk.map(k=>hp[k]),color:COLORS[2]}],{stack:true});
+  // 8 subagents
+  b=chart('c-agents','Субагенты (Agent tool, окно)','692 вызова в 127 из 212 сессий; migration-reviewer 2, test-writer 4, prompt-auditor 4');
+  hbars(b,Object.entries(D.tools.agents).filter(([k])=>k!=='?').map(([k,v])=>({k,v,color:COLORS[1]})),{pl:140});
+  // 9 skills loads
+  b=chart('c-skills','Загрузки skills в транскриптах: главный агент vs субагенты','101 сессия транскриптов; главный агент 9 загрузок, субагенты 158');
+  const sk={};for(const [k,v] of Object.entries(D.tools.skill_loads_main_tr))sk[k]=(sk[k]||0)+v;for(const [k,v] of Object.entries(D.tools.skill_loads_sub_tr))sk[k]=(sk[k]||0)+v;
+  const skk=Object.keys(sk).sort((a,b)=>sk[b]-sk[a]);
+  stackedBars(b,skk,[{name:'главный агент',data:skk.map(k=>D.tools.skill_loads_main_tr[k]||0),color:COLORS[0]},{name:'субагенты',data:skk.map(k=>D.tools.skill_loads_sub_tr[k]||0),color:COLORS[2]}],{stack:true});
+  // 10 slash
+  b=chart('c-slash','Slash-команды за окно','Мертвы за всё время: '+D.tools.dead_commands_ever.join(', '));
+  hbars(b,Object.entries(D.tools.slash).map(([k,v])=>({k:'/'+k,v,color:COLORS[5]})),{pl:120});
+  // 11 skill risk by week
+  b=chart('c-risk','Риск-делегирование по неделям (постановки, work+personal)','analysis-first = «проведи анализ …»; architecture-decision; debug-root-cause; unfamiliar-code');
+  const rk=['analysis-first','architecture-decision','debug-root-cause','unfamiliar-code'];
+  stackedBars(b,W,rk.map((k,i)=>({name:k,data:W.map(w=>D.skill_risk.by_week[w][k]||0),color:COLORS[i]})),{stack:true,short:true,showTotal:true});
+  // 12 hypothesis baseline
+  b=chart('c-hyp','Baseline rule 08: постановки со своей гипотезой/вариантом','debug: '+D.hypothesis_share.debug.with_hypothesis+' из '+D.hypothesis_share.debug.n+'; design: '+D.hypothesis_share.design.with_hypothesis+' из '+D.hypothesis_share.design.n);
+  stackedBars(b,W,[{name:'debug без гипотезы',data:W.map(w=>D.hypothesis_share.by_week[w].debug_n-D.hypothesis_share.by_week[w].debug_h),color:COLORS[4]},{name:'debug с гипотезой',data:W.map(w=>D.hypothesis_share.by_week[w].debug_h),color:COLORS[3]},{name:'design без варианта',data:W.map(w=>D.hypothesis_share.by_week[w].design_n-D.hypothesis_share.by_week[w].design_h),color:COLORS[1]},{name:'design с вариантом',data:W.map(w=>D.hypothesis_share.by_week[w].design_h),color:COLORS[5]}],{stack:true,short:true});
+});
+</script>
+</body></html>

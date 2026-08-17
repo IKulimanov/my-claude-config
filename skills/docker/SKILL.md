@@ -1,6 +1,7 @@
 ---
 name: docker
-description: Use when working with Docker and Docker Compose — writing or reviewing Dockerfiles, compose configurations, local dev environments, container debugging, and image optimization.
+description: Use when working with Docker and Docker Compose — writing or reviewing Dockerfiles, compose configurations, local dev environments, container debugging, and image optimization. Triggers on Dockerfile, docker-compose, `docker build`, multi-stage builds, base image / layer size questions.
+paths: "**/Dockerfile,**/Dockerfile.*,**/*.dockerfile,**/docker-compose*.yml,**/docker-compose*.yaml,**/compose.yml,**/compose.yaml,**/.dockerignore"
 ---
 
 # Docker Skill

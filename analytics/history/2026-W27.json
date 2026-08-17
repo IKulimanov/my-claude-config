@@ -1,0 +1,271 @@
+{
+  "schema_version": 1,
+  "week": "2026-W27",
+  "range": {
+    "from": "2026-06-27T00:00:00Z",
+    "to": "2026-07-04T00:00:00Z"
+  },
+  "generated_at": "2026-07-11T13:11:51Z",
+  "sessions": {
+    "total": 95,
+    "by_project": {
+      "Lark": 18,
+      "business-corporate-selfcare": 1,
+      "business-m2m-gateway": 22,
+      "business-notification-analytics": 1,
+      "business-operator-detailing": 1,
+      "cockpit-testing-management": 2,
+      "ivankulimanov": 34,
+      "lark": 3,
+      "lifeOS": 5,
+      "lk-mobile-api": 1,
+      "teacher-pro": 7
+    }
+  },
+  "daily_sessions": {
+    "2026-06-27": 8,
+    "2026-06-28": 14,
+    "2026-06-29": 22,
+    "2026-06-30": 17,
+    "2026-07-01": 9,
+    "2026-07-02": 13,
+    "2026-07-03": 12
+  },
+  "active_days": 7,
+  "peak": {
+    "date": "2026-06-29",
+    "sessions": 22
+  },
+  "tokens": {
+    "input": 1140303,
+    "output": 5189411,
+    "cache_read": 547120417,
+    "cache_write": 27167549,
+    "turns": 3197,
+    "by_project_top": [
+      {
+        "project": "business-m2m-gateway",
+        "input": 609873,
+        "output": 2698604
+      },
+      {
+        "project": "Lark",
+        "input": 249620,
+        "output": 1396242
+      },
+      {
+        "project": "teacher-pro",
+        "input": 85588,
+        "output": 319533
+      },
+      {
+        "project": "campaign-reply-backfill",
+        "input": 41033,
+        "output": 355810
+      },
+      {
+        "project": "lifeOS",
+        "input": 55670,
+        "output": 271433
+      }
+    ]
+  },
+  "models": {
+    "claude-fable-5": 1,
+    "claude-opus-4-8": 32
+  },
+  "tools": {
+    "top": [
+      {
+        "name": "Read",
+        "count": 2058
+      },
+      {
+        "name": "Bash",
+        "count": 1643
+      },
+      {
+        "name": "Edit",
+        "count": 606
+      },
+      {
+        "name": "Write",
+        "count": 329
+      },
+      {
+        "name": "Agent",
+        "count": 119
+      },
+      {
+        "name": "WebFetch",
+        "count": 46
+      },
+      {
+        "name": "WebSearch",
+        "count": 40
+      },
+      {
+        "name": "AskUserQuestion",
+        "count": 30
+      },
+      {
+        "name": "ToolSearch",
+        "count": 18
+      },
+      {
+        "name": "ExitPlanMode",
+        "count": 10
+      },
+      {
+        "name": "Skill",
+        "count": 10
+      },
+      {
+        "name": "TaskUpdate",
+        "count": 7
+      },
+      {
+        "name": "TaskCreate",
+        "count": 6
+      },
+      {
+        "name": "mcp__context7__resolve-library-id",
+        "count": 5
+      },
+      {
+        "name": "DesignSync",
+        "count": 4
+      }
+    ],
+    "failures_total": 71,
+    "failures_by_tool": [
+      {
+        "name": "Read",
+        "count": 44
+      },
+      {
+        "name": "Bash",
+        "count": 25
+      },
+      {
+        "name": "mcp__context7__resolve-library-id",
+        "count": 2
+      }
+    ]
+  },
+  "skills": {
+    "top": [
+      {
+        "name": "java-service-convention",
+        "count": 6
+      },
+      {
+        "name": "claude-api",
+        "count": 2
+      },
+      {
+        "name": "test",
+        "count": 1
+      },
+      {
+        "name": "testing",
+        "count": 1
+      }
+    ]
+  },
+  "slash_commands": {
+    "top": [
+      {
+        "name": "/task",
+        "count": 30
+      },
+      {
+        "name": "/review",
+        "count": 3
+      },
+      {
+        "name": "/plan",
+        "count": 2
+      },
+      {
+        "name": "/review-mr",
+        "count": 2
+      },
+      {
+        "name": "/jira",
+        "count": 1
+      },
+      {
+        "name": "/test",
+        "count": 1
+      }
+    ]
+  },
+  "subagents": {
+    "top": [
+      {
+        "name": "general-purpose",
+        "count": 60
+      },
+      {
+        "name": "Explore",
+        "count": 24
+      },
+      {
+        "name": "Plan",
+        "count": 18
+      },
+      {
+        "name": "java-reviewer",
+        "count": 13
+      },
+      {
+        "name": "workflow-subagent",
+        "count": 11
+      },
+      {
+        "name": "test-writer",
+        "count": 3
+      },
+      {
+        "name": "prompt-auditor",
+        "count": 1
+      }
+    ]
+  },
+  "prompts": {
+    "count": 151,
+    "mean_length": 1100,
+    "median_length": 148,
+    "slash_pct": 25.83,
+    "cyrillic_pct": 89.4
+  },
+  "plan_mode": {
+    "exit_plan_mode_count": 10
+  },
+  "tdd": {
+    "test_edits": 124,
+    "prod_edits": 811,
+    "test_runs": 146
+  },
+  "blocks": {
+    "by_kind": {
+      "destructive": 5,
+      "secret": 2
+    },
+    "total": 7
+  },
+  "friction": {
+    "total": 6,
+    "by_keyword": {
+      "не так": 2,
+      "не то": 4
+    }
+  },
+  "enrichment": {
+    "ccusage": {
+      "available": false,
+      "reason": "disabled"
+    }
+  }
+}

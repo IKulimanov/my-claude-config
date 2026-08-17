@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "week": "2026-W23",
+  "range": {
+    "from": "2026-05-30T00:00:00Z",
+    "to": "2026-06-06T00:00:00Z"
+  },
+  "generated_at": "2026-07-11T08:25:11Z",
+  "sessions": {
+    "total": 52,
+    "by_project": {
+      "business-document-generation": 7,
+      "business-m2m-gateway": 1,
+      "business-notification-analytics": 1,
+      "digital-store-api": 1,
+      "gateway-platform": 11,
+      "ivankulimanov": 12,
+      "lifeOS": 12,
+      "teacher-pro": 7
+    }
+  },
+  "daily_sessions": {
+    "2026-05-30": 7,
+    "2026-05-31": 5,
+    "2026-06-01": 5,
+    "2026-06-02": 6,
+    "2026-06-03": 16,
+    "2026-06-04": 7,
+    "2026-06-05": 6
+  },
+  "active_days": 7,
+  "peak": {
+    "date": "2026-06-03",
+    "sessions": 16
+  },
+  "tokens": {
+    "input": 147841,
+    "output": 7539769,
+    "cache_read": 1161851809,
+    "cache_write": 28761192,
+    "turns": 3983,
+    "by_project_top": [
+      {
+        "project": "teacher-pro",
+        "input": 11446,
+        "output": 2906753
+      },
+      {
+        "project": "mvc-prototype",
+        "input": 651,
+        "output": 2324474
+      },
+      {
+        "project": "gateway-platform",
+        "input": 56303,
+        "output": 1588851
+      },
+      {
+        "project": "english-bot-test",
+        "input": 414,
+        "output": 253407
+      },
+      {
+        "project": "business-document-generation",
+        "input": 32660,
+        "output": 218753
+      }
+    ]
+  },
+  "models": {
+    "claude-opus-4-6": 2,
+    "claude-opus-4-7": 11,
+    "claude-opus-4-8": 3
+  },
+  "tools": {
+    "top": [
+      {
+        "name": "Bash",
+        "count": 998
+      },
+      {
+        "name": "Edit",
+        "count": 762
+      },
+      {
+        "name": "Read",
+        "count": 735
+      },
+      {
+        "name": "TaskUpdate",
+        "count": 255
+      },
+      {
+        "name": "Write",
+        "count": 183
+      },
+      {
+        "name": "TaskCreate",
+        "count": 134
+      },
+      {
+        "name": "AskUserQuestion",
+        "count": 16
+      },
+      {
+        "name": "Agent",
+        "count": 13
+      },
+      {
+        "name": "ToolSearch",
+        "count": 11
+      },
+      {
+        "name": "WebFetch",
+        "count": 8
+      },
+      {
+        "name": "WebSearch",
+        "count": 4
+      },
+      {
+        "name": "Skill",
+        "count": 1
+      },
+      {
+        "name": "TaskList",
+        "count": 1
+      },
+      {
+        "name": "mcp__Claude_in_Chrome__list_connected_browsers",
+        "count": 1
+      },
+      {
+        "name": "mcp__ccd_session__mark_chapter",
+        "count": 1
+      }
+    ],
+    "failures_total": 23,
+    "failures_by_tool": [
+      {
+        "name": "Bash",
+        "count": 19
+      },
+      {
+        "name": "Read",
+        "count": 4
+      }
+    ]
+  },
+  "skills": {
+    "top": [
+      {
+        "name": "(unknown)",
+        "count": 1
+      }
+    ]
+  },
+  "slash_commands": {
+    "top": [
+      {
+        "name": "/review",
+        "count": 8
+      },
+      {
+        "name": "/plan",
+        "count": 6
+      },
+      {
+        "name": "/onboard",
+        "count": 3
+      },
+      {
+        "name": "/jira",
+        "count": 2
+      },
+      {
+        "name": "/arch",
+        "count": 1
+      }
+    ]
+  },
+  "subagents": {
+    "top": [
+      {
+        "name": "general-purpose",
+        "count": 5
+      },
+      {
+        "name": "go-reviewer",
+        "count": 5
+      },
+      {
+        "name": "java-reviewer",
+        "count": 2
+      },
+      {
+        "name": "Explore",
+        "count": 1
+      }
+    ]
+  },
+  "prompts": {
+    "count": 174,
+    "mean_length": 407,
+    "median_length": 124,
+    "slash_pct": 11.49,
+    "cyrillic_pct": 85.63
+  },
+  "plan_mode": {
+    "exit_plan_mode_count": 0
+  },
+  "tdd": {
+    "test_edits": 130,
+    "prod_edits": 815,
+    "test_runs": 137
+  },
+  "blocks": {
+    "by_kind": {
+      "destructive": 3,
+      "secret": 2
+    },
+    "total": 5
+  },
+  "friction": {
+    "total": 4,
+    "by_keyword": {
+      "не так": 1,
+      "не работает": 2,
+      "не то": 1
+    }
+  },
+  "enrichment": {
+    "ccusage": {
+      "available": false,
+      "reason": "disabled"
+    }
+  }
+}

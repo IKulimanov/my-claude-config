@@ -30,7 +30,7 @@ SCAN_OUT=$(trufflehog filesystem --no-update --no-verification --json "$CWD" 2>/
 if [ -n "$SCAN_OUT" ]; then
   COUNT=$(echo "$SCAN_OUT" | wc -l | tr -d ' ')
   hook_deny "Blocked: trufflehog found $COUNT potential secret(s). Inspect and clean before push."
-  hook_log "blocks" "$(jq -n --arg ts "$(hook_now)" --arg sid "$(hook_field "$INPUT" '.session_id')" --arg cwd "$CWD" --arg n "$COUNT" '{ts:$ts, kind:"push-secrets", session:$sid, cwd:$cwd, found:($n|tonumber)}')"
+  hook_log "blocks" "$(jq -n --arg ts "$(hook_now)" --arg sid "$(hook_field "$INPUT" '.session_id')" --arg cwd "$CWD" --arg proj "$(hook_project_name "$CWD")" --arg n "$COUNT" '{ts:$ts, kind:"push-secrets", session:$sid, project:$proj, cwd:$cwd, found:($n|tonumber)}')"
   exit 0
 fi
 

@@ -1,6 +1,6 @@
 ---
 name: spring-best-practices
-description: Use for advanced Spring Boot development. Covers bean lifecycle, @ConfigurationProperties, Spring Security patterns, caching, async/scheduling, Spring Data best practices, global error handling, and API design beyond team conventions.
+description: Use for advanced Spring Boot development. Covers bean lifecycle, @ConfigurationProperties, Spring Security patterns, caching, async/scheduling, Spring Data best practices, global error handling, and API design beyond team conventions. Triggers on @Configuration/@Bean, @ConfigurationProperties, @Cacheable, @Async/@Scheduled, @Transactional, @ControllerAdvice, @RestControllerAdvice, SecurityFilterChain.
 ---
 
 # Spring Best Practices

@@ -46,7 +46,10 @@ For every directly-reviewed branch (Web, DevOps, other), apply the Output Rules 
 - Order findings by severity.
 - Include file and line references whenever possible.
 - Keep each finding concrete: what is wrong, why it matters, what can break.
-- Reference convention rule IDs when applicable (e.g. LANG-4, SPR-2).
+- Reference convention rule IDs when applicable — for work Java projects use the real codes from
+  `~/dev/my-claude-config/skills/java-service-convention/references/sonar-rules.md` (e.g. `LANG-410`,
+  `SPR-902`); do not invent codes. That file is internal team material — cite codes, don't paste its
+  prose or examples verbatim.
 - If there are no findings, state that explicitly and mention residual risks or test gaps.
 
 ## Severity Bands

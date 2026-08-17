@@ -36,8 +36,7 @@ same procedure in prose each run.
 Decision rule:
 - **deterministic + repeatable + no judgment → script.** Put it in `scripts/helpers/`, call it from
   the command. A script is fast, costs no tokens, is testable, and produces identical output every
-  run. Examples: scaffolding the `.ai/` skeleton (`ai-init.sh`), collecting a review diff
-  (`collect-diff.sh`), rendering markdown to PDF/HTML (`render-doc.sh`).
+  run. Example: scaffolding the `.ai/` skeleton (`ai-init.sh`).
 - **needs context or judgment → prompt.** Keep it in the command/agent body. Examples: planning,
   review reasoning, changelog selection, distilling a correction into a rule.
 
@@ -87,3 +86,31 @@ Conventions for `scripts/helpers/`:
 6. Hooks
 
 This order keeps token cost and maintenance burden under control.
+
+## Как добавить новый компонент (перенесено из README)
+
+### Skill
+Структура: `skills/<name>/SKILL.md` (+ `references/` для объёмных материалов).
+Процесс: убедись, что это skill (не rule/command) → узкое имя → короткое `description`
+для триггеринга → в SKILL.md только workflow и guardrails, детали в `references/` →
+проверь дубли с существующими skills. Не делай skill слишком широким, не копируй
+полдокументации, не тащи project-specific договорённости в общий skill.
+
+### Command
+Нужна, когда хочешь зафиксировать повторяемый workflow: файл в `commands/`, короткий
+`description`, когда применять, шаги, ожидаемый формат результата. Команда ведёт агента
+по процессу, а не является длинным куском текста.
+
+### Agent
+Только если реально нужна новая роль. Ответь заранее: зона ответственности; чем
+отличается от существующих; какие tools действительно нужны; где остановиться и
+спросить; как выглядит успешный результат. Если неясно — нужен command или skill.
+
+### Rule
+Правило подходит для `rules/`, только если: относится почти ко всем проектам, короткое,
+устойчиво во времени, не место ему в project CLAUDE.md и оно не оформляется как skill.
+
+### Порядок роста без хаоса
+1. CLAUDE.md конкретных проектов → 2. повторяемые знания в `skills/` → 3. устойчивые
+процессы в `commands/` → 4. узкие `agents/` → 5. в последнюю очередь `rules/`.
+Это защищает always-on слой от разрастания.

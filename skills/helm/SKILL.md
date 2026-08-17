@@ -1,6 +1,7 @@
 ---
 name: helm
-description: Use when creating or modifying Helm charts for Java/Spring services. Covers chart structure, values files, template helpers, multi-environment values, hooks, and release management.
+description: Use when creating or modifying Helm charts for Java/Spring services. Covers chart structure, values files, template helpers, multi-environment values, hooks, and release management. Triggers on Chart.yaml, values*.yaml, templates/*.tpl, `helm install/upgrade`, `{{ .Values }}` templating.
+paths: "**/Chart.yaml,**/values*.yaml,**/values*.yml,**/templates/*.yaml,**/templates/*.tpl,**/charts/**"
 ---
 
 # Helm

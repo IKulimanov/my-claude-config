@@ -428,9 +428,9 @@ Zero-install, кроссплатформенно, ценой uv-runtime.
 - `log-tool.sh` — PreToolUse/PostToolUse/PostToolUseFailure. Пишет в `~/.claude/logs/tools.jsonl` каждый tool call (инструмент, агент, краткий input, размер результата).
 - `log-session.sh` — SessionStart/SessionEnd → `sessions.jsonl`.
 - `log-subagent.sh` — SubagentStart/SubagentStop → `subagents.jsonl`. **Главный источник «какие агенты я использую».**
-- `log-prompt.sh` — UserPromptSubmit → `prompts.jsonl`. Метаданные промпта (длина, slash-команда, первые 120 символов).
-- `log-instructions.sh` — InstructionsLoaded → `instructions.jsonl`. **Главный источник «какие skills реально подхватились».**
-- `log-stop.sh` — Stop → `stops.jsonl`. Парсит transcript, считает input/output/cache токены, перечисляет использованные модели.
+- `log-prompt.sh` — UserPromptSubmit → `prompts.jsonl`. Метаданные промпта (длина, slash-команда, первые 500 символов в `head`).
+- `log-instructions.sh` — InstructionsLoaded → `instructions.jsonl`. Только загрузки CLAUDE.md/rules/памяти — **skills сюда НЕ попадают**. Источник «какие skills реально подхватились» — Skill-вызовы в `tools.jsonl` (`tool=="Skill"`, имя в `input.skill`), см. `analyze-usage.sh`.
+- `log-stop.sh` — Stop → `stops.jsonl`. Парсит transcript, считает input/output/cache токены, перечисляет использованные модели. ВАЖНО: Stop срабатывает после каждого ответа и каждый раз пересуммирует ВЕСЬ транскрипт — строки кумулятивны в рамках сессии. Сумма сессии = последняя строка (или дельта за период), а не сумма строк.
 
 **Общая библиотека:** `hooks/scripts/lib/common.sh` — `hook_log`, `hook_field`, `hook_deny`, `hook_now`, `hook_project_name`.
 
@@ -469,11 +469,11 @@ ls ~/.claude/logs/     # после нескольких сессий — фай
 - Нет `inject-jira.sh` (UserPromptSubmit) — будет в следующей итерации.
 - Нет `format-on-edit.sh` (PostToolUse / Edit) — нужен решительный выбор стека (project-level через `.claude/settings.json`, чтобы не ломать кросс-стек проекты).
 - Нет TTS (`say`/ElevenLabs) — пока только тихая нотификация macOS.
-- Нет интеграции в `init-project.sh` — хуки сейчас глобальные, не per-project.
+- Нет per-project установки — хуки глобальные (ставит `setup-global.sh` / `install-hooks.sh`).
 
 ---
 
-## 8. Источники
+## 10. Источники
 
 **Anthropic (читать обязательно):**
 - [Hooks reference](https://code.claude.com/docs/en/hooks) — все 29 событий

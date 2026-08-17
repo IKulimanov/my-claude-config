@@ -10,7 +10,7 @@
 - `rules/` — тонкий always-on слой. Только то, что специфично для рабочего процесса автора (Jira ID,
   staging-flow, Vault, TDD, язык). Чем меньше — тем лучше.
 - `commands/` — повторяемые сценарии (slash-команды).
-- `agents/` — субагенты (reviewers, test-writers, planner, prompt-auditor).
+- `agents/` — субагенты (reviewers, test-writers, migration-reviewer).
 - `skills/` — глубокие стек- и доменные знания. Грузятся по соответствию `description`, не «на всякий случай».
 - `templates/` — шаблоны `CLAUDE.md` и `settings.json` под профили (java/go/vue/web/docker).
 - `hooks/` — block-* (безопасность) и log-* (аналитика) скрипты.
@@ -42,7 +42,15 @@ scripts/setup-global.sh uninstall --apply # откатить
   `BEGIN/END my-claude-config (managed)`. **Не редактируй этот блок руками** — он перегенерируется.
   Менять правила нужно в `rules/*.md`, затем `install --apply`.
 - Хуки ставит `scripts/install-hooks.sh --write` (мержит в `~/.claude/settings.json` с бэкапом).
-- `scripts/analyze-usage.sh` — отчёт по tools/agents/skills/токенам из `~/.claude/logs/*.jsonl`.
+- `scripts/analyze-usage.sh` — быстрый отчёт по tools/agents/skills/токенам из `~/.claude/logs/*.jsonl`.
+  ВАЖНО: строки `stops.jsonl` кумулятивны в рамках сессии — токены считаются дельтами, не суммой строк.
+- `scripts/audit/` — месячный аудит (extract → report_phase1 → build_report): классификация промтов, итерации,
+  skills, baseline rule 08. Результаты и протокол — `docs/audit-2026-08/`. Запускать раз в месяц, 2 команды.
+- Недельная аналитика (`analytics/`): `scripts/collect-weekly.sh` (снапшоты Сб–Пт UTC, бэкфилл),
+  `scripts/render-dashboard.sh` (автономный дашборд), `scripts/run-weekly-review.sh`
+  (сбор → headless `claude -p` → дашборд → pathspec-коммит только `analytics/`),
+  `scripts/install-weekly-analytics.sh` (launchd, Сб 09:00 + страховка Вс/Пн). Общая
+  jq-логика — `scripts/lib/usage-lib.sh`. Детали: `analytics/README.md`.
 - Требуется `jq`.
 
 ## Конвенции авторинга
@@ -67,7 +75,7 @@ scripts/setup-global.sh uninstall --apply # откатить
 
 ## Язык (rule 07)
 
-- Чат: английский, простыми словами (A2).
+- Чат: русский, простыми словами (см. `rules/07`, `output-styles/personal.md`).
 - Комментарии в коде, commit-сообщения, документация (README, docs, этот файл): русский.
 - Идентификаторы, имена веток, ключи конфигов, имена команд/скиллов/агентов: английский.
 
@@ -80,8 +88,13 @@ scripts/setup-global.sh uninstall --apply # откатить
 
 ## Текущий фокус / TBD
 
-См. `docs/ROADMAP.md` и заметку памяти `project_config_state`. На 2026-06-23 в работе:
-- сократить `README.md` (~100 строк, остальное в `docs/`); [TBD: подтвердить]
-- завести Jira/Atlassian MCP; статуслайн; `skill-creator` meta-skill;
-- packaging как plugin для marketplace;
-- судьба `digest-routine.md`.
+На 2026-08-16 (после аудита `docs/audit-2026-08/`):
+- принцип: конфиг меняется только по данным месячного аудита (`scripts/audit/`), не по каталогу идей;
+  лимит — не больше 7 изменений за раз, удалять больше, чем добавлять;
+- сделано: rule 08 (гипотеза до ответа), rule 06 (случаи тестов — пользователь, код — Claude), анти-слоп в
+  rule 07, `/adr`, `/jira` под командный формат, `/reflect` под реальный поток, `/review-mr` без шума;
+  удалены 5 мёртвых команд, `prompt-auditor`, meta-skills, мёртвые helpers;
+- открыто (решает пользователь, файлы не в git): недельный пайплайн `analytics/` + `collect-weekly/run-weekly-review/
+  install-weekly-analytics/render-dashboard` (остановлен на W28, launchd не применён) — удалить или оставить;
+  `digest-routine.md`; `docs/AI_USAGE_AUDIT_2026-07.md` (заменён августовским);
+- НЕ в работе (осознанно): Jira MCP, skill-creator, plugin packaging — тюнинг инструментов без запроса из данных.

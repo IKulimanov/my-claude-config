@@ -3,7 +3,7 @@
 > Создано 2026-05-16 на основе ревью и исследования топ-репозиториев.
 > Это рабочий чек-лист. Отмечай галочками по мере выполнения.
 >
-> 📖 Парный документ: **[`docs/RESEARCH_FINDINGS.md`](RESEARCH_FINDINGS.md)** — каталог идей из публичных репо с приоритетами.
+> Каталог идей из публичных репо (RESEARCH_FINDINGS) удалён 2026-08-16: см. `docs/audit-2026-08/` — конфиг меняется по данным, не по каталогу идей.
 
 ## Контекст
 
@@ -14,11 +14,25 @@
 ## ✅ Уже сделано (Quick Wins, 2026-05-16)
 
 - [x] `rules/01..05` переписаны: убраны дубли системного промпта Claude Code; оставлены только специфичные правила (Jira ID, staging-flow, Vault, командная конвенция).
-- [x] Все 11 агентов: убраны несуществующие frontmatter-поля (`skills:`, `maxTurns`), фронтматтер канонический (`name`, `description`, `tools`, `model`).
+- [x] Агенты: убрано несуществующее поле `maxTurns`. ВАЖНО: поле `skills:` ОФИЦИАЛЬНО
+  поддерживается и возвращено 2026-06-19 (канон: `name`, `description`, `tools`, `model`, `skills`
+  — см. CLAUDE.md «Конвенции авторинга»). Старая формулировка «skills: не существует» — ошибка.
 - [x] Все 14 команд: добавлены `argument-hint` и `allowed-tools`. Убраны изобретённые `effort:`, `context: fork`.
 - [x] `templates/settings.*.json.template`: убраны `Bash(sed *)` (обходит Edit/Write) и `Bash(cat *)` (запрещён системным промптом).
 - [x] Разведены `web-app` ↔ `vue-frontend`: в SKILL.md и web-reviewer явно прописано «NOT for Vue/React/SPA».
 - [x] Обновлена память проекта (`memory/project_config_state.md`).
+
+## ✅ Аналитика v1 — недельный пайплайн (2026-07-11)
+
+- [x] `scripts/collect-weekly.sh` — недельные снапшоты (Сб–Пт UTC) в `analytics/history/`,
+  бэкфилл с 2026-W21; общая jq-логика в `scripts/lib/usage-lib.sh`.
+- [x] `scripts/render-dashboard.sh` + `templates/dashboard.html.template` — автономный дашборд.
+- [x] `analytics/weekly-review-prompt.md` — промт недельного анализа (5 ролей, анти-галлюцинация).
+- [x] `scripts/run-weekly-review.sh` — оркестратор: сбор → headless `claude -p` → дашборд → коммит.
+- [x] `scripts/install-weekly-analytics.sh` — launchd-джоб (Сб 09:00 + страховка Вс/Пн).
+- [x] Фикс: `blocks.jsonl` теперь пишет `project`; токены в `analyze-usage.sh` считаются
+  дельтами кумулятивных стопов (раньше завышались на порядки).
+- [ ] Ротация `tools.jsonl` (28+ MiB и растёт) — по мере надобности.
 
 ## ✅ Hooks v1 — реализованы (2026-05-17)
 
@@ -93,16 +107,16 @@ cd ~/dev/my-claude-config
 - Логика фильтрации внутри shell-скрипта, который читает JSON из stdin.
 - `exit 0` — продолжить, `exit 2` — заблокировать (текст stderr увидит Claude), любой другой код — warning.
 
-**План:**
+**План (выполнен 2026-05-17, кроме inject-jira/lint-on-edit — см. HOOKS_GUIDE §9):**
 
-- [ ] Создать `hooks/scripts/` с исполняемыми скриптами.
-- [ ] Переписать `hooks/settings.json` под правильный синтаксис matcher (см. шаблон ниже).
-- [ ] Добавить `block-destructive.sh` (PreToolUse / Bash).
-- [ ] Добавить `block-secrets.sh` (PreToolUse / Edit|Write — блок `.env`, `id_rsa`, `*.pem`).
+- [x] Создать `hooks/scripts/` с исполняемыми скриптами.
+- [x] Переписать `hooks/settings.json` под правильный синтаксис matcher (см. шаблон ниже).
+- [x] Добавить `block-destructive.sh` (PreToolUse / Bash).
+- [x] Добавить `block-secrets.sh` (PreToolUse / Edit|Write — блок `.env`, `id_rsa`, `*.pem`).
 - [ ] Добавить `inject-jira.sh` (UserPromptSubmit — извлечь Jira ID из ветки и инжектить контекст).
 - [ ] Опционально: `lint-on-edit.sh` (PostToolUse — `mvn compile` для Java, `go vet` для Go).
-- [ ] Опционально: `notify-stop.sh` (Stop — звуковое/desktop уведомление о завершении).
-- [ ] Проверить вручную: попытаться сделать `git push -f` — должно блокироваться.
+- [x] Опционально: `notify-stop.sh` (Stop — звуковое/desktop уведомление о завершении).
+- [x] Проверить вручную: попытаться сделать `git push -f` — должно блокироваться.
 
 **Шаблон `hooks/settings.json`:**
 ```json
@@ -194,13 +208,8 @@ fi
 - **`ccstatusline`** — https://github.com/sirmalloc/ccstatusline (фокус на 5h/7d лимитах)
 - **`claude-powerline`** — https://github.com/Owloops/claude-powerline (powerline-стиль)
 
-**План:**
-- [ ] Установить один из двух.
-- [ ] Добавить в `~/.claude/settings.json`:
-  ```json
-  { "statusLine": { "type": "command", "command": "npx ccstatusline" } }
-  ```
-- [ ] Документация: https://docs.claude.com/en/docs/claude-code/statusline
+**Выполнено иначе (2026-06): собственный `statusline/statusline.sh`, ставится
+`setup-global.sh` (компонент `statusline`). Сторонние ccstatusline/claude-powerline не нужны.**
 
 ---
 
@@ -259,7 +268,7 @@ fi
 
 ### 8. Packaging как plugin
 
-**Зачем:** установка на новой машине = `/plugin install`, а не `init-project.sh`. Версионирование через git tags.
+**Зачем:** установка на новой машине = `/plugin install`, а не `setup-global.sh`. Версионирование через git tags.
 
 - [ ] Прочитать https://docs.claude.com/en/docs/claude-code/plugins и https://docs.claude.com/en/docs/claude-code/plugin-marketplaces
 - [ ] Создать `.claude-plugin/plugin.json`:
@@ -381,7 +390,7 @@ fi
 - Чек **Anthropic Changelog** (https://docs.claude.com/en/docs/claude-code/changelog) — обновления частые, поля frontmatter добавляются.
 - Чек **Anthropic engineering blog** на новые техники.
 - Чек **awesome-claude-code** на новые подборки.
-- Раз в месяц — `/prompt-audit` по своему репо для отслеживания drift.
+- Раз в месяц — `python3 scripts/audit/extract.py && python3 scripts/audit/report_phase1.py` (мёртвые команды/агенты/skills видны в `data/tables.md`).
 
 ---
 

@@ -33,7 +33,11 @@ fail() { echo "FAIL: $1" >&2; exit 1; }
 
 # --- минимальные прочие файлы ---
 echo '{"ts":"2026-06-23T10:00:00Z","event":"SessionStart","project":"p"}' > "$TMP/sessions.jsonl"
-: > "$TMP/stops.jsonl"
+# Стопы КУМУЛЯТИВНЫ в рамках сессии: сумма сессии = последняя строка, а не сумма строк.
+{
+  echo '{"ts":"2026-06-23T10:00:00Z","session":"s1","project":"p","input_tokens":10,"output_tokens":20,"cache_read":0,"cache_write":0,"turns":2}'
+  echo '{"ts":"2026-06-23T11:00:00Z","session":"s1","project":"p","input_tokens":30,"output_tokens":50,"cache_read":0,"cache_write":0,"turns":5}'
+} > "$TMP/stops.jsonl"
 
 out=$(CLAUDE_LOG_DIR="$TMP" "$ANALYZE" 2>/dev/null) || fail "report aborted (exit $?)"
 
@@ -48,7 +52,12 @@ printf '%s\n' "$out" | grep -qE '[0-9]+  at$' && fail "slash: noise 'at' leaked"
 printf '%s\n' "$out" | grep -q '<td'              && fail "slash: noise '<td' leaked"
 printf '%s\n' "$out" | grep -q '/Users/'          && fail "slash: path leaked as command"
 
-# 3. TDD-сигнал: 2 правки тестов, 1 правка прод, 2 запуска тестов.
+# 3. Токены: кумулятивные стопы не пересуммируются — сессия = последняя строка.
+printf '%s\n' "$out" | grep -qE 'input:[[:space:]]+30 tokens'  || fail "tokens: input != 30 (кумулятив пересуммирован?)"
+printf '%s\n' "$out" | grep -qE 'output:[[:space:]]+50 tokens' || fail "tokens: output != 50"
+printf '%s\n' "$out" | grep -qE 'sessions analyzed:[[:space:]]+1' || fail "tokens: sessions != 1"
+
+# 4. TDD-сигнал: 2 правки тестов, 1 правка прод, 2 запуска тестов.
 printf '%s\n' "$out" | grep -qE 'тест-файл[а-я]*:[[:space:]]+2'  || fail "tdd: test edits != 2"
 printf '%s\n' "$out" | grep -qE 'прод-файл[а-я]*:[[:space:]]+1'  || fail "tdd: prod edits != 1"
 printf '%s\n' "$out" | grep -qE 'запуск[а-я]* тест[а-я]*:[[:space:]]+2' || fail "tdd: test runs != 2"

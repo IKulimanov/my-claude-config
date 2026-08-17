@@ -18,7 +18,8 @@ PATTERN='(\brm[[:space:]]+([^|;&]*[[:space:]])?-[a-zA-Z]*r[a-zA-Z]*f|\brm[[:spac
 
 if echo "$CMD" | grep -qiE "$PATTERN"; then
   hook_deny "Blocked: destructive pattern detected. Run manually if intended. Command: $(echo "$CMD" | head -c 200)"
-  hook_log "blocks" "$(jq -n --arg ts "$(hook_now)" --arg cmd "$CMD" --arg sid "$(hook_field "$INPUT" '.session_id')" --arg cwd "$(hook_field "$INPUT" '.cwd')" '{ts:$ts, kind:"destructive", session:$sid, cwd:$cwd, command:$cmd}')"
+  CWD=$(hook_field "$INPUT" '.cwd')
+  hook_log "blocks" "$(jq -n --arg ts "$(hook_now)" --arg cmd "$CMD" --arg sid "$(hook_field "$INPUT" '.session_id')" --arg cwd "$CWD" --arg proj "$(hook_project_name "$CWD")" '{ts:$ts, kind:"destructive", session:$sid, project:$proj, cwd:$cwd, command:$cmd}')"
   exit 0
 fi
 
