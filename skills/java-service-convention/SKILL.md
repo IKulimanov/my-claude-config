@@ -44,6 +44,17 @@ When canonical conflicts with the summary in `references/` of this skill — **c
 `sonar-rules.md` is derived directly from the enforced rules and is safe to rely on; the other
 `references/*.md` are historical summaries (see below).
 
+## Step 1b — Scope: convention applies to code you touch (v1.2.0, work projects)
+
+Convention `index.md` → «Применение конвенции при внесении изменений в код»:
+
+- If you modify an existing method, **that method must be brought into line with the convention in the
+  same change**. The last person to touch it owns its compliance.
+- Cascading counts: changes introduced *by* the alignment are themselves subject to the convention.
+- Untouched code stays untouched — do not reformat whole files or unrelated methods.
+- If alignment would require significant work (changing an interface contract, edits across several
+  classes), do **not** do it silently — tell the user it needs sign-off from the team lead.
+
 ## Step 2 — Apply
 
 - Read the local project `CLAUDE.md` for service boundaries and local exceptions.
@@ -60,7 +71,14 @@ These are valid for both work and personal projects. They are NOT a substitute f
 - Prefer domain exceptions over generic runtime exceptions.
 - Do not log secrets, OTP, passwords, keys — mask to first/last char.
 - Organize packages by domain, not by technical type.
-- Use JSpecify `@NullMarked` at package level for null-safety.
+- Nullability (LANG-223): JSpecify only for static analysis — `@NullMarked` at package level,
+  `@Nullable` for exceptions, `@NonNull` where genuinely needed. `@NotNull` **only** from
+  `jakarta.validation.constraints`, and only at a Bean Validation boundary — never `lombok.NonNull`
+  or `org.jetbrains.annotations.NotNull`.
+- Field access (LANG-115): read class fields through `this`. Exception — DI collaborators
+  (`@Autowired`/`@Inject`/`@Resource`/`@Named`, constructor-injected collaborators, `@RequiredArgsConstructor`
+  beans). Plain value fields (`Integer`, `String`, `BigDecimal`, …) still need `this`, even when they
+  come through the constructor.
 - Use `EnumSet`/`EnumMap` for enum collections.
 
 ## What lives where

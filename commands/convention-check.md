@@ -22,6 +22,10 @@ not on the work machine), fall back to the built-in list below.
 -Dsonar.qualitygate.wait=true`).** Never claim the code "passes convention" — say it passes the
 local pre-check; CI Sonar decides.
 
+**Scope (convention v1.2.0):** check every method the diff touches, including old code that was only
+partly edited — its compliance belongs to whoever edited it last. Do not report methods the diff
+did not touch.
+
 ## What Is Checked (fallback list for personal projects / when checklist is absent)
 
 ### Code Style (LANG)
@@ -32,7 +36,8 @@ local pre-check; CI Sonar decides.
 - [ ] Method size (<=30 lines, <=3 params)
 - [ ] Nesting depth (<=3 levels)
 - [ ] No magic numbers/strings
-- [ ] Nullability annotations (JSpecify)
+- [ ] Nullability: JSpecify only for static analysis; `@NotNull` only from `jakarta.validation.constraints` (LANG-223)
+- [ ] Class fields read through `this` — exception: DI collaborators, not plain value fields (LANG-115)
 
 ### Spring (SPR)
 - [ ] Constructor injection via `@RequiredArgsConstructor`

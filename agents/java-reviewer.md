@@ -44,6 +44,10 @@ Convention Quick Reference below instead. This is a pre-filter — the authorita
 local pre-check. `sonar-rules.md` is internal team material — cite rule codes, do not paste its
 prose or examples verbatim into shared outputs.
 
+**Scope of the check (convention v1.2.0):** every method the diff *touches* must comply — legacy code
+is no excuse when the author edited it. Flag a touched method that still violates the convention.
+Untouched methods are out of scope: do not ask for reformatting of code the diff did not change.
+
 ## Convention Quick Reference
 
 The list below is a fallback for personal projects / when the checklist above is unavailable:
