@@ -6,71 +6,73 @@ allowed-tools: Read, Edit, Write, Grep, Glob, Bash, Agent
 
 # Test
 
-Write tests for the specified class, method, or module.
+Написать тесты для указанного класса, метода или модуля.
 
-## Workflow
+## Порядок работы
 
-### Step 1 — Detect stack and load context
+### Шаг 1 — Определить стек и загрузить контекст
 
-1. Read the local `CLAUDE.md`.
-2. Detect the stack and delegate:
-   - **Java/Spring**: load `testing` skill → delegate to `test-writer` agent.
-   - **Go**: load `go-best-practices/references/testing.md` → delegate to `go-test-writer` agent.
-   - **Vue/JS**: load `vue-frontend/references/testing-vue.md` → delegate to `vue-test-writer` agent.
+1. Прочитай локальный `CLAUDE.md`.
+2. Определи стек и делегируй:
+   - **Java/Spring**: загрузи скил `testing` → делегируй агенту `test-writer`.
+   - **Go**: загрузи `go-best-practices/references/testing.md` → делегируй агенту `go-test-writer`.
+   - **Vue/JS**: загрузи `vue-frontend/references/testing-vue.md` → делегируй агенту `vue-test-writer`.
 
-### Step 2 — Analyze the target
+### Шаг 2 — Разобрать цель
 
-1. Read the class/method/module under test.
-2. Inspect existing tests to match naming convention and style.
-3. Identify the correct test layer:
+1. Прочитай класс/метод/модуль, который покрываешь.
+2. Посмотри существующие тесты, чтобы совпасть с их именованием и стилем.
+3. Выбери правильный уровень теста:
 
 **Java:**
-| Target | Layer |
+| Что покрываем | Уровень |
 |---|---|
-| Pure logic, no Spring | Unit: JUnit 5 + Mockito |
-| Controller + serialization | `@WebMvcTest` |
-| Repository + SQL | `@DataJpaTest` + Testcontainers |
-| Kafka consumer/producer | `@EmbeddedKafka` or Testcontainers |
-| Cross-layer wiring | `@SpringBootTest` |
+| Чистая логика, без Spring | Unit: JUnit 5 + Mockito |
+| Контроллер + сериализация | `@WebMvcTest` |
+| Репозиторий + SQL | `@DataJpaTest` + Testcontainers |
+| Kafka consumer/producer | `@EmbeddedKafka` или Testcontainers |
+| Связка нескольких слоёв | `@SpringBootTest` |
 
 **Vue:**
-| Target | Layer |
+| Что покрываем | Уровень |
 |---|---|
-| Composable / utility | Vitest unit test |
-| Component rendering + events | Vue Test Utils + mount |
-| Store logic | Pinia testing utils |
+| Composable / утилита | Unit-тест на Vitest |
+| Рендер компонента + события | Vue Test Utils + mount |
+| Логика стора | Pinia testing utils |
 
 **Go:**
-| Target | Layer |
+| Что покрываем | Уровень |
 |---|---|
-| Pure function | Table-driven unit test |
-| HTTP handler | httptest |
-| DB interaction | Testcontainers |
+| Чистая функция | Табличный unit-тест |
+| HTTP-обработчик | httptest |
+| Работа с БД | Testcontainers |
 
-### Step 3 — Write tests
+### Шаг 3 — Написать тесты
 
-1. Cover: happy path, edge cases, failure cases.
-2. Follow team naming: `methodName_shouldBehavior_whenCondition`.
-3. Use strong assertions (AssertJ for Java, expect for JS, testify for Go).
-4. One test = one clear business contract.
-5. Apply the 7-point test checklist (see `testing` skill).
+1. Покрой: happy path, краевые случаи, случаи ошибок.
+2. Соблюдай командное именование: `methodName_shouldBehavior_whenCondition`.
+3. Используй сильные проверки (AssertJ для Java, expect для JS, testify для Go).
+4. Один тест — один понятный бизнес-контракт.
+5. Чек-лист из 7 пунктов («Team Test Standard») применяет агент `test-writer` — он описан в самом
+   агенте, а не в скиле `testing`. Для других стеков это профильный test-writer: `go-test-writer`,
+   `vue-test-writer`.
 
-### Step 4 — Report
+### Шаг 4 — Отчитаться
 
 ```text
-## Tests Written: <target>
+## Написаны тесты: <цель>
 
-### Layer
-<chosen layer and why>
+### Уровень
+<выбранный уровень и почему>
 
-### Coverage
-- <scenario 1>
-- <scenario 2>
+### Покрытие
+- <сценарий 1>
+- <сценарий 2>
 - ...
 
-### Gaps
-- <what was intentionally left out and why>
+### Что не покрыто
+- <что осознанно оставлено и почему>
 
-### Validation
-- <test command> — <result>
+### Проверка
+- <команда запуска тестов> — <результат>
 ```

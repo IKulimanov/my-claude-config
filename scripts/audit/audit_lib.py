@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import os
 import re
 from zoneinfo import ZoneInfo
 
@@ -58,13 +59,18 @@ def in_window(d: dt.datetime) -> bool:
     return AUDIT_START <= d < AUDIT_END
 
 
+# Каталоги projects/ в ~/.claude называются по cwd, где "/" заменён на "-".
+# Префикс домашнего каталога вычисляем, а не зашиваем: на разных машинах имя пользователя разное.
+HOME_PREFIX = os.path.expanduser("~").replace("/", "-") + "-"
+
+
 def project_short(path_or_name: str) -> str:
     """Короткое имя проекта из cwd или из имени директории projects/."""
     if not path_or_name:
         return "?"
     p = path_or_name
-    if p.startswith("-Users-ivankulimanov-"):
-        p = p[len("-Users-ivankulimanov-"):]
+    if p.startswith(HOME_PREFIX):
+        p = p[len(HOME_PREFIX):]
         if p.startswith("docs-lifeOS"):
             return "lifeOS"
         for pref in ("dev-work-java-", "dev-work-js-", "dev-personal-", "dev-work-", "dev-"):

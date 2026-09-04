@@ -6,13 +6,12 @@
 
 ## Core / meta
 
-te'ов.
 - `repo-onboarding` — быстрая карта незнакомого репозитория.
 
 ## Java / Spring
 
 - `java-service-convention` — конвенция Maven + Spring сервисов. Для рабочих проектов
-  перенаправляет на каноническую конвенцию `~/dev/work/java/convention-java/docs/`.
+  в профиле work перенаправляет на каноническую конвенцию (путь — в `~/.claude/workspace.md`).
 - `spring-best-practices` — Security, кэш, async/scheduling, `@ConfigurationProperties`,
   ProblemDetail, Actuator/Micrometer, Spring Data.
 - `java-patterns` — SOLID, GOF, functional Java, рефакторинг к чистым абстракциям.
@@ -24,8 +23,7 @@ te'ов.
 ## Go
 
 - `go-best-practices` — основной Go-скил: структура проекта, error handling, concurrency,
-  интерфейсы, тесты, производительность (production и review).
-- `go-service` — лёгкий профиль для домашних Go-сервисов (быстрый старт).
+  интерфейсы, тесты, производительность (production и review). Грузится сам на `**/*.go`.
 
 ## Frontend
 

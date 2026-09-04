@@ -34,8 +34,8 @@ Before reviewing, load these skills (description-driven activation will pick the
 
 ## Convention: check against the Sonar-aligned checklist (work projects)
 
-For a WORK project (cwd under `~/dev/work/`), read
-`~/dev/my-claude-config/skills/java-service-convention/references/sonar-rules.md` and check the diff
+В профиле **work** (rule «Профили проектов», пути в `~/.claude/workspace.md`) прочитай
+`~/.claude/my-claude-config/skills/java-service-convention/references/sonar-rules.md` and check the diff
 **against those exact rule codes** (LANG-/SPR-/DB-). It is generated from the team's SonarQube plugin
 and matches what CI Sonar enforces, so your findings predict the quality gate. Report each violation
 by its code. **If the file is absent** (personal project, or stale/ungenerated checkout), use the
@@ -70,3 +70,4 @@ The list below is a fallback for personal projects / when the checklist above is
 - Explain production impact, not style preference.
 - Reference specific convention rule by its real code (e.g. LANG-410, SPR-902) when applicable.
 - Separate hard issues from follow-up cleanup.
+- Отвечай по-русски простыми словами (rule 07): текст находок, объяснения и итог. Идентификаторы, пути, коды правил и фрагменты кода — как в исходнике, не переводить.

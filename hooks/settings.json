@@ -1,6 +1,33 @@
 {
-  "_comment": "Hook config for personal claude-config. Replace HOOKS_DIR via sed before installing, or set CLAUDE_HOOKS_DIR=/abs/path/to/my-claude-config/hooks/scripts in env. Logs land in $HOME/.claude/logs/*.jsonl.",
-  "_install": "См. docs/HOOKS_GUIDE.md → 'Установка'. Кратко: sed -e 's|HOOKS_DIR|/Users/ivankulimanov/dev/my-claude-config/hooks/scripts|g' hooks/settings.json > ~/.claude/settings.json (merge с существующим).",
+  "_comment": "Базовые настройки, которые ставит install-hooks.sh: hooks + permissions + cleanupPeriodDays. Плейсхолдер HOOKS_DIR подменяется на абсолютный путь при установке. Логи пишутся в $HOME/.claude/logs/*.jsonl.",
+  "_install": "См. docs/HOOKS_GUIDE.md → 'Установка'. Обычный путь: scripts/setup-global.sh install --apply (он вызывает scripts/install-hooks.sh --write, который сам подставляет пути и мержит в ~/.claude/settings.json с бэкапом).",
+
+  "cleanupPeriodDays": 90,
+
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(ls:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(**/.env)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/credentials)",
+      "Read(~/.kube/config)",
+      "Read(~/.gnupg/**)",
+      "Read(**/*.pem)",
+      "Read(**/id_rsa)",
+      "Read(**/id_ed25519)"
+    ]
+  },
 
   "hooks": {
     "PreToolUse": [
@@ -12,7 +39,7 @@
         ]
       },
       {
-        "matcher": "Read|Edit|Write|MultiEdit|Bash",
+        "matcher": "Read|Edit|Write|Bash",
         "hooks": [
           { "type": "command", "command": "HOOKS_DIR/block-secrets.sh", "timeout": 5 }
         ]
@@ -20,7 +47,7 @@
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "HOOKS_DIR/log-tool.sh pre", "timeout": 5 }
+          { "type": "command", "command": "HOOKS_DIR/log-tool.sh pre", "timeout": 5, "async": true }
         ]
       }
     ],
@@ -29,7 +56,7 @@
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "HOOKS_DIR/log-tool.sh post", "timeout": 5 }
+          { "type": "command", "command": "HOOKS_DIR/log-tool.sh post", "timeout": 5, "async": true }
         ]
       }
     ],
@@ -38,7 +65,7 @@
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "HOOKS_DIR/log-tool.sh fail", "timeout": 5 }
+          { "type": "command", "command": "HOOKS_DIR/log-tool.sh fail", "timeout": 5, "async": true }
         ]
       }
     ],
@@ -47,7 +74,7 @@
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "HOOKS_DIR/log-prompt.sh", "timeout": 5 }
+          { "type": "command", "command": "HOOKS_DIR/log-prompt.sh", "timeout": 5, "async": true }
         ]
       }
     ],
@@ -56,7 +83,7 @@
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "HOOKS_DIR/log-session.sh", "timeout": 5 }
+          { "type": "command", "command": "HOOKS_DIR/log-session.sh", "timeout": 5, "async": true }
         ]
       }
     ],
@@ -65,7 +92,7 @@
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "HOOKS_DIR/log-session.sh", "timeout": 5 }
+          { "type": "command", "command": "HOOKS_DIR/log-session.sh", "timeout": 5, "async": true }
         ]
       }
     ],
@@ -74,7 +101,7 @@
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "HOOKS_DIR/log-subagent.sh", "timeout": 5 }
+          { "type": "command", "command": "HOOKS_DIR/log-subagent.sh", "timeout": 5, "async": true }
         ]
       }
     ],
@@ -83,7 +110,7 @@
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "HOOKS_DIR/log-subagent.sh", "timeout": 5 }
+          { "type": "command", "command": "HOOKS_DIR/log-subagent.sh", "timeout": 5, "async": true }
         ]
       }
     ],
@@ -92,7 +119,7 @@
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "HOOKS_DIR/log-instructions.sh", "timeout": 5 }
+          { "type": "command", "command": "HOOKS_DIR/log-instructions.sh", "timeout": 5, "async": true }
         ]
       }
     ],
@@ -101,8 +128,8 @@
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "HOOKS_DIR/notify-stop.sh", "timeout": 5 },
-          { "type": "command", "command": "HOOKS_DIR/log-stop.sh", "timeout": 15 }
+          { "type": "command", "command": "HOOKS_DIR/notify-stop.sh", "timeout": 5, "async": true },
+          { "type": "command", "command": "HOOKS_DIR/log-stop.sh", "timeout": 15, "async": true }
         ]
       }
     ]

@@ -13,8 +13,16 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PLUGIN="/Users/ivankulimanov/dev/work/java/convention-sonar-rules-plugin"
 OUT="$ROOT/skills/java-service-convention/references/sonar-rules.md"
+
+# Путь к репозиторию плагина берём из workspace.conf этой машины; иначе нужен флаг --plugin.
+PLUGIN=""
+if [ -f "$ROOT/workspace.conf" ]; then
+  CONVENTION_PLUGIN=""
+  # shellcheck source=/dev/null
+  . "$ROOT/workspace.conf"
+  PLUGIN="$CONVENTION_PLUGIN"
+fi
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -24,6 +32,12 @@ while [ $# -gt 0 ]; do
     *) echo "Неизвестный аргумент: $1" >&2; exit 2 ;;
   esac
 done
+
+if [ -z "$PLUGIN" ]; then
+  echo "Не задан путь к репозиторию Sonar-плагина конвенции." >&2
+  echo "Пропиши CONVENTION_PLUGIN в workspace.conf или передай --plugin DIR." >&2
+  exit 2
+fi
 
 RULES_DIR="$PLUGIN/src/main/resources/org/sonar/l10n/java/rules/nurtelecomconventionjavarules"
 if [ ! -d "$RULES_DIR" ]; then

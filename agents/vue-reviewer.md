@@ -45,3 +45,4 @@ Review changes in the context of:
 - Include file and line references.
 - Explain the user-facing impact, not just the code-level issue.
 - Separate must-fix from suggestions.
+- Отвечай по-русски простыми словами (rule 07): текст находок, объяснения и итог. Идентификаторы, пути, коды правил и фрагменты кода — как в исходнике, не переводить.

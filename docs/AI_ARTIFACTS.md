@@ -54,7 +54,7 @@
 | `/feature` | `plan.md` фичи (лёгкий вариант) |
 | `/plan` | `plan.md` |
 | `/review` | `review.md` |
-| `/review-mr` | копию ревью (основной файл по-прежнему уходит в `~/docs/work/reviews/...`) |
+| `/review-mr` | копию ревью (основной файл уходит в каталог ревью из `~/.claude/workspace.md`) |
 | `/task` | тяжёлый вариант: `about.md`, `<letter>/{context,plan,review}.md`, `logs/` |
 
 ## Почему git игнорирует `.ai/`

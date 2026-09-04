@@ -6,114 +6,116 @@ allowed-tools: Read, Grep, Glob, Bash
 
 # Architecture Design
 
-Use this command when designing new architecture or reviewing an existing design decision. Works at two scopes:
-- **Local** — a single class, module, or service layer
-- **System** — a full microservice or multi-service landscape
+Команда для проектирования новой архитектуры или разбора уже принятого решения. Два масштаба:
+- **local** — один класс, модуль или слой сервиса;
+- **system** — целый микросервис или ландшафт из нескольких сервисов.
 
-## Workflow
+## Порядок работы
 
-### Step 1 — Establish context
+### Шаг 1 — Собрать контекст
 
-1. Read the local `CLAUDE.md` to understand the service and its constraints.
-2. **Project type:** if cwd is under `/Users/ivankulimanov/dev/work/` → work project. Load `java-service-convention` skill for Java work, which directs to the canonical convention at `/Users/ivankulimanov/dev/work/java/convention-java/docs/`. Design must align with canonical, not generic best practices.
-3. Ask if unclear: what is the scope (single component vs. full system)?
-4. Identify the primary driver: correctness, scalability, maintainability, team fit, or migration path.
+1. Прочитай локальный `CLAUDE.md`, чтобы понять сервис и его ограничения.
+2. **Профиль проекта:** определи по rule «Профили проектов» — пути в `~/.claude/workspace.md`. В профиле **work** для Java загрузи скил `java-service-convention`; он ведёт к канонической конвенции, путь к ней указан в `~/.claude/workspace.md`. Проектируй под канон, а не под общие best practices. В профиле **personal** командная конвенция не применяется — опирайся на здравые практики стека.
+3. Если неясно — спроси про масштаб: один компонент или вся система?
+4. Определи главный критерий: корректность, масштабируемость, поддерживаемость, посильность для команды или путь миграции.
 
-### Step 2 — Load relevant skills
+### Шаг 2 — Загрузить нужные скилы
 
-Load skills based on the detected stack:
+Скилы выбираются по определённому стеку:
 
 **Java/Spring:**
 - `java-patterns` — SOLID, GOF, Clean Code
-- `spring-best-practices` — if Spring beans, configuration, or security are involved
-- `jpa-db-review` — if the design involves data access or schema
-- `integration-patterns` — if the design involves Kafka, REST integrations, or async flows
+- `spring-best-practices` — если задействованы бины Spring, конфигурация или security
+- `jpa-db-review` — если проект затрагивает доступ к данным или схему
+- `integration-patterns` — если есть Kafka, REST-интеграции или асинхронные потоки
 
 **Go:**
-- `go-best-practices` — project structure, interfaces, dependency direction
-- `go-best-practices/references/concurrency.md` — if concurrency or async flows are in scope
-- `web-app` — if the service serves web content
+- `go-best-practices` — структура проекта, интерфейсы, направление зависимостей
+- `go-best-practices/references/concurrency.md` — если в объёме конкурентность или асинхронные потоки
+- `web-app` — если сервис отдаёт веб-контент
 
 **Web:**
-- `web-app` — security, performance, rendering patterns
-- `web-app/references/security.md` — if auth, CSP, or session design is in scope
-- `go-best-practices` — if Go is the backend
+- `web-app` — безопасность, производительность, паттерны рендеринга
+- `web-app/references/security.md` — если в объёме аутентификация, CSP или дизайн сессий
+- `go-best-practices` — если бэкенд на Go
 
-### Step 3 — Map the problem
+### Шаг 3 — Разобрать задачу
 
-For **local scope:**
-- Identify the responsibility boundary of the component being designed
-- List dependencies (what does it need? what depends on it?)
-- Identify variation points (what is likely to change?)
-- Identify invariants (what must always be true?)
+Для масштаба **local**:
+- определи границу ответственности проектируемого компонента;
+- перечисли зависимости (что ему нужно, кто зависит от него);
+- определи точки изменчивости (что скорее всего будет меняться);
+- определи инварианты (что должно быть верно всегда).
 
-For **system scope:**
-- Identify bounded contexts and their ownership
-- Map synchronous vs. asynchronous interactions
-- Identify shared data and avoid implicit coupling
-- Identify failure modes and cascade risks
+Для масштаба **system**:
+- определи ограниченные контексты и их владельцев;
+- разметь синхронные и асинхронные взаимодействия;
+- найди общие данные и убери неявную связанность;
+- определи режимы отказа и риски каскадных сбоев.
 
-### Step 4 — Produce design options
+### Шаг 4 — Предложить варианты решения
 
-For non-trivial decisions, present 2–3 options with clear trade-offs:
+Для нетривиальных решений покажи 2–3 варианта с честными компромиссами:
 
 ```
-Option A: [name]
-  Description: ...
-  Pros: ...
-  Cons: ...
-  Best when: ...
+Вариант A: [название]
+  Описание: ...
+  Плюсы: ...
+  Минусы: ...
+  Когда подходит: ...
 
-Option B: [name]
+Вариант B: [название]
   ...
 
-Recommended: [option] because [reason tied to the stated driver]
+Рекомендую: [вариант], потому что [причина, связанная с главным критерием]
 ```
 
-### Step 5 — Define contracts and risks
+### Шаг 5 — Описать контракты и риски
 
-- Define public interfaces and their contracts (what they guarantee, what they require)
-- Identify seams where testing is needed
-- Flag rollout risks: breaking changes, migration steps, backward-compatibility requirements
+- Опиши публичные интерфейсы и их контракты (что гарантируют, что требуют).
+- Найди швы, где нужны тесты.
+- Отметь риски выката: ломающие изменения, шаги миграции, требования обратной совместимости.
 
-### Step 6 — Wait for approval before implementation
+### Шаг 6 — Дождаться подтверждения перед реализацией
 
-Do not write production code until the design has been reviewed. If the scope is small, note that code can proceed after this step.
+Не пиши прод-код, пока дизайн не разобран. Если объём маленький — скажи, что после этого шага можно
+переходить к коду.
 
-## Output Format
+## Формат вывода
 
 ```text
-# Architecture: <topic>
+# Архитектура: <тема>
 
-## Scope
+## Масштаб
 <local | system>
 
-## Context
-<what exists today, what is changing, and why>
+## Контекст
+<что есть сейчас, что меняется и зачем>
 
-## Design Options
+## Варианты решения
 
-### Option A: <name>
+### Вариант A: <название>
 ...
 
-### Option B: <name>
+### Вариант B: <название>
 ...
 
-## Recommended Approach
-<option + rationale>
+## Рекомендуемый подход
+<вариант + обоснование>
 
-## Contracts and Interfaces
-- <component>: <what it owns, what it exposes>
+## Контракты и интерфейсы
+- <компонент>: <чем владеет, что отдаёт наружу>
 
-## Risks
-- <risk>: <mitigation>
+## Риски
+- <риск>: <как снижаем>
 
-## Next Steps
+## Следующие шаги
 1. ...
 ```
 
-## After the decision
+## После решения
 
-If the user accepts an option that changes technology, a pattern with consequences, or an earlier design decision —
-record it as an ADR via `/adr` (rules and template: `~/dev/my-claude-config/docs/shared/adr-template.md`).
-Do not inline the ADR into this output; the ADR is a separate file in the repo's `docs/adr/`.
+Если пользователь принял вариант, который меняет технологию, вводит паттерн с последствиями или
+отменяет более раннее решение, — запиши это как ADR через `/adr` (правила и шаблон:
+`~/.claude/my-claude-config/docs/shared/adr-template.md`).
+Не вставляй ADR в этот вывод: ADR — отдельный файл в `docs/adr/` репозитория.

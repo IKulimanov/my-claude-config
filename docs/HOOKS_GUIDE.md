@@ -418,8 +418,18 @@ Zero-install, кроссплатформенно, ценой uv-runtime.
 
 **Блокирующие:**
 - `block-destructive.sh` — PreToolUse / Bash. Блок `rm -rf`, `git push --force` в main/master/staging/prod, `DROP TABLE`, `TRUNCATE`, `chmod 777`, `mkfs.*`.
-- `block-secrets.sh` — PreToolUse / Read|Edit|Write|Bash. Блок `.env` (кроме `.example`/`.sample`), `~/.ssh/`, `id_rsa`, `*.pem`, `aws/credentials`, `vault.yml`, `.netrc`, `.pgpass`, kubeconfig.
-- `block-push-secrets.sh` — PreToolUse / Bash. Перед `git push` запускает `trufflehog` (если установлен) и блокирует при находках.
+- `block-secrets.sh` — PreToolUse / Read|Edit|Write|Bash. Два режима. Для Read/Edit/Write проверяется
+  `file_path` — это точный путь, ложных срабатываний нет. Для Bash проверяются **только аргументы
+  читающих команд** (`cat`, `cp`, `scp`, `base64`, `source` и т.п.), а не вся строка команды.
+  Раньше был поиск подстроки по всей команде: он блокировал `grep .env docs/` и даже комментарий со
+  словом `.envrc` — три ложные блокировки за первые минуты работы 2026-09-04. Регрессия:
+  `tests/test-block-secrets.sh`. Дублирующая защита — `permissions.deny` в `settings.json`.
+- `block-push-secrets.sh` — PreToolUse / Bash. Перед `git push` запускает `trufflehog` по **коммитам,
+  которых ещё нет на сервере** (полный скан ругался на примеры из документации, лежащие в истории).
+  Апстрима нет — сканируется весь каталог. Ложные срабатывания снимаются файлом `.trufflehogignore`
+  в корне репозитория. В сообщении блокировки указано место находки. Если `trufflehog` не установлен,
+  в `blocks.jsonl` пишется запись `kind: "scan-skipped"` — чтобы отсутствие защиты было видно в аудите,
+  а не выглядело как чистый результат. Регрессия: `tests/test-block-push-secrets.sh`.
 
 **Уведомления:**
 - `notify-stop.sh` — Stop. macOS `osascript display notification` с звуком Glass; Linux `notify-send`. Защита от Stop-петли через `stop_hook_active`.
@@ -442,7 +452,15 @@ Zero-install, кроссплатформенно, ценой uv-runtime.
 ```bash
 ./scripts/install-hooks.sh --write
 ```
-Сохранит существующий `~/.claude/settings.json` в `*.bak.<timestamp>`, мержит свои `hooks` секцией, остальное оставит как было.
+Сохранит существующий `~/.claude/settings.json` в `*.bak.<timestamp>`. Из `hooks/settings.json`
+ставятся три вещи: `hooks` и `cleanupPeriodDays` перезаписываются нашими значениями, `permissions`
+(allow и deny) **объединяются** с уже существующими — свои разрешения пользователя не теряются.
+Остальные ключи файла не трогаются. Регрессия: `tests/test-settings-merge.sh`.
+
+Логирующие хуки (`log-*`, `notify-stop`) помечены `"async": true` — они не задерживают вызов
+инструмента. Блокирующие (`block-*`) остаются синхронными, иначе они не смогут запретить действие.
+Замер до перевода в async: логирующий хук 51 мс, два таких на каждый вызов инструмента.
+Журналы ротируются при 20 МБ (`CLAUDE_LOG_MAX_MB`), старые срезы остаются для месячного аудита.
 
 **Способ 2 — посмотреть что встанет:**
 ```bash

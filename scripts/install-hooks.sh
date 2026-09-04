@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Устанавливает хуки в ~/.claude/settings.json — глобально для всех проектов.
+# Устанавливает базовые настройки в ~/.claude/settings.json — глобально для всех проектов:
+# hooks, permissions (allow/deny), cleanupPeriodDays.
 # Подменяет плейсхолдер HOOKS_DIR на реальный абсолютный путь к скриптам.
+# permissions объединяются с существующими, hooks и cleanupPeriodDays перезаписываются.
 #
 # Использование:
 #   ./scripts/install-hooks.sh         # печатает merge-инструкцию
@@ -35,9 +37,19 @@ if [ "$MODE" = "--write" ]; then
     cp "$TARGET" "$BACKUP"
     echo "Backup saved: $BACKUP"
 
-    # Merge: берём существующие top-level ключи кроме hooks, и hooks из нашего рендера.
-    # Идемпотентно — повторный запуск перезаписывает только секцию hooks.
-    MERGED=$(jq -s '.[0] * {hooks: .[1].hooks}' "$TARGET" <(echo "$RENDERED"))
+    # Merge: hooks и cleanupPeriodDays перезаписываем своими, permissions ОБЪЕДИНЯЕМ —
+    # чтобы не стереть разрешения, которые пользователь добавил сам.
+    # Идемпотентно: повторный запуск даёт тот же результат.
+    MERGED=$(jq -s '
+      .[0] as $cur | .[1] as $new
+      | $cur
+      * { hooks: $new.hooks, cleanupPeriodDays: $new.cleanupPeriodDays }
+      * { permissions: (
+            ($cur.permissions // {})
+            * { allow: ((($cur.permissions.allow // []) + ($new.permissions.allow // [])) | unique),
+                deny:  ((($cur.permissions.deny  // []) + ($new.permissions.deny  // [])) | unique) }
+          ) }
+    ' "$TARGET" <(echo "$RENDERED"))
     echo "$MERGED" | jq '.' > "$TARGET"
   else
     echo "$RENDERED" | jq 'del(._comment, ._install)' > "$TARGET"

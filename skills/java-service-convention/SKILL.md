@@ -1,28 +1,33 @@
 ---
 name: java-service-convention
-description: Use for Maven-based Spring Boot services. For work projects (cwd under ~/dev/work/) the canonical team convention at /Users/ivankulimanov/dev/work/java/convention-java/docs/ is the AUTHORITATIVE source — read it directly, do not rely on summary in this skill. For personal Spring projects, the guardrails below are best-practices.
+description: Use for Maven-based Spring Boot services. In the work profile the canonical team convention (path in ~/.claude/workspace.md) is the AUTHORITATIVE source — read it directly, do not rely on the summary in this skill. In the personal profile the team convention does not apply; the guardrails and references here are best-practices.
 paths: "**/*.java"
 ---
 
 # Java Service Convention
 
-## Step 0 — Determine project type (CRITICAL)
+## Шаг 0 — Определить профиль проекта (КРИТИЧНО)
 
-Look at the current working directory:
+Профиль определяется по rule «Профили проектов»: строка `Тип проекта:` в локальном `CLAUDE.md`,
+иначе каталог из `~/.claude/workspace.md`.
 
-- **Path starts with `/Users/ivankulimanov/dev/work/`** → this is a WORK project. The **canonical team convention** at
-  `/Users/ivankulimanov/dev/work/java/convention-java/docs/` is the ONLY authoritative prose source.
-  The narrative summaries in `references/` (`java-style.md`, `spring-service.md`, `data-access.md`,
-  `db-design.md`, `kafka.md`) are outdated/derivative and MUST NOT be used as the source of truth.
-  **Exception:** `references/sonar-rules.md` is a generated mirror of the enforced Sonar rules — it
-  stays reliable as the local pre-check checklist (see Step 1).
-- **Anywhere else** → personal/side project. Canonical convention does NOT apply. Use the guardrails below as best-practices.
+- **Профиль work** → авторитетный источник только один: каноническая командная конвенция, путь к ней
+  в `~/.claude/workspace.md` (ключ «Каноническая Java-конвенция»). Пересказы в `references/`
+  (`java-style.md`, `spring-service.md`, `data-access.md`, `db-design.md`, `kafka.md`) сделаны по более
+  ранней версии конвенции — как источник истины для work их не использовать.
+  **Исключение:** `references/sonar-rules.md` — сгенерированное зеркало правил Sonar из CI, остаётся
+  надёжным чек-листом для локального предчека (шаг 1).
+  Если канон не задан в `~/.claude/workspace.md` — работать по `sonar-rules.md` и сказать об этом
+  пользователю одной строкой.
+- **Профиль personal** → командная конвенция НЕ применяется. Пересказы в `references/` и guardrails
+  ниже работают как обычные best-practices: бери их как советы, не как обязательные правила.
+  Не требуй Jira ID, staging-flow и коды Sonar.
 
-## Step 1 — Read canonical convention (work projects only)
+## Шаг 1 — Прочитать каноническую конвенцию (только профиль work)
 
-If this is a work project, before writing any non-trivial Java code:
+В профиле work, до написания нетривиального Java-кода:
 
-1. Read the index: `/Users/ivankulimanov/dev/work/java/convention-java/docs/index.md`
+1. Прочитать индекс: `<канон>/index.md`, где `<канон>` — путь из `~/.claude/workspace.md`
 2. Read the specific section(s) for your task — examples:
    - Git / branches / commits → `docs/001_git.md`
    - Project dependencies → `docs/002_project_deps.md`
@@ -84,5 +89,5 @@ These are valid for both work and personal projects. They are NOT a substitute f
 ## What lives where
 
 - `references/sonar-rules.md` — **generated Sonar-aligned checklist** (codes + examples), matches CI Sonar. Regenerate with `scripts/gen-convention-checklist.sh`. INTERNAL — do not publish. This is the concrete rule set to check against locally.
-- `references/java-style.md`, `references/spring-service.md`, `references/data-access.md`, `references/db-design.md`, `references/kafka.md` — **historical summaries**, derived from older convention. Useful for quick reference when canonical re-read is overkill. **Not authoritative for work projects.**
-- `/Users/ivankulimanov/dev/work/java/convention-java/docs/` — authoritative prose for work.
+- `references/java-style.md`, `references/spring-service.md`, `references/data-access.md`, `references/db-design.md`, `references/kafka.md` — пересказы по более ранней версии конвенции. Для профиля **personal** это обычные best-practices, ими можно пользоваться напрямую. Для профиля **work** — только для быстрой справки, источник истины там канон.
+- Канон командной конвенции — путь в `~/.claude/workspace.md`. Авторитетный источник для профиля work.

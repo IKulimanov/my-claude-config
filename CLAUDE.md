@@ -8,7 +8,7 @@
 
 Каркас управления поведением агента. Слои:
 - `rules/` — тонкий always-on слой. Только то, что специфично для рабочего процесса автора (Jira ID,
-  staging-flow, Vault, TDD, язык). Чем меньше — тем лучше.
+  staging-flow, Vault, TDD, язык, профили work/personal). Чем меньше — тем лучше.
 - `commands/` — повторяемые сценарии (slash-команды).
 - `agents/` — субагенты (reviewers, test-writers, migration-reviewer).
 - `skills/` — глубокие стек- и доменные знания. Грузятся по соответствию `description`, не «на всякий случай».
@@ -23,7 +23,7 @@
 
 ## Тип проекта
 
-Personal (вне `~/dev/work/`). Командная Java-конвенция здесь не применяется к самому репо, но
+Personal (профиль personal, см. `rules/09`). Командная Java-конвенция здесь не применяется к самому репо, но
 описывается внутри `skills/` и `rules/` для использования в рабочих проектах.
 
 ## Развёртывание
@@ -37,21 +37,25 @@ scripts/setup-global.sh install --apply   # реально применить (�
 scripts/setup-global.sh uninstall --apply # откатить
 ```
 
-- Компоненты: `skills,agents,commands,hooks,claude-md,output-styles`.
-- `claude-md` генерирует `~/.claude/CLAUDE.md` с `@import` каждого `rules/*.md` между маркерами
-  `BEGIN/END my-claude-config (managed)`. **Не редактируй этот блок руками** — он перегенерируется.
-  Менять правила нужно в `rules/*.md`, затем `install --apply`.
-- Хуки ставит `scripts/install-hooks.sh --write` (мержит в `~/.claude/settings.json` с бэкапом).
+- Компоненты: `skills,agents,commands,hooks,claude-md,output-styles,statusline,config,workspace`.
+- `claude-md` генерирует `~/.claude/CLAUDE.md` с `@import` каждого `rules/*.md` и `workspace.md`
+  между маркерами `BEGIN/END my-claude-config (managed)`. **Не редактируй этот блок руками** — он
+  перегенерируется. Менять правила нужно в `rules/*.md`, затем `install --apply`.
+- `config` — symlink репозитория в `~/.claude/my-claude-config`. Через этот путь команды и правила
+  ссылаются на `docs/shared/`, `scripts/helpers/` и references скилов. **Внутри репозитория не писать
+  абсолютные пути к самому репозиторию** — только `~/.claude/my-claude-config/...`.
+- `workspace` — читает `workspace.conf` (машинно-зависимый, в `.gitignore`; создаётся из
+  `workspace.conf.example`), создаёт каталоги work/personal и генерирует `~/.claude/workspace.md`
+  с путями. Профили work/personal описаны в `rules/09`. **Путь к рабочему каталогу нигде не зашивать** —
+  он берётся из `workspace.md`, а тип проекта можно перекрыть строкой `Тип проекта:` в локальном `CLAUDE.md`.
+- Хуки и базовые настройки (`permissions`, `cleanupPeriodDays`) ставит `scripts/install-hooks.sh --write`:
+  `hooks` и `cleanupPeriodDays` перезаписываются, `permissions` объединяются с уже существующими.
 - `scripts/analyze-usage.sh` — быстрый отчёт по tools/agents/skills/токенам из `~/.claude/logs/*.jsonl`.
   ВАЖНО: строки `stops.jsonl` кумулятивны в рамках сессии — токены считаются дельтами, не суммой строк.
 - `scripts/audit/` — месячный аудит (extract → report_phase1 → build_report): классификация промтов, итерации,
   skills, baseline rule 08. Результаты и протокол — `docs/audit-2026-08/`. Запускать раз в месяц, 2 команды.
-- Недельная аналитика (`analytics/`): `scripts/collect-weekly.sh` (снапшоты Сб–Пт UTC, бэкфилл),
-  `scripts/render-dashboard.sh` (автономный дашборд), `scripts/run-weekly-review.sh`
-  (сбор → headless `claude -p` → дашборд → pathspec-коммит только `analytics/`),
-  `scripts/install-weekly-analytics.sh` (launchd, Сб 09:00 + страховка Вс/Пн). Общая
-  jq-логика — `scripts/lib/usage-lib.sh`. Детали: `analytics/README.md`.
-- Требуется `jq`.
+- Требуется `jq`. Для хуков защиты — `trufflehog` (без него `block-push-secrets.sh` пишет
+  в `blocks.jsonl` запись `kind: "scan-skipped"`, чтобы отсутствие защиты было видно).
 
 ## Конвенции авторинга
 
@@ -84,17 +88,23 @@ scripts/setup-global.sh uninstall --apply # откатить
 - `~/.claude/` напрямую (через скрипты, не руками) — это применённая глобальная конфигурация.
 - Управляемый блок `BEGIN/END my-claude-config (managed)` в любом `CLAUDE.md`.
 - `.claude/` репозитория — в `.gitignore`, локальные переопределения.
-- `digest-routine.md` — осиротевший файл, не подключён; решение по нему отложено (не интегрировать без запроса).
+- `workspace.conf` — машинно-зависимый, в `.gitignore`. Правится руками, читается установщиком.
 
 ## Текущий фокус / TBD
 
-На 2026-08-16 (после аудита `docs/audit-2026-08/`):
-- принцип: конфиг меняется только по данным месячного аудита (`scripts/audit/`), не по каталогу идей;
-  лимит — не больше 7 изменений за раз, удалять больше, чем добавлять;
-- сделано: rule 08 (гипотеза до ответа), rule 06 (случаи тестов — пользователь, код — Claude), анти-слоп в
-  rule 07, `/adr`, `/jira` под командный формат, `/reflect` под реальный поток, `/review-mr` без шума;
+Принцип (с аудита 2026-08): конфиг меняется только по данным месячного аудита (`scripts/audit/`),
+не по каталогу идей; лимит — не больше 7 изменений за раз, удалять больше, чем добавлять.
+
+На 2026-09-04 (переезд на новую машину + аудит конфига):
+- сделано в августе: rule 08 (гипотеза до ответа), rule 06 (случаи тестов — пользователь, код — Claude),
+  анти-слоп в rule 07, `/adr`, `/jira` под командный формат, `/reflect` под реальный поток;
   удалены 5 мёртвых команд, `prompt-auditor`, meta-skills, мёртвые helpers;
-- открыто (решает пользователь, файлы не в git): недельный пайплайн `analytics/` + `collect-weekly/run-weekly-review/
-  install-weekly-analytics/render-dashboard` (остановлен на W28, launchd не применён) — удалить или оставить;
-  `digest-routine.md`; `docs/AI_USAGE_AUDIT_2026-07.md` (заменён августовским);
-- НЕ в работе (осознанно): Jira MCP, skill-creator, plugin packaging — тюнинг инструментов без запроса из данных.
+- сделано в сентябре: конфиг отвязан от прежней машины (компоненты `config` + `workspace`,
+  `~/.claude/my-claude-config`, `workspace.conf`); rule 09 (профили work/personal); `block-secrets.sh`
+  переписан после трёх ложных срабатываний; логирующие хуки асинхронные, журналы ротируются;
+  `permissions` и `cleanupPeriodDays` ставятся установщиком; удалён недельный пайплайн `analytics/`,
+  `digest-routine.md`, июльский аудит, skill `go-service`; Context7 MCP;
+- открыто: перевод внутренних промтов команд на русский (сейчас переведены только видимые пользователю
+  части); проверить на живой сессии, работает ли `paths:` в skills; разделить `sonar-rules.md`
+  на чек-лист и детали;
+- НЕ в работе (осознанно): Jira MCP, SonarQube MCP (до токена), skill-creator, plugin packaging.

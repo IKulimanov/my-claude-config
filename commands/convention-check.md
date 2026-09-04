@@ -6,94 +6,96 @@ allowed-tools: Read, Grep, Glob, Bash
 
 # Convention Check
 
-Fast, focused check of Java code against the team convention. No architecture review, no optimization suggestions — only convention compliance.
+Быстрая точечная проверка Java-кода на соответствие командной конвенции. Без архитектурного ревью и
+советов по оптимизации — только соответствие конвенции.
 
-**Optimized for speed and low token usage.**
+**Команда рассчитана на скорость и малый расход токенов.**
 
-## Step 0 — Load the authoritative rule set (work projects)
+## Шаг 0 — Загрузить источник правил (рабочие проекты)
 
-For a WORK project (cwd under `~/dev/work/`), the source of truth is the generated Sonar-aligned
-checklist: `~/dev/my-claude-config/skills/java-service-convention/references/sonar-rules.md`. Read
-it and check the diff **against those exact codes** (LANG-/SPR-/DB-) — they match what CI Sonar
-enforces, so your findings predict the quality gate. If the file is missing (personal project, or
-not on the work machine), fall back to the built-in list below.
+В профиле **work** (rule «Профили проектов», пути в `~/.claude/workspace.md`) источник истины —
+сгенерированный Sonar-aligned чек-лист:
+`~/.claude/my-claude-config/skills/java-service-convention/references/sonar-rules.md`. Прочитай его и
+проверяй дифф **ровно по этим кодам** (LANG-/SPR-/DB-): они совпадают с тем, что требует CI Sonar,
+поэтому твои находки предсказывают quality gate. Если файла нет (личный проект или не рабочая
+машина) — используй встроенный список ниже.
 
-**This is a local pre-filter. The authoritative verdict is CI Sonar (`mvn verify sonar:sonar
--Dsonar.qualitygate.wait=true`).** Never claim the code "passes convention" — say it passes the
-local pre-check; CI Sonar decides.
+**Это локальный предфильтр. Окончательный вердикт даёт CI Sonar (`mvn verify sonar:sonar
+-Dsonar.qualitygate.wait=true`).** Никогда не говори, что код «прошёл конвенцию» — говори, что он
+прошёл локальный предчек, а решает CI Sonar.
 
-**Scope (convention v1.2.0):** check every method the diff touches, including old code that was only
-partly edited — its compliance belongs to whoever edited it last. Do not report methods the diff
-did not touch.
+**Область проверки (конвенция v1.2.0):** проверяй каждый метод, которого коснулся дифф, включая
+старый код, отредактированный частично, — за его соответствие отвечает тот, кто правил последним.
+Методы, которых дифф не касался, в отчёт не тяни.
 
-## What Is Checked (fallback list for personal projects / when checklist is absent)
+## Что проверяем (запасной список для личных проектов и когда чек-листа нет)
 
-### Code Style (LANG)
-- [ ] Package naming (`snake_case`, domain-organized)
-- [ ] Class naming (PascalCase, no numbers, no vague names)
-- [ ] Variable naming (camelCase, meaningful, no abbreviations)
-- [ ] Method naming (correct prefixes: find/get/fetch/build, boolean as question)
-- [ ] Method size (<=30 lines, <=3 params)
-- [ ] Nesting depth (<=3 levels)
-- [ ] No magic numbers/strings
-- [ ] Nullability: JSpecify only for static analysis; `@NotNull` only from `jakarta.validation.constraints` (LANG-223)
-- [ ] Class fields read through `this` — exception: DI collaborators, not plain value fields (LANG-115)
+### Стиль кода (LANG)
+- [ ] Имена пакетов (`snake_case`, организованы по домену)
+- [ ] Имена классов (PascalCase, без цифр, без размытых названий)
+- [ ] Имена переменных (camelCase, осмысленные, без сокращений)
+- [ ] Имена методов (правильные префиксы: find/get/fetch/build, boolean — как вопрос)
+- [ ] Размер метода (<=30 строк, <=3 параметров)
+- [ ] Глубина вложенности (<=3 уровней)
+- [ ] Нет магических чисел и строк
+- [ ] Nullability: JSpecify только для статического анализа; `@NotNull` только из `jakarta.validation.constraints` (LANG-223)
+- [ ] Поля класса читаются через `this` — исключение: зависимости из DI, а не обычные поля-значения (LANG-115)
 
 ### Spring (SPR)
-- [ ] Constructor injection via `@RequiredArgsConstructor`
-- [ ] Thin controllers (no business logic)
-- [ ] `@Valid` on request models
-- [ ] Global exception handling (no `ResponseEntity` for success)
-- [ ] Separate `*Api` interface for Swagger
-- [ ] No `System.out` — SLF4J only
-- [ ] Parameterized logging
-- [ ] Secrets masked in logs
-- [ ] Schedulers disabled by default (`@ConditionalOnProperty`)
+- [ ] Внедрение через конструктор с `@RequiredArgsConstructor`
+- [ ] Тонкие контроллеры (без бизнес-логики)
+- [ ] `@Valid` на моделях запроса
+- [ ] Глобальная обработка исключений (никакого `ResponseEntity` для успешного ответа)
+- [ ] Отдельный интерфейс `*Api` для Swagger
+- [ ] Нет `System.out` — только SLF4J
+- [ ] Параметризованное логирование
+- [ ] Секреты в логах замаскированы
+- [ ] Планировщики выключены по умолчанию (`@ConditionalOnProperty`)
 
-### Data Access (SPR, DB)
-- [ ] Entity suffix on JPA entities
-- [ ] Entities don't leak outside DAO layer
-- [ ] `@PrePersist`/`@PreUpdate` for timestamps
-- [ ] Explicit pool names
-- [ ] Parameterized queries (no SQL concatenation)
+### Доступ к данным (SPR, DB)
+- [ ] Суффикс Entity у JPA-сущностей
+- [ ] Сущности не утекают за пределы слоя DAO
+- [ ] `@PrePersist`/`@PreUpdate` для меток времени
+- [ ] Явные имена пулов
+- [ ] Параметризованные запросы (никакой склейки SQL)
 
 ### Lombok (LIB)
-- [ ] `callSuper = true` when inheriting
-- [ ] `@UtilityClass` for utility classes
-- [ ] `@FieldNameConstants` for `mappedBy`
+- [ ] `callSuper = true` при наследовании
+- [ ] `@UtilityClass` для утилитных классов
+- [ ] `@FieldNameConstants` для `mappedBy`
 
 ### Git (GIT)
-- [ ] Branch format: `{type}/{JIRA-CODE}-{description}`
-- [ ] Commit format: `{JIRA-CODE}: {verb-led description}`
+- [ ] Формат ветки: `{type}/{JIRA-CODE}-{description}`
+- [ ] Формат коммита: `{JIRA-CODE}: {verb-led description}`
 
-## Workflow
+## Порядок работы
 
-1. Inspect the current diff or specified files.
-2. Check against **Step 0's Sonar-aligned checklist** (`sonar-rules.md` codes) on work projects; use
-   the fallback list above only if that checklist was unavailable.
-3. Report only violations — no praise, no style suggestions.
+1. Посмотри текущий дифф или указанные файлы.
+2. На рабочих проектах проверяй по **Sonar-aligned чек-листу из Шага 0** (коды `sonar-rules.md`);
+   запасной список выше используй только если чек-лист недоступен.
+3. Сообщай только нарушения — без похвалы и советов по стилю.
 
-`sonar-rules.md` is internal team material — cite rule codes (e.g. `SPR-902`); do not paste its
-prose or code examples verbatim into shared outputs.
+`sonar-rules.md` — внутренний материал команды: цитируй коды правил (например, `SPR-902`), не
+вставляй его текст и примеры кода дословно в общедоступные выводы.
 
-## Output Format
+## Формат вывода
 
 ```text
-## Convention Check: <scope>
+## Проверка конвенции: <область>
 
-### Violations
-- LANG-103: <file>:<line> — <violation>
-- SPR-902: <file>:<line> — <violation>
+### Нарушения
+- LANG-103: <файл>:<строка> — <нарушение>
+- SPR-902: <файл>:<строка> — <нарушение>
 - ...
-(use the real codes from `sonar-rules.md`; do not invent codes)
+(бери реальные коды из `sonar-rules.md`; коды не выдумывай)
 
-### Clean
-<list categories with no violations>
+### Чисто
+<перечисли категории без нарушений>
 
-### Summary
-<N violations found across M categories>
+### Итог
+<найдено N нарушений в M категориях>
 ```
 
-If no violations found (work project): `Локальный предчек пройден — нарушений по кодам конвенции не
-найдено. Финальный вердикт даёт CI Sonar.` For a personal project: `All checked code complies with
-the convention guardrails.`
+Если нарушений нет (рабочий проект): `Локальный предчек пройден — нарушений по кодам конвенции не
+найдено. Финальный вердикт даёт CI Sonar.` Для личного проекта: `Весь проверенный код соответствует
+guardrails конвенции.`

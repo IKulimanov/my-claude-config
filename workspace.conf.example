@@ -1,0 +1,25 @@
+# Каталоги этой машины. Скопируй в workspace.conf и поправь под себя.
+#
+#   cp workspace.conf.example workspace.conf
+#   scripts/setup-global.sh install --components workspace --apply
+#
+# Файл читается установщиком: он создаёт каталоги и генерирует ~/.claude/workspace.md,
+# который подключается в ~/.claude/CLAUDE.md. Сам workspace.conf в git не попадает —
+# на каждой машине он свой.
+
+# Рабочие проекты. Здесь действует командная конвенция (профиль work).
+WORK_ROOT="$HOME/dev/work"
+
+# Личные проекты. Командный процесс не применяется (профиль personal).
+PERSONAL_ROOT="$HOME/dev/personal"
+
+# Каталог с канонической Java-конвенцией команды (docs/ внутри репозитория конвенции).
+# Пусто — конвенция не подключена, работает выжимка sonar-rules.md.
+CONVENTION_DIR=""
+
+# Репозиторий Sonar-плагина конвенции — источник для gen-convention-checklist.sh.
+# Пусто — генератор нужно вызывать с флагом --plugin.
+CONVENTION_PLUGIN=""
+
+# Куда /review-mr сохраняет ревью чужих веток.
+REVIEWS_DIR="$HOME/dev/work/reviews"

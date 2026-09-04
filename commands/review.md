@@ -6,64 +6,65 @@ allowed-tools: Read, Grep, Glob, Bash, Agent, Write
 
 # Review
 
-Review the current changes with a code-review mindset.
+Ревью текущих изменений — со взглядом код-ревьюера.
 
-## Workflow
+## Порядок работы
 
-1. Inspect the current diff and changed files.
-2. Detect the stack and route the review:
+1. Посмотри текущий дифф и изменённые файлы.
+2. Определи стек и направь ревью:
 
-### Java/Spring → `java-reviewer` agent
-- Agent auto-loads: `java-service-convention`, `jpa-db-review`, `integration-patterns`, `testing`
-- Agent knows the full team convention — no need to duplicate rules here.
+### Java/Spring → агент `java-reviewer`
+- Агент сам грузит: `java-service-convention`, `jpa-db-review`, `integration-patterns`, `testing`
+- Агент знает командную конвенцию целиком — дублировать правила здесь не нужно.
 
-### Go → `go-reviewer` agent
-- Agent auto-loads: `go-best-practices`
+### Go → агент `go-reviewer`
+- Агент сам грузит: `go-best-practices`
 
-### Vue/Vite (`.vue`, `package.json` with vue) → `vue-reviewer` agent
-- Agent auto-loads: `vue-frontend`
+### Vue/Vite (`.vue`, `package.json` с vue) → агент `vue-reviewer`
+- Агент сам грузит: `vue-frontend`
 
-### Web (generic HTML/CSS/JS, server templates)
-- No dedicated agent — load the `web-app` skill and review directly.
+### Web (обычные HTML/CSS/JS, серверные шаблоны)
+- Отдельного агента нет — загрузи скил `web-app` и делай ревью сам.
 
 ### DevOps (Docker, CI, K8s, Terraform)
-- Load the relevant skill (`docker`, `terraform`, `gitlab-ci`, `kubernetes`, `helm`).
-- No dedicated agent — review directly.
+- Загрузи нужный скил (`docker`, `terraform`, `gitlab-ci`, `kubernetes`, `helm`).
+- Отдельного агента нет — делай ревью сам.
 
-### Any other stack
-- No dedicated agent — review directly with general code-review judgment.
+### Любой другой стек
+- Отдельного агента нет — делай ревью сам, по общим правилам код-ревью.
 
-For every directly-reviewed branch (Web, DevOps, other), apply the Output Rules and Severity Bands below.
+Для всех веток, где ревью идёт напрямую (Web, DevOps, прочее), применяй правила вывода и градации
+серьёзности ниже.
 
-3. Focus on correctness, behavioral regressions, and risky assumptions.
-4. Check security-sensitive paths, input validation, and error handling.
-5. Check whether tests cover new or changed behavior.
-6. Ignore pure style nits unless they hide a real risk.
+3. Смотри на корректность, регрессии поведения и рискованные допущения.
+4. Проверь чувствительные к безопасности места, валидацию входных данных и обработку ошибок.
+5. Проверь, покрыто ли тестами новое и изменённое поведение.
+6. Чисто стилевые придирки пропускай, если за ними не стоит реальный риск.
 
-## Output Rules
+## Правила вывода
 
-- Findings come first.
-- Order findings by severity.
-- Include file and line references whenever possible.
-- Keep each finding concrete: what is wrong, why it matters, what can break.
-- Reference convention rule IDs when applicable — for work Java projects use the real codes from
-  `~/dev/my-claude-config/skills/java-service-convention/references/sonar-rules.md` (e.g. `LANG-410`,
-  `SPR-902`); do not invent codes. That file is internal team material — cite codes, don't paste its
-  prose or examples verbatim.
-- If there are no findings, state that explicitly and mention residual risks or test gaps.
+- Находки идут первыми.
+- Сортируй находки по серьёзности.
+- Где возможно, указывай файл и строку.
+- Каждая находка конкретна: что не так, почему это важно, что может сломаться.
+- Ссылайся на коды правил конвенции, когда они применимы. Для рабочих Java-проектов бери реальные коды
+  из `~/.claude/my-claude-config/skills/java-service-convention/references/sonar-rules.md` (например,
+  `LANG-410`, `SPR-902`); коды не выдумывай. Этот файл — внутренний материал команды: цитируй коды,
+  не вставляй его текст и примеры дословно.
+- Если находок нет — скажи об этом прямо и назови остаточные риски или пробелы в тестах.
 
-## Severity Bands
+## Градации серьёзности
 
-- **CRITICAL**: data loss, security exposure, broken behavior, or unsafe rollout risk
-- **WARNING**: likely bug, regression risk, missing validation, or serious maintainability issue
-- **SUGGESTION**: lower-impact improvement worth considering
+- **CRITICAL**: потеря данных, дыра в безопасности, сломанное поведение или опасный выкат
+- **WARNING**: вероятный баг, риск регрессии, отсутствующая валидация или серьёзная проблема поддержки
+- **SUGGESTION**: улучшение с меньшим влиянием, но его стоит рассмотреть
 
-## Persist to `.ai/` (light convention)
+## Сохранение в `.ai/` (лёгкая конвенция)
 
-When working inside a repo, save the findings as a durable artifact (see `docs/AI_ARTIFACTS.md`):
+Если работаешь внутри репозитория, сохрани находки как долгоживущий артефакт (см. `docs/AI_ARTIFACTS.md`):
 
 ```bash
-DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<feature-or-branch>")
+DIR=$(~/.claude/my-claude-config/scripts/helpers/ai-init.sh "<feature-or-branch>")
 ```
 
-Write the review (findings + severities) to `$DIR/review.md`. Optional when there are no findings.
+Запиши ревью (находки + серьёзность) в `$DIR/review.md`. Если находок нет — можно не сохранять.

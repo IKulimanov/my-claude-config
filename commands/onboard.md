@@ -6,72 +6,74 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion
 
 # /onboard — Project Bootstrap
 
-Generates a tailored `CLAUDE.md` for the current project. Detects stack, work-vs-personal, asks the user about things that cannot be inferred from code, picks the right template, fills it in.
+Генерирует `CLAUDE.md` под текущий проект. Определяет стек и профиль (work или personal), спрашивает
+о том, чего не видно в коде, выбирает подходящий шаблон и заполняет его.
 
-## When to Use
+## Когда применять
 
-- First time opening Claude in a new repo.
-- Returning to a side-project after months — refresh the `CLAUDE.md`.
-- Inherited a repo with no `CLAUDE.md`.
+- Первый запуск Claude в новом репозитории.
+- Возвращение к своему проекту через несколько месяцев — обновить `CLAUDE.md`.
+- Достался репозиторий без `CLAUDE.md`.
 
-## Workflow
+## Порядок работы
 
-### Step 1 — Check for existing CLAUDE.md
+### Шаг 1 — Проверить, есть ли CLAUDE.md
 
 ```bash
 ls CLAUDE.md 2>/dev/null
 ```
 
-- If exists and `--force` not passed → tell the user it exists, show the date, ask if they want to regenerate (use `AskUserQuestion` with options Overwrite/Append-changes/Cancel). Default: cancel.
-- If `--force` → backup as `CLAUDE.md.bak.<timestamp>` before overwrite.
+- Файл есть и `--force` не передан → скажи пользователю, что файл существует, покажи дату и спроси, генерировать ли заново (через `AskUserQuestion` с вариантами: перезаписать / дописать изменения / отмена). По умолчанию — отмена.
+- Передан `--force` → перед перезаписью сделай бэкап `CLAUDE.md.bak.<timestamp>`.
 
-### Step 2 — Detect project type (work vs personal)
+### Шаг 2 — Определить тип проекта (work или personal)
 
 ```bash
 pwd
 ```
 
-- If path starts with `/Users/ivankulimanov/dev/work/` → **work project**. Team convention applies. Use the work-tuned template.
-- Otherwise → **personal project**. Use simpler template, no team-convention reference.
+- Путь под каталогом work из `~/.claude/workspace.md` → профиль **work**. Командная конвенция действует, бери work-шаблон.
+- Путь под каталогом personal (или профиль не определился) → профиль **personal**. Простой шаблон, без ссылок на командную конвенцию.
+- Подробности профилей — rule «Профили проектов».
 
-### Step 3 — Detect stack
+### Шаг 3 — Определить стек
 
-Check files in this order; first match wins primary stack, but record secondary stacks too:
+Проверяй файлы в этом порядке; первое совпадение даёт основной стек, но второстепенные тоже запиши:
 
-| File | Stack |
+| Файл | Стек |
 |---|---|
-| `pom.xml` or `build.gradle(.kts)` | java-service |
+| `pom.xml` или `build.gradle(.kts)` | java-service |
 | `go.mod` | go-service |
-| `package.json` with `"vue"` in dependencies | vue-app |
-| `package.json` without vue (or just dist/static) | web-app |
-| Only `Dockerfile` / `docker-compose.yml` and no source | docker-service |
+| `package.json` с `"vue"` в зависимостях | vue-app |
+| `package.json` без vue (или только dist/статика) | web-app |
+| Только `Dockerfile` / `docker-compose.yml`, исходников нет | docker-service |
 
-Inspect manifests to extract:
-- **Java:** Spring Boot version (`<spring-boot.version>` or parent), Maven vs Gradle, JPA/Kafka/Security modules from dependencies.
-- **Go:** Go version (`go 1.X` line), HTTP framework (gin/fiber/echo or stdlib), main packages.
-- **Vue:** Vue version, Pinia/Router/TypeScript presence, Vite vs Vue CLI.
-- **Docker:** base images, compose services.
+Из манифестов вытащи:
+- **Java:** версию Spring Boot (`<spring-boot.version>` или parent), Maven или Gradle, модули JPA/Kafka/Security из зависимостей.
+- **Go:** версию Go (строка `go 1.X`), HTTP-фреймворк (gin/fiber/echo или stdlib), основные пакеты.
+- **Vue:** версию Vue, наличие Pinia/Router/TypeScript, Vite или Vue CLI.
+- **Docker:** базовые образы, сервисы в compose.
 
-Detect runtime commands:
+Определи команды запуска:
 - Java: `mvn test` / `gradle test`, `mvn verify`, `mvn package`.
 - Go: `go test ./...`, `go build ./...`.
-- Vue: parse `package.json` scripts → `npm test`, `npm run dev`, `npm run build`.
-- Detect linters: `golangci-lint`, `eslint`, `checkstyle`, `ruff`.
+- Vue: разбери scripts в `package.json` → `npm test`, `npm run dev`, `npm run build`.
+- Найди линтеры: `golangci-lint`, `eslint`, `checkstyle`, `ruff`.
 
-Detect entry points:
-- Java: `@SpringBootApplication`-annotated class.
-- Go: `package main` with `func main()`.
-- Vue: `src/main.ts` or `src/main.js`.
+Определи точки входа:
+- Java: класс с аннотацией `@SpringBootApplication`.
+- Go: `package main` с `func main()`.
+- Vue: `src/main.ts` или `src/main.js`.
 
-Detect databases/messaging via dependencies:
-- Java: look for `spring-boot-starter-data-jpa`, `spring-kafka`, drivers (`ojdbc`, `postgresql`, `clickhouse-jdbc`).
+Определи БД и брокеры по зависимостям:
+- Java: ищи `spring-boot-starter-data-jpa`, `spring-kafka`, драйверы (`ojdbc`, `postgresql`, `clickhouse-jdbc`).
 - Go: `pgx`, `sqlx`, `kafka-go`, `redis`.
 
-### Step 4 — Pick template
+### Шаг 4 — Выбрать шаблон
 
-Map detected stack → template in `templates/`:
+Сопоставь определённый стек с шаблоном в `templates/`:
 
-| Stack | Template |
+| Стек | Шаблон |
 |---|---|
 | java-service | `templates/CLAUDE.java-service.md.template` |
 | go-service | `templates/CLAUDE.go-service.md.template` |
@@ -79,23 +81,23 @@ Map detected stack → template in `templates/`:
 | web-app | `templates/CLAUDE.web-app.md.template` |
 | docker-service | `templates/CLAUDE.docker-service.md.template` |
 
-If detection was ambiguous (multiple manifests like `pom.xml` + `package.json` for a Java service with frontend), ask via `AskUserQuestion`.
+Если детект получился неоднозначным (например, есть и `pom.xml`, и `package.json` — Java-сервис с фронтендом), спроси через `AskUserQuestion`.
 
-### Step 5 — Ask targeted questions
+### Шаг 5 — Задать точечные вопросы
 
-Use `AskUserQuestion` for things that cannot be detected from code. Ask in a single batch (1 round of questions, not back-and-forth). Pick a relevant subset based on stack and work/personal:
+Через `AskUserQuestion` спрашивай только то, чего не видно в коде. Спрашивай одним пакетом (один раунд вопросов, не переписка). Подбери набор под стек и профиль work/personal:
 
-**Universal:**
+**Общие:**
 1. Что делает сервис (1 предложение)?
 2. Главные upstream системы (что вызывает этот сервис)?
 3. Главные downstream системы (кого вызывает этот сервис)?
 
-**Work-only (skip for personal):**
+**Только для профиля work (для personal пропустить):**
 4. Текущая бизнес-цель / основная фича в работе?
-5. Есть ли локальные исключения из командной конвенции (что отличается от `/Users/ivankulimanov/dev/work/java/convention-java/`)?
+5. Есть ли локальные исключения из командной конвенции (что отличается от канона, путь к нему — в `~/.claude/workspace.md`)?
 6. Какие папки / файлы НЕЛЬЗЯ трогать без явного запроса?
 
-**Stack-specific:**
+**По стеку:**
 - Java: какие БД реально используются (Oracle / PostgreSQL / ClickHouse) и для каких задач (OLTP / OLAP)?
 - Java: какие Kafka-топики consume/produce?
 - Go: какой HTTP-фреймворк (если не задетектил)?
@@ -103,51 +105,55 @@ Use `AskUserQuestion` for things that cannot be detected from code. Ask in a sin
 
 Не задавай больше 5-6 вопросов за раз. Если что-то можно вывести из кода — выводи, не спрашивай.
 
-### Step 6 — Fill template
+### Шаг 6 — Заполнить шаблон
 
 1. Прочитай выбранный template.
 2. Подставь:
    - `{{PROJECT_NAME}}` → `basename $(pwd)`
    - `{{DATE}}` → `date +%Y-%m-%d`
 3. Заполни секции на основе детекции + ответов пользователя. То, что не известно — оставь `[TBD]` с короткой пометкой что заполнить.
-4. Для work-проектов добавь блок:
+4. В начало файла добавь строку профиля — она главнее путей и не даст перепутать тип проекта:
    ```markdown
-   ## Team Convention Source
-   Canonical: `/Users/ivankulimanov/dev/work/java/convention-java/docs/`
-   When in doubt, READ canonical directly. Skill `java-service-convention` will redirect.
+   Тип проекта: work
+   ```
+   (или `personal`). Для work-проектов добавь ещё блок:
+   ```markdown
+   ## Источник командной конвенции
+   Канон: путь из `~/.claude/workspace.md` (ключ «Каноническая Java-конвенция»).
+   Сомневаешься — читай канон напрямую. Скил `java-service-convention` направит.
    ```
 5. Запиши в `CLAUDE.md`.
 
-### Step 7 — Report
+### Шаг 7 — Отчитаться
 
 Выведи короткий отчёт:
 
 ```markdown
-## /onboard complete
+## /onboard завершён
 
-**Stack detected:** <stack> (<sub-details>)
-**Project type:** work | personal
-**Template used:** <template-file>
+**Определён стек:** <стек> (<подробности>)
+**Тип проекта:** work | personal
+**Использован шаблон:** <файл-шаблона>
 
-**Filled automatically:**
-- <field>: <value>
+**Заполнено автоматически:**
+- <поле>: <значение>
 - ...
 
-**Pre-filled from your answers:**
-- <field>: <value>
+**Заполнено из твоих ответов:**
+- <поле>: <значение>
 - ...
 
-**Still TBD (fill manually):**
-- <field>: <reason>
+**Осталось TBD (заполнить вручную):**
+- <поле>: <почему>
 - ...
 
-**Next steps:**
-- Review `CLAUDE.md` — adjust any TBD or wrong inferences.
-- For work Java projects: load `java-service-convention` skill or run `/feature` — canonical convention will be read.
-- For new feature: `/feature <description>` follows TDD-first flow.
+**Что дальше:**
+- Просмотри `CLAUDE.md` — поправь TBD и неверные догадки.
+- Для рабочих Java-проектов: загрузи скил `java-service-convention` или запусти `/feature` — каноническая конвенция будет прочитана.
+- Для новой фичи: `/feature <описание>` идёт по TDD-first потоку.
 ```
 
-## Notes
+## Заметки
 
 - **Не задавай вопросов о том что можешь сам найти в коде.** Если в `pom.xml` есть `spring-kafka` — Kafka используется, спрашивать не надо.
 - **Не пиши boilerplate** который не относится к этому проекту. Если нет Kafka — не упоминай Kafka в CLAUDE.md.

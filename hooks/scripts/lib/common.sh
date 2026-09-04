@@ -14,6 +14,21 @@ hook_project_name() {
   basename "$cwd"
 }
 
+# Порог ротации журнала в мегабайтах. tools.jsonl на прежней машине дорос до 28 МБ —
+# после этого его тяжело читать скриптами аудита и он замедляет каждый разбор.
+LOG_MAX_MB="${CLAUDE_LOG_MAX_MB:-20}"
+
+# Отрезать журнал, если он перерос порог: переименовать в <name>-<дата>.jsonl.
+# Старые срезы не удаляем — их читает месячный аудит.
+hook_log_rotate() {
+  local file="$1"
+  [ -f "$file" ] || return 0
+  local size_mb
+  size_mb=$(( $(wc -c < "$file" 2>/dev/null || echo 0) / 1048576 ))
+  [ "$size_mb" -lt "$LOG_MAX_MB" ] && return 0
+  mv "$file" "${file%.jsonl}-$(date -u +%Y%m%d-%H%M%S).jsonl" 2>/dev/null || true
+}
+
 # Append одной JSON-записи в лог-файл строго как одна строка JSONL.
 # Компактизируем payload (jq -c), чтобы многострочный pretty-JSON не ломал
 # поток при частичной/гонке записи. Невалидный payload — как fallback
@@ -24,6 +39,7 @@ hook_log() {
   local payload="$2"
   local line
   line=$(jq -c . <<<"$payload" 2>/dev/null) || line=$(printf '%s' "$payload" | tr -d '\n')
+  hook_log_rotate "$LOG_DIR/$name.jsonl"
   printf '%s\n' "$line" >> "$LOG_DIR/$name.jsonl"
 }
 

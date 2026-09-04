@@ -15,7 +15,7 @@ CLAUDE_HOME="${CLAUDE_HOME:-$HOME/.claude}"
 # ─── Defaults ────────────────────────────────────────────────────────────────
 APPLY=0
 MODE="symlink"          # symlink | copy
-COMPONENTS="skills,agents,commands,hooks,claude-md,output-styles,statusline"
+COMPONENTS="skills,agents,commands,hooks,claude-md,output-styles,statusline,config,workspace"
 COMMAND=""
 
 # ─── Args ────────────────────────────────────────────────────────────────────
@@ -32,7 +32,11 @@ Options:
   --apply             Реально применить. Без этого — dry-run, ничего не меняем.
   --copy              Использовать copy вместо symlink (по умолчанию: symlink)
   --components LIST   Список компонентов через запятую (default: $COMPONENTS)
-                      Доступно: skills,agents,commands,hooks,claude-md,output-styles,statusline
+                      Доступно: skills,agents,commands,hooks,claude-md,output-styles,statusline,
+                                config,workspace
+                      config    — symlink репозитория в ~/.claude/my-claude-config (по этому пути
+                                  команды и правила читают docs/shared, scripts/helpers, skills)
+                      workspace — каталоги work/personal из workspace.conf + ~/.claude/workspace.md
   --config-dir DIR    Откуда брать (default: $ROOT_DIR)
   -h, --help
 
@@ -82,8 +86,8 @@ fi
 
 for comp in $(echo "$COMPONENTS" | tr ',' ' '); do
   case "$comp" in
-    skills|agents|commands|hooks|claude-md|output-styles|statusline) ;;
-    *) echo "Error: unknown component '$comp'. Valid: skills,agents,commands,hooks,claude-md,output-styles,statusline" >&2; exit 1 ;;
+    skills|agents|commands|hooks|claude-md|output-styles|statusline|config|workspace) ;;
+    *) echo "Error: unknown component '$comp'. Valid: skills,agents,commands,hooks,claude-md,output-styles,statusline,config,workspace" >&2; exit 1 ;;
   esac
 done
 
@@ -154,6 +158,87 @@ install_hooks() {
   fi
 }
 
+# Symlink всего репозитория в ~/.claude/my-claude-config.
+# Через этот путь команды, правила и шаблоны ссылаются на docs/shared, scripts/helpers
+# и references скилов — независимо от того, куда склонирован репозиторий.
+install_config_link() {
+  local dst="$CLAUDE_HOME/my-claude-config"
+
+  if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$ROOT_DIR" ]; then
+    echo "$(prefix) config → уже указывает на $ROOT_DIR"
+    return
+  fi
+
+  backup_if_exists "$dst" || true
+  do_or_echo "ln -s '$ROOT_DIR' '$dst'"
+}
+
+# Прочитать workspace.conf (или создать из примера) и сгенерировать ~/.claude/workspace.md.
+# Каталоги work/personal создаются, если их нет.
+install_workspace() {
+  local conf="$ROOT_DIR/workspace.conf"
+  local example="$ROOT_DIR/workspace.conf.example"
+  local dst="$CLAUDE_HOME/workspace.md"
+
+  if [ ! -f "$conf" ]; then
+    if [ ! -f "$example" ]; then
+      echo "$(prefix) skip workspace — нет ни workspace.conf, ни workspace.conf.example"
+      return
+    fi
+    echo "$(prefix) workspace.conf отсутствует → создаю из workspace.conf.example"
+    if [ "$APPLY" -eq 1 ]; then
+      cp "$example" "$conf"
+    fi
+  fi
+
+  # Значения по умолчанию на случай неполного конфига.
+  WORK_ROOT="$HOME/dev/work"
+  PERSONAL_ROOT="$HOME/dev/personal"
+  CONVENTION_DIR=""
+  CONVENTION_PLUGIN=""
+  REVIEWS_DIR="$HOME/dev/work/reviews"
+
+  if [ -f "$conf" ]; then
+    # shellcheck source=/dev/null
+    . "$conf"
+  fi
+
+  echo "$(prefix) workspace: work=$WORK_ROOT personal=$PERSONAL_ROOT"
+  echo "$(prefix) workspace → $dst"
+
+  if [ "$APPLY" -ne 1 ]; then return 0; fi
+
+  mkdir -p "$CLAUDE_HOME" "$WORK_ROOT" "$PERSONAL_ROOT"
+  [ -n "$REVIEWS_DIR" ] && mkdir -p "$REVIEWS_DIR"
+
+  local conv_line plugin_line
+  if [ -n "$CONVENTION_DIR" ]; then
+    conv_line="- Каноническая Java-конвенция: \`$CONVENTION_DIR\`"
+  else
+    conv_line="- Каноническая Java-конвенция: не задана. Источник для work-проектов — выжимка \`sonar-rules.md\` в скиле \`java-service-convention\`."
+  fi
+  if [ -n "$CONVENTION_PLUGIN" ]; then
+    plugin_line="- Репозиторий Sonar-плагина конвенции: \`$CONVENTION_PLUGIN\`"
+  else
+    plugin_line="- Репозиторий Sonar-плагина конвенции: не задан."
+  fi
+
+  cat > "$dst" <<EOF
+# Каталоги этой машины
+
+Сгенерировано \`setup-global.sh\` из \`workspace.conf\`. Не править руками — правь \`workspace.conf\`
+в репозитории конфига и перезапусти установщик.
+
+- Рабочие проекты (профиль **work**): \`$WORK_ROOT\`
+- Личные проекты (профиль **personal**): \`$PERSONAL_ROOT\`
+$conv_line
+$plugin_line
+- Ревью чужих веток сохраняются в: \`$REVIEWS_DIR\`
+
+Что означают профили — rule «Профили проектов: work и personal».
+EOF
+}
+
 # Сгенерировать ~/.claude/CLAUDE.md с @import каждого rules/*.md.
 # Пишем только между маркерами — ручной контент пользователя сохраняется.
 install_claude_md() {
@@ -183,6 +268,10 @@ install_claude_md() {
     [ -e "$f" ] || continue
     block+="@$f"$'\n'
   done
+  # Каталоги этой машины (генерируется компонентом workspace).
+  if [ -f "$CLAUDE_HOME/workspace.md" ] || case ",$COMPONENTS," in *,workspace,*) true ;; *) false ;; esac; then
+    block+="@$CLAUDE_HOME/workspace.md"$'\n'
+  fi
   block+="$end"
 
   if [ -f "$dst" ]; then
@@ -266,8 +355,8 @@ cmd_status() {
   echo "  config dir : $ROOT_DIR"
   echo "  ~/.claude  : $CLAUDE_HOME"
   echo
-  printf '%-12s %-10s %s\n' "Component" "State" "Target"
-  printf '%-12s %-10s %s\n' "─────────" "─────" "──────"
+  printf '%-13s %-14s %s\n' "Component" "State" "Target"
+  printf '%-13s %-14s %s\n' "─────────" "─────" "──────"
   for name in skills agents commands output-styles; do
     local dst="$CLAUDE_HOME/$name"
     local src="$ROOT_DIR/$name"
@@ -284,7 +373,7 @@ cmd_status() {
     else
       state="missing"; target="—"
     fi
-    printf '%-12s %-10s %s\n' "$name" "$state" "$target"
+    printf '%-13s %-14s %s\n' "$name" "$state" "$target"
   done
 
   # hooks
@@ -295,7 +384,7 @@ cmd_status() {
   else
     hooks_state="missing"
   fi
-  printf '%-12s %-10s %s\n' "hooks" "$hooks_state" "in $settings"
+  printf '%-13s %-14s %s\n' "hooks" "$hooks_state" "in $settings"
 
   # claude-md: глобальная память, импортирующая rules/
   local cmd_file="$CLAUDE_HOME/CLAUDE.md" cmd_state
@@ -304,14 +393,14 @@ cmd_status() {
   else
     cmd_state="missing"
   fi
-  printf '%-12s %-10s %s\n' "claude-md" "$cmd_state" "$cmd_file"
+  printf '%-13s %-14s %s\n' "claude-md" "$cmd_state" "$cmd_file"
 
   # outputStyle в settings.json
   local os_state="missing"
   if [ -f "$settings" ] && [ "$(jq -r '.outputStyle // empty' "$settings" 2>/dev/null)" = "personal" ]; then
     os_state="personal"
   fi
-  printf '%-12s %-10s %s\n' "outputStyle" "$os_state" "in $settings"
+  printf '%-13s %-14s %s\n' "outputStyle" "$os_state" "in $settings"
 
   # statusline: файл statusline.sh + .statusLine в settings.json
   local sl_dst="$CLAUDE_HOME/statusline.sh" sl_src="$ROOT_DIR/statusline/statusline.sh" sl_state sl_target
@@ -326,7 +415,33 @@ cmd_status() {
   if [ -f "$settings" ] && jq -e '.statusLine' "$settings" >/dev/null 2>&1; then
     sl_state="$sl_state +cfg"
   fi
-  printf '%-12s %-10s %s\n' "statusline" "$sl_state" "$sl_target"
+  printf '%-13s %-14s %s\n' "statusline" "$sl_state" "$sl_target"
+
+  # config: symlink репозитория, через который команды читают docs/shared и helpers
+  local cfg_dst="$CLAUDE_HOME/my-claude-config" cfg_state cfg_target
+  if [ -L "$cfg_dst" ]; then
+    cfg_target=$(readlink "$cfg_dst")
+    [ "$cfg_target" = "$ROOT_DIR" ] && cfg_state="linked-ok" || cfg_state="linked-foreign"
+  elif [ -e "$cfg_dst" ]; then
+    cfg_state="present"; cfg_target="(не наш путь)"
+  else
+    cfg_state="missing"; cfg_target="—"
+  fi
+  printf '%-13s %-14s %s\n' "config" "$cfg_state" "$cfg_target"
+
+  # workspace: сгенерированный ~/.claude/workspace.md + каталоги work/personal
+  local ws_dst="$CLAUDE_HOME/workspace.md" ws_state ws_target
+  if [ -f "$ws_dst" ]; then
+    ws_state="present"
+    # Показываем сами каталоги, а не первые попавшиеся кавычки в шапке файла.
+    ws_target=$(grep -E '^- (Рабочие|Личные) проекты' "$ws_dst" 2>/dev/null \
+      | sed -E 's/^- (Рабочие|Личные) проекты[^`]*`([^`]*)`.*/\1=\2/' | tr '\n' ' ')
+    [ -z "$ws_target" ] && ws_target="$ws_dst"
+  else
+    ws_state="missing"; ws_target="—"
+  fi
+  printf '%-13s %-14s %s\n' "workspace" "$ws_state" "$ws_target"
+
   echo
   echo "Run '$(basename "$0") install' to see install plan, add --apply to execute."
 }
@@ -344,12 +459,19 @@ cmd_install() {
     mkdir -p "$CLAUDE_HOME"
   fi
 
+  # workspace идёт до claude-md: управляемый блок подключает сгенерированный workspace.md.
+  case ",$COMPONENTS," in
+    *,workspace,*) install_workspace ;;
+  esac
+
   for comp in $(echo "$COMPONENTS" | tr ',' ' '); do
     case "$comp" in
       skills|agents|commands|output-styles) install_component "$comp" ;;
       hooks)                                 install_hooks ;;
       claude-md)                             install_claude_md ;;
       statusline)                            install_statusline_file ;;
+      config)                                install_config_link ;;
+      workspace)                             : ;;   # уже поставлен выше
     esac
   done
   # Настройки в settings.json ставим ПОСЛЕ hooks, чтобы merge хуков не затёр их.
@@ -413,6 +535,27 @@ cmd_uninstall() {
     echo "$(prefix) skip statusline.sh — is a real file, not installed by us. Trogai vruchnuiu."
   else
     echo "$(prefix) skip statusline.sh — not present"
+  fi
+
+  # config: убрать symlink на репозиторий
+  local cfg_dst="$CLAUDE_HOME/my-claude-config"
+  if [ -L "$cfg_dst" ]; then
+    if [ "$(readlink "$cfg_dst")" = "$ROOT_DIR" ]; then
+      do_or_echo "rm '$cfg_dst'"
+    else
+      echo "$(prefix) skip config — symlink ведёт не к нам"
+    fi
+  else
+    echo "$(prefix) skip config — not present"
+  fi
+
+  # workspace: убрать сгенерированный workspace.md. Каталоги work/personal НЕ трогаем —
+  # там лежат проекты пользователя.
+  local ws_dst="$CLAUDE_HOME/workspace.md"
+  if [ -f "$ws_dst" ]; then
+    do_or_echo "rm '$ws_dst'"
+  else
+    echo "$(prefix) skip workspace — not present"
   fi
 
   # claude-md: убрать управляемый блок из ~/.claude/CLAUDE.md (ручной контент сохраняем)

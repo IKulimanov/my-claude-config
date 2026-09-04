@@ -73,14 +73,16 @@ rules/
   03-implementation-quality.md     ← "не мешай функциональные и стилевые правки"
   04-context-loading.md            ← "не загружай все skills сразу"
   05-convention-precedence.md      ← "локальный CLAUDE.md важнее глобальных правил"
-  06-tdd-discipline.md             ← "iron-law TDD + выбор авторства теста"
+  06-tdd-discipline.md             ← "жёсткое правило TDD + выбор авторства теста"
   07-communication-and-language.md ← "язык, тон, комментарии vs доки, ширина строки"
+  08-think-first.md                ← "своя гипотеза до ответа агента"
+  09-project-profiles.md           ← "work или personal: где командный процесс действует, а где нет"
 ```
 
 **Как загружаются (важно):** Claude Code НЕ читает каталог `rules/` сам по себе. `setup-global.sh`
-генерирует `~/.claude/CLAUDE.md` с блоком `@import` на каждый файл `rules/*.md` (абсолютные пути
-в репо). Так правила попадают в каждую сессию через user-memory и наследуются субагентами
-(кроме встроенных Explore/Plan — они память пропускают).
+генерирует `~/.claude/CLAUDE.md` с блоком `@import` на каждый файл `rules/*.md` и на
+`~/.claude/workspace.md` (каталоги work/personal этой машины). Так правила попадают в каждую сессию
+через user-memory и наследуются субагентами (кроме встроенных Explore/Plan — они память пропускают).
 
 **Принцип:** Если инструкция нужна ВСЕГДА и для ВСЕХ проектов — это rule. Если только для Java/Vue/Go — это skill.
 

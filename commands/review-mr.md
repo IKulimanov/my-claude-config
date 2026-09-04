@@ -29,10 +29,10 @@ allowed-tools: Read, Grep, Glob, Bash, Agent, Write
 
 ## Шаг 2 — Загрузить конвенцию (приоритет №1)
 
-- Рабочий проект (cwd под `/Users/ivankulimanov/dev/work/`): коды правил брать из Sonar-выжимки
-  `~/dev/my-claude-config/skills/java-service-convention/references/sonar-rules.md` (совпадает с CI
-  Sonar по кодам LANG-/SPR-/DB-). За «почему» и детали — каноническая конвенция
-  `/Users/ivankulimanov/dev/work/java/convention-java/docs/` (`index.md` + релевантные диффу разделы).
+- Профиль **work** (rule «Профили проектов»): коды правил брать из Sonar-выжимки
+  `~/.claude/my-claude-config/skills/java-service-convention/references/sonar-rules.md` (совпадает с CI
+  Sonar по кодам LANG-/SPR-/DB-). За «почему» и детали — каноническая конвенция, путь к ней в
+  `~/.claude/workspace.md` (`index.md` + релевантные диффу разделы).
   Если выжимки нет — коды из заголовков канона (`### LANG-410`, `### SPR-902`).
   `sonar-rules.md` — внутренний материал: цитируй коды, не вставляй его текст дословно.
 - Прочий проект: guardrails из скила `java-service-convention`.
@@ -75,7 +75,9 @@ allowed-tools: Read, Grep, Glob, Bash, Agent, Write
 Записать файл (папку проекта создать при отсутствии). В `<branch>`/`<author>` заменить `/` и
 пробелы на `-`:
 
-`/Users/ivankulimanov/docs/work/reviews/<project>/<YYYY-MM-DD>__<branch>__<author>.md`
+`<каталог ревью>/<project>/<YYYY-MM-DD>__<branch>__<author>.md`
+
+Каталог ревью — ключ «Ревью чужих веток сохраняются в» из `~/.claude/workspace.md`.
 
 Шапка файла, затем находки из Шага 4:
 
@@ -98,10 +100,10 @@ allowed-tools: Read, Grep, Glob, Bash, Agent, Write
 продублируй ревью локально, чтобы оно было под рукой при доработках:
 
 ```bash
-DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<branch>")   # создаст .ai/<branch>/, заигнорит .ai/
+DIR=$(~/.claude/my-claude-config/scripts/helpers/ai-init.sh "<branch>")   # создаст .ai/<branch>/, заигнорит .ai/
 ```
 
-Скопировать тот же текст в `$DIR/review.md`. Основной файл в `~/docs/work/reviews/...` остаётся
+Скопировать тот же текст в `$DIR/review.md`. Основной файл в каталоге ревью остаётся
 источником истины.
 
 ## Шаг 6 — Краткий итог в чат
@@ -110,4 +112,4 @@ DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<branch>")   # созд
 - Счётчик: N CRITICAL, M WARNING, K SUGGESTION.
 - Если находок нет — сказать прямо и упомянуть остаточные риски / пробелы в тестах.
 - Раз в месяц полезно свести коды по всем ревью проекта (для ретро с командой, без нового инструмента):
-  `grep -h '^### \[' ~/docs/work/reviews/<project>/*.md | sed 's/\].*/]/' | sort | uniq -c | sort -rn`
+  `grep -h '^### \[' <каталог ревью>/<project>/*.md | sed 's/\].*/]/' | sort | uniq -c | sort -rn`

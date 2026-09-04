@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   show(location.hash&&document.getElementById(location.hash.slice(1))?location.hash.slice(1):'usage');
   const W=D.weeks;
   // 1 prompts by week/group
-  let b=chart('c-prompts','Промты по неделям и группам проектов','hooks/prompts.jsonl + history.jsonl; work = ~/dev/work, personal = ~/dev/personal, pkm = lifeOS, meta = my-claude-config');
+  let b=chart('c-prompts','Промты по неделям и группам проектов','hooks/prompts.jsonl + history.jsonl; work и personal — каталоги из ~/.claude/workspace.md, pkm = lifeOS, meta = my-claude-config');
   const grps=['work','personal','pkm','meta'];
   stackedBars(b,W,grps.map((g,k)=>({name:g,data:W.map(w=>(D.prompts_by_week_group[w]||{})[g]||0),color:COLORS[k]})),{stack:true,short:true,showTotal:true});
   // 2 tokens

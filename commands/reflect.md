@@ -17,7 +17,7 @@ allowed-tools: Read, Edit, Write, Grep, Glob, Bash(git diff:*), Bash(git status:
 
 `$ARGUMENTS` = "$ARGUMENTS"
 
-Если задан — это имя фичи в `.ai/<name>/` (конвенция `~/dev/my-claude-config/docs/AI_ARTIFACTS.md`). Тогда прочитай
+Если задан — это имя фичи в `.ai/<name>/` (конвенция `~/.claude/my-claude-config/docs/AI_ARTIFACTS.md`). Тогда прочитай
 `.ai/<name>/plan.md` (и `review.md`, если есть), чтобы понять, что агент пытался сделать. Это резко
 улучшает различение частного и общего. Если пусто — работай только по диффам.
 
@@ -60,7 +60,7 @@ git status
 Прочитай только релевантное правке (не всё подряд):
 - Локальный `CLAUDE.md` проекта — проектные конвенции.
 - Подходящий скил по стеку (Java/Go/Vue/DevOps) — если правка про стек-специфику. Найди нужный файл
-  скила/правила через Glob/Grep по `~/dev/my-claude-config/skills/` и `~/dev/my-claude-config/rules/`.
+  скила/правила через Glob/Grep по `~/.claude/my-claude-config/skills/` и `~/.claude/my-claude-config/rules/`.
 - Релевантные `rules/*.md` — если правка про общий процесс/безопасность/язык.
 - Индекс памяти `MEMORY.md` — если правка про то, *как* тебе работать с пользователем (предпочтения,
   процесс, повторяющиеся замечания).
@@ -104,7 +104,7 @@ git status
 
 ## Шаг 5 — Куда это положить (выбор слоя)
 
-Прочитай `~/dev/my-claude-config/docs/EXTENSION_GUIDE.md` (раздел «Decision Rule») и применяй его:
+Прочитай `~/.claude/my-claude-config/docs/EXTENSION_GUIDE.md` (раздел «Decision Rule») и применяй его:
 
 - **Память (auto-memory, тип `feedback`)** — урок про то, *как тебе работать* (процесс, предпочтения,
   повторяющиеся замечания пользователя). Самый лёгкий и частый адресат. Формат и расположение — в

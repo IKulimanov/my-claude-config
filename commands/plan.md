@@ -6,31 +6,34 @@ allowed-tools: Read, Grep, Glob, Bash, Write
 
 # Plan
 
-Use this command when the task is ambiguous, multi-file, high-risk, or likely to change behavior.
+Команда нужна, когда задача неоднозначная, затрагивает много файлов, рискованная или скорее всего
+меняет поведение.
 
-## Workflow
+**Это только план. Код по нему не пишется** — реализация идёт отдельно через `/feature` или `/fix`.
 
-1. Read the project's `CLAUDE.md` and the most relevant source files.
-2. Restate the requirement in concrete terms.
-3. Identify affected files and any unknowns.
-4. List edge cases, dependencies, and risks.
-5. Choose an approach and be ready to explain **why this path** (which alternatives you rejected
-   and why) — the plan must make the reasoning visible, not just list steps.
-6. Define the validation and tests needed.
-7. Wait for approval before large changes.
+## Порядок работы
 
-## Persist to `.ai/` (light convention)
+1. Контекст и стек — по общему блоку `~/.claude/my-claude-config/docs/shared/stack-detection.md`
+   (чтение локального `CLAUDE.md`, детект стека, профиль work или personal, загрузка скилов).
+   Здесь это не дублируется.
+2. Дальше — шаги 3-5 из `/feature` (`~/.claude/my-claude-config/commands/feature.md`): затронутые
+   слои, открытые вопросы, поэтапный план. Остановись на плане: шаги 6-8 (реализация, проверка,
+   ворота конвенции) в этой команде не выполняются.
+3. Дождись подтверждения. Крупные изменения без него не начинай.
 
-When working inside a repo, save the plan as a durable artifact (see `docs/AI_ARTIFACTS.md`):
+## Сохранение в `.ai/` (лёгкая конвенция)
+
+Если работаешь внутри репозитория, сохрани план как долгоживущий артефакт (см. `docs/AI_ARTIFACTS.md`):
 
 ```bash
-DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<task>")   # creates .ai/<task>/, gitignores .ai/
+DIR=$(~/.claude/my-claude-config/scripts/helpers/ai-init.sh "<task>")   # создаст .ai/<task>/, заигнорит .ai/
 ```
 
-Write the plan below to `$DIR/plan.md`. Optional for trivial tasks.
+Запиши план в `$DIR/plan.md`. Для тривиальных задач можно не сохранять.
 
-## Output Format
+## Формат вывода
 
-Follow `~/dev/my-claude-config/docs/shared/plan-template.md` exactly — Russian, plain words, and
-the mandatory **«Каким путём идём»** section that explains the chosen approach and why, not just a
-list of steps. The plan the user reads must let them follow your reasoning end to end.
+Точно по `~/.claude/my-claude-config/docs/shared/plan-template.md` — русский, простые слова и
+обязательная секция **«Каким путём идём»**: она объясняет выбранный подход и почему именно он (какие
+варианты отклонены и почему), а не просто перечисляет шаги. По плану пользователь должен пройти за
+твоей мыслью от начала до конца.

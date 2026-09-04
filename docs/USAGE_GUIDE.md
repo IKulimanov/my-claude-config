@@ -151,7 +151,7 @@ Stack trace: [вставь trace]
 ### Новая задача в Go-сервисе
 
 ```
-Загрузи skill go-service.
+Загрузи skill go-best-practices.
 Нужно добавить HTTP handler для GET /health с проверкой подключения к БД.
 Проект использует chi router и pgx.
 ```
@@ -163,7 +163,7 @@ Stack trace: [вставь trace]
 ```
 /review
 
-Загрузи skill go-service.
+Загрузи skill go-best-practices.
 Проверь handler.go и service.go: правильная работа с context, error wrapping, тесты.
 ```
 

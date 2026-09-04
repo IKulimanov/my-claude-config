@@ -18,7 +18,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent, AskUserQuestion
 
 **Аргументы:** `$ARGUMENTS` = "$ARGUMENTS". Если пусто — спроси, что реализовать.
 
-## Конвенция артефактов (тяжёлый вариант, см. `~/dev/my-claude-config/docs/AI_ARTIFACTS.md`)
+## Конвенция артефактов (тяжёлый вариант, см. `~/.claude/my-claude-config/docs/AI_ARTIFACTS.md`)
 
 ```
 .ai/<project>/
@@ -30,7 +30,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent, AskUserQuestion
   b/ ...
 ```
 
-## Фаза 0 — Setup
+## Фаза 0 — Подготовка
 
 1. Запомни время старта (`date`) как `$START_TIME` — покажешь общее время в конце.
 2. **Детект follow-up (СНАЧАЛА).** Возьми первый токен `$ARGUMENTS` как `FIRST_TOKEN`. Параллельно:
@@ -40,7 +40,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent, AskUserQuestion
    - Файла нет → **новый проект**: выбери короткое kebab-имя, не конфликтующее со списком. Буква = `a`.
 3. Создай скелет:
    ```bash
-   DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<project>" "<letter>")  # .ai/<project>/<letter>/ + gitignore
+   DIR=$(~/.claude/my-claude-config/scripts/helpers/ai-init.sh "<project>" "<letter>")  # .ai/<project>/<letter>/ + gitignore
    ```
 
 ## Фаза 1 — Сбор контекста (свежий подагент)
@@ -50,7 +50,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent, AskUserQuestion
 Follow-up вида «продолжай / следующая фаза» — не спрашивать.
 
 Запусти агента `Explore` (read-only). В промпте:
-- Сначала следуй `~/dev/my-claude-config/docs/shared/stack-detection.md` (детект стека, нужные скилы).
+- Сначала следуй `~/.claude/my-claude-config/docs/shared/stack-detection.md` (детект стека, нужные скилы).
 - Прочитай локальный `CLAUDE.md` и весь код, релевантный задаче. Лучше прочитать больше.
 - Для нового проекта напиши ДВА файла; для follow-up — сначала прочитай `.ai/<project>/about.md` и
   `context.md` предыдущей буквы, пойми, что уже сделано, затем напиши файлы.
@@ -70,7 +70,7 @@ External contracts (API/Kafka/DB) · Build/Test commands · Reference Implementa
 
 Запусти агента `Plan`. В промпте: прочитать `.ai/<project>/<letter>/context.md` и упомянутые в нём
 исходники, затем написать `.ai/<project>/<letter>/plan.md` по формату
-`~/dev/my-claude-config/docs/shared/plan-template.md`. **Секция «Каким путём идём» обязательна** —
+`~/.claude/my-claude-config/docs/shared/plan-template.md`. **Секция «Каким путём идём» обязательна** —
 план должен объяснять выбранный подход и почему именно он (какие варианты отклонили), простым
 русским, а не только перечислять шаги. Каждый шаг — конкретный (точные пути, имена функций, что и
 где добавить/изменить) с проверкой. Группируй шаги в фазы, если их больше ~8. В конце plan.md —
@@ -113,10 +113,10 @@ External contracts (API/Kafka/DB) · Build/Test commands · Reference Implementa
 ## Фаза 6 — Цикл ревью (до 3 итераций)
 
 `R = 1`. Делегируй профильному ревьюеру (`java-reviewer` / `go-reviewer` / `vue-reviewer`; прочие
-стеки или если профильный агент недоступен — ревью напрямую по `~/dev/my-claude-config/commands/review.md`).
-Передай агенту дифф (`git diff`) и формат находок. **Для рабочего Java-проекта (cwd под `~/dev/work/`)
+стеки или если профильный агент недоступен — ревью напрямую по `~/.claude/my-claude-config/commands/review.md`).
+Передай агенту дифф (`git diff`) и формат находок. **Для Java в профиле work (rule «Профили проектов»)
 ревьюер обязан сверить дифф с Sonar-выжимкой**
-`~/dev/my-claude-config/skills/java-service-convention/references/sonar-rules.md` по кодам
+`~/.claude/my-claude-config/skills/java-service-convention/references/sonar-rules.md` по кодам
 (LANG-/SPR-/DB-) — это предфильтр перед CI Sonar, финальный вердикт даёт quality gate.
 `sonar-rules.md` — внутренний материал: цитируй коды правил, не вставляй его текст/примеры
 дословно в артефакты ревью (`.ai/`, отчёты).
