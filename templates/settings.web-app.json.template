@@ -19,6 +19,12 @@
       "Bash(npx *)",
       "Bash(node *)",
       "Bash(curl -s *)"
+    ],
+    "ask": [
+      "Edit(**/Dockerfile*)",
+      "Write(**/Dockerfile*)",
+      "Edit(**/package.json)",
+      "Write(**/package.json)"
     ]
   }
 }

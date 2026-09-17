@@ -68,3 +68,11 @@ hook_slash_command() {
     printf '%s' "${BASH_REMATCH[1]}"
   fi
 }
+
+# Отдать JSON-ответ для PreToolUse-ask: действие показывается пользователю с причиной.
+# Args: <reason>
+hook_ask() {
+  local reason="$1"
+  jq -n --arg r "$reason" \
+    '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "ask", permissionDecisionReason: $r}}'
+}

@@ -1,22 +1,57 @@
 ---
 name: git-convention
-description: Use for branch naming, commit messages, and merge flow in team Java services that follow the staging-based workflow.
+description: Ветки, сообщения коммитов и запреты git для рабочих (Jira, staging-flow) и личных проектов. Используй при создании ветки, коммите, вопросах про push/merge/rebase или формат сообщения коммита.
 ---
 
-# Git Convention
+# Git-конвенция
 
-Use this skill when the task involves branch naming, commit preparation, staging merges, or release flow discussion.
+Единый источник форматов для хуков `check-commit-msg.sh` и `guard-git.sh` (правило 09).
 
-## Workflow
+## Кто что делает
 
-1. Confirm whether the repository follows the team staging flow.
-2. Read `references/flow.md`.
-3. Apply the branch and commit naming rules.
-4. If the repo documents an exception in its local `CLAUDE.md` or README, prefer the repo-local rule.
+| Действие | Кто |
+|---|---|
+| ветка от master, add, commit, stash, fetch, diff, log, status | агент |
+| push, merge, rebase, pull, MR, переключение на master/main/staging/prod | пользователь |
+| reset --hard, clean -f, branch -D, stash drop, checkout/restore файлов, commit --amend | агент после подтверждения |
 
-## Guardrails
+## Ветка
 
-- Work in dedicated branches created from `master`.
-- Validate through `staging` when the repo follows that flow.
-- Never merge `staging` into `master`.
-- Do not create direct commits in `master` or `staging`.
+`{type}/{JIRA-ID}-{короткое-описание}`, type: feature, hotfix, refactor, docs.
+Пример: `feature/ORSP-2864-service-config-localization`. Личные проекты: `{type}/{описание}`, без Jira-ID.
+
+## Сообщение коммита
+
+Рабочий проект (`~/dev/work/`):
+
+```
+ORSP-2864: Добавить ретрай отправки в Kafka
+
+Причина: провайдер отвечает 503 при пиковой нагрузке; без повтора событие теряется.
+```
+
+Личный проект:
+
+```
+feat(api): добавить ретрай отправки в Kafka
+```
+
+- Первая строка ≤ 72 символа. Описание по-русски, начинается с глагола в инфинитиве: в рабочем проекте
+  с заглавной после Jira-ID, в личном — со строчной после типа.
+- Типы личного проекта: feat, fix, docs, refactor, test, chore, build, ci, perf; scope по желанию.
+- Тело по желанию: отвечает «почему», а не «что»; без списка файлов.
+- Трейлеры запрещены: `Co-Authored-By`, `Signed-off-by`, `Generated with`.
+- Исключения формата: `Merge …`, `Revert "…"`.
+- Сообщение передаётся через `-m` (можно несколько) или heredoc; без сообщения хук откажет —
+  редактора у агента нет.
+
+## Staging-flow рабочих проектов
+
+- `master` и `staging` — основные ветки; рабочие ветки создаются от `master`.
+- Проверка идёт через слияние в `staging`; правки — в той же рабочей ветке и снова в `staging`.
+- Перед финальным слиянием ветка обновляется от `master`, конфликты решаются локально.
+- В `master` — только после проверки на `staging`; `staging` в `master` не сливается никогда;
+  после слияния рабочая ветка удаляется.
+
+Всё это делает пользователь. Агент готовит ветку и коммиты и не смешивает функциональные правки
+со стилистическим рефакторингом в одном коммите (правило 03).

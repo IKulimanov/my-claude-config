@@ -18,6 +18,10 @@
       "Bash(mvn test *)",
       "Bash(./mvnw test *)",
       "Bash(cargo test *)"
+    ],
+    "ask": [
+      "Edit(**/Dockerfile*)",
+      "Write(**/Dockerfile*)"
     ]
   }
 }

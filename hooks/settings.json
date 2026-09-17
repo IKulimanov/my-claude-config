@@ -1,6 +1,26 @@
 {
-  "_comment": "Hook config for personal claude-config. Replace HOOKS_DIR via sed before installing, or set CLAUDE_HOOKS_DIR=/abs/path/to/my-claude-config/hooks/scripts in env. Logs land in $HOME/.claude/logs/*.jsonl.",
-  "_install": "См. docs/HOOKS_GUIDE.md → 'Установка'. Кратко: sed -e 's|HOOKS_DIR|/Users/ivankulimanov/dev/my-claude-config/hooks/scripts|g' hooks/settings.json > ~/.claude/settings.json (merge с существующим).",
+  "_comment": "Хуки и permissions личного конфига. HOOKS_DIR подменяется на абсолютный путь при установке (scripts/install-hooks.sh --write или scripts/setup-global.sh install --apply). Логи — $HOME/.claude/logs/*.jsonl.",
+  "_install": "scripts/install-hooks.sh --write сливает секции hooks и permissions.deny/ask в ~/.claude/settings.json с бэкапом; allow не трогает. Описание хуков — docs/TECHNICAL.md.",
+
+  "permissions": {
+    "deny": [
+      "Bash(git push*)",
+      "Bash(git merge *)",
+      "Bash(git rebase *)",
+      "Bash(git pull*)"
+    ],
+    "ask": [
+      "Edit(**/.gitlab-ci.yml)",
+      "Write(**/.gitlab-ci.yml)",
+      "MultiEdit(**/.gitlab-ci.yml)",
+      "Edit(**/.gitlab/**)",
+      "Write(**/.gitlab/**)",
+      "MultiEdit(**/.gitlab/**)",
+      "Edit(**/helm/**)",
+      "Write(**/helm/**)",
+      "MultiEdit(**/helm/**)"
+    ]
+  },
 
   "hooks": {
     "PreToolUse": [
@@ -8,7 +28,14 @@
         "matcher": "Bash",
         "hooks": [
           { "type": "command", "command": "HOOKS_DIR/block-destructive.sh", "timeout": 10 },
-          { "type": "command", "command": "HOOKS_DIR/block-push-secrets.sh", "timeout": 60 }
+          { "type": "command", "command": "HOOKS_DIR/guard-git.sh", "timeout": 10 },
+          { "type": "command", "command": "HOOKS_DIR/check-commit-msg.sh", "timeout": 10 }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|Bash",
+        "hooks": [
+          { "type": "command", "command": "HOOKS_DIR/guard-paths.sh", "timeout": 10 }
         ]
       },
       {

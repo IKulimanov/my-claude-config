@@ -14,6 +14,12 @@
       "Bash(go vet ./...)",
       "Bash(go build *)",
       "Bash(golangci-lint *)"
+    ],
+    "ask": [
+      "Edit(**/Dockerfile*)",
+      "Write(**/Dockerfile*)",
+      "Edit(**/go.mod)",
+      "Write(**/go.mod)"
     ]
   }
 }

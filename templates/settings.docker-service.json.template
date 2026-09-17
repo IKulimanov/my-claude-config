@@ -19,6 +19,12 @@
       "Bash(docker images *)",
       "Bash(docker stats *)",
       "Bash(docker inspect *)"
+    ],
+    "ask": [
+      "Edit(**/Dockerfile*)",
+      "Write(**/Dockerfile*)",
+      "Edit(**/docker-compose*.yml)",
+      "Write(**/docker-compose*.yml)"
     ]
   }
 }

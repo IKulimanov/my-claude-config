@@ -12,6 +12,12 @@
       "Bash(mvn -Dtest=* test)",
       "Bash(mvn package *)",
       "Bash(mvn verify *)"
+    ],
+    "ask": [
+      "Edit(**/Dockerfile*)",
+      "Write(**/Dockerfile*)",
+      "Edit(**/pom.xml)",
+      "Write(**/pom.xml)"
     ]
   }
 }

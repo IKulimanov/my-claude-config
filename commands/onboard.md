@@ -118,6 +118,20 @@ Use `AskUserQuestion` for things that cannot be detected from code. Ask in a sin
    ```
 5. Запиши в `CLAUDE.md`.
 
+### Step 6b — Проектные права (`.claude/settings.local.json`)
+
+Глобальные ограждения (правило 09) закрывают git, `.gitlab-ci.yml`, `.gitlab/`, `helm/`. Проектные добавки
+(Dockerfile, манифесты зависимостей) живут в `.claude/settings.local.json` проекта — файл личный, в git не идёт.
+
+1. Возьми `permissions.ask` из шаблона профиля: `templates/settings.<profile>.json.template`
+   (`java-service` → `pom.xml`, `go-service` → `go.mod`, `web-app` → `package.json`, `docker-service` → compose).
+2. Если `.claude/settings.local.json` нет — создай с секцией `permissions.ask` из шаблона. Если есть — добавь
+   недостающие элементы в `permissions.ask`, остальное не трогай.
+3. Убедись, что `.claude/settings.local.json` есть в `.gitignore` проекта (добавь строку один раз, как
+   `ai-init.sh` делает для `.ai/`).
+4. Спроси пользователя одним вопросом, есть ли в проекте другие папки «не трогать без запроса», и добавь их
+   в тот же список (`Edit(<путь>/**)`, `Write(<путь>/**)`).
+
 ### Step 7 — Report
 
 Выведи короткий отчёт:
