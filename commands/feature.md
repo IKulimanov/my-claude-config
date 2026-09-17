@@ -1,87 +1,67 @@
 ---
-description: Develop a feature with plan-first flow. Auto-detects the stack (Java/Spring, Go, Vue/Vite), loads relevant skills, maps affected layers, asks clarifying questions, then implements step by step with tests.
-argument-hint: <feature description or Jira ID>
-allowed-tools: Read, Edit, Write, Grep, Glob, Bash, Agent
+description: Фича или заметное изменение в один контекст — стек, план по умению planning с кейсами внутри, один проход критика, согласование, реализация по TDD, локальный Sonar, два ревьюера. Для нескольких фаз — /task, для бага — /fix, для точечной правки — /quick.
+argument-hint: <описание фичи или Jira-ID>
+allowed-tools: Read, Edit, Write, Grep, Glob, Bash, Agent, AskUserQuestion
 ---
 
-# Feature Development
+# /feature — фича в один контекст
 
-Use this command for any new feature or significant change. It enforces a plan-first flow and automatically loads the skills needed based on the detected stack.
+## Шаг 1 — Контекст и стек
 
-## Workflow
+`~/dev/my-claude-config/shared/stack-detection.md`: локальный `CLAUDE.md`, стек, рабочий или личный
+проект, нужные скилы. Переформулируй требование в конкретных технических терминах.
 
-### Step 1-2 — Load context, detect stack, load skills
+## Шаг 2 — Слои и вопросы
 
-Follow the shared block: `~/dev/my-claude-config/docs/shared/stack-detection.md`. It covers reading
-the local `CLAUDE.md`, detecting Java/Spring · Go · Vue/Vite · Web, detecting WORK vs personal
-project, restating the requirement, and the per-stack skill-loading tables.
+Перечисли затронутые слои по `~/dev/my-claude-config/shared/affected-layers.md`. Вопросы — только
+настоящие блокеры: нехватка требований, развилка с важным выбором, внешняя зависимость, риск выката,
+безопасность. Правило 08: нет варианта автора — один вопрос «Твой вариант в 1–3 строках?».
 
-### Step 3 — Map affected layers
+## Шаг 3 — План и кейсы
 
-List every layer the feature will touch, using the checklist in
-`~/dev/my-claude-config/docs/shared/affected-layers.md` (Java/Spring · Go · Vue/Vite).
-
-### Step 4 — State open questions
-
-Surface ambiguities that would lead to wrong implementation:
-- Missing requirements (edge cases, error behavior, validation rules)
-- Design decisions with real trade-offs
-- External dependencies that need coordination (schema change, API contract)
-- Rollout risks (backward compatibility, data migration)
-- Security considerations
-
-**Do not ask about obvious things. Only surface genuine blockers.**
-
-### Step 5 — Produce phased implementation plan
-
-Present the plan for approval before implementing, using the shared format in
-`~/dev/my-claude-config/playbook/templates/plan-template.md` — Russian sections, including the **mandatory
-«Каким путём идём»** (explains the chosen approach and why, not just a list of steps). The plan must
-let the reader follow your reasoning, not only what changes.
-
-**Wait for approval or answers to open questions.**
-
-#### Persist the plan to `.ai/` (light convention)
-
-When working inside a repo, save the approved plan as a durable artifact so it survives context
-compaction and follow-ups. See `docs/AI_ARTIFACTS.md`.
+Загрузи скил `planning`. Напиши план по `~/dev/my-claude-config/playbook/templates/plan-template.md`;
+кейсы — в секции «Тесты» плана в формате Дано/Когда/Тогда с уровнем (1–3 на шаг, обязательно граница
+и ошибка). Сохрани в `.ai/<фича>/plan.md`:
 
 ```bash
-DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<feature>")   # creates .ai/<feature>/, gitignores .ai/
+DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<фича>")
 ```
 
-Write the plan to `$DIR/plan.md`. Update it as the implementation evolves. This is optional for
-trivial changes.
+## Шаг 4 — Критик
 
-### Step 6 — Implement step by step (TDD-first, iron law)
+`critic`, точка 1, вход — план с кейсами; выход `.ai/<фича>/critique1.md`. Внеси «блокирует» и «стоит»,
+«по желанию» — в «Границы».
 
-After approval, for each step:
-1. **RED:** Author the failing test FIRST. Delegate test design to the stack's test-writer agent — Java/Spring → `test-writer`, Go → `go-test-writer`, Vue/Vite → `vue-test-writer`. The agent is read-only: it returns the test code; you write it to the test file and run it, confirming it fails for the right reason. For any other stack, write the failing test directly. (Or let the user write it — see test authorship in `rules/06-tdd-discipline.md`.)
-2. **GREEN:** Write the minimal production code to make the test pass. Run it. Confirm green.
-3. **REFACTOR:** Clean up code and test without changing behavior. Re-run tests.
-4. Only THEN move to the next step.
+## Шаг 5 — Согласование (единственная остановка)
 
-If you cannot write a failing test first (e.g., genuine UI-only change with no behavior to assert), pause and discuss before proceeding. See `rules/06-tdd-discipline.md`.
+Покажи «Решение», шаги и кейсы. AskUserQuestion: «Согласовать план и кейсы?» — «да», «поправить: …»,
+«добавить кейсы: …». Автор добавляет хотя бы один свой случай или говорит «случаи твои» (правило 06).
+После «да» — `Статус: согласован <дата>` в плане; кейсы заморожены.
 
-If an unexpected complication arises, pause and report before continuing.
+## Шаг 6 — Реализация по шагам (TDD)
 
-### Step 7 — Validate
+Для каждого шага: `plan-status.sh <plan.md> <шаг> wip` →
+1. **RED:** код тестов по кейсам шага — стек-тест-райтер (`test-writer` / `go-test-writer` /
+   `vue-test-writer`; они только возвращают код) или пользователь, если он взял тесты на себя.
+   Запусти через `scripts/helpers/test-summary.sh`; убедись, что падают по правильной причине.
+2. **GREEN:** минимальный прод-код, тесты зелёные.
+3. **REFACTOR:** почисти без смены поведения, тесты снова зелёные.
+`plan-status.sh <шаг> done`. Кейсы после согласования не менять — нужное изменение через вопрос.
+Стоп-точка `[#]` — остановись и жди «дальше».
 
-Run the appropriate validation:
-- **Java**: `mvn verify` (or from `CLAUDE.md`)
-- **Go**: `go test ./... && go vet ./...`
-- **Vue/Vite**: `npm run test` or `npx vitest run`
+## Шаг 7 — Проверка и Sonar
 
-### Step 8 — Convention gate (Java work projects), then report
+Полный прогон тестов через `test-summary.sh`. Рабочий Java-проект при заданных `SONAR_HOST_URL`
+и `SONAR_TOKEN`: `scripts/helpers/sonar-local.sh` → цикл исправлений как в `/task` шаг 10 (собственные
+правила и BLOCKER/HIGH — чинить; спорные — один вопрос пакетом; не больше двух кругов).
 
-Before declaring the feature done, run the convention pre-check on the final diff so drift is caught
-locally, not by CI. For a WORK Java project (cwd under `~/dev/work/`), check the diff against the
-Sonar-aligned checklist `~/dev/my-claude-config/skills/java-service-convention/references/sonar-rules.md`
-(codes LANG-/SPR-/DB-) — equivalent to running `/convention-check`. Fix violations with TDD, then
-re-validate. This is a pre-filter: the authoritative gate is CI Sonar (`mvn verify sonar:sonar
--Dsonar.qualitygate.wait=true`). For non-Java or personal projects, skip.
+## Шаг 8 — Ревью
 
-`sonar-rules.md` is internal team material — cite rule codes (LANG-410, SPR-902); do not paste its
-prose or code examples verbatim into shared outputs.
+Параллельно `convention-reviewer` и стек-ревьюер (`java-reviewer` / `go-reviewer` / `vue-reviewer`;
+при миграциях `migration-reviewer`). Закрой «блокирует», CRITICAL и WARNING по TDD; повторное ревью —
+один раз. Итог — в `.ai/<фича>/review.md`.
 
-Only after this — report what was verified, the convention-gate result, and any residual risks.
+## Шаг 9 — Отчёт
+
+Что сделано и проверено, Sonar, находки ревью и что осталось, остаточные риски. Коммит — только
+по просьбе и только в локальную ветку (правило 09).

@@ -1,69 +1,46 @@
 ---
-description: Review current changes for bugs, regressions, security risks, and missing tests. Auto-detects the stack (Java/Spring, Go, Vue) and delegates to the matching reviewer agent; other stacks are reviewed directly.
-argument-hint: [optional path or PR scope]
-allowed-tools: Read, Grep, Glob, Bash, Agent, Write
+description: Ревью текущих изменений — локальный Sonar для рабочих Java-проектов с циклом исправлений, затем параллельно convention-reviewer (коды конвенции, библиотеки, git) и стек-ревьюер (баги, структура, переусложнение, тесты). Прочие стеки — напрямую. Итог в .ai/<ветка>/review.md.
+argument-hint: [путь или scope] [--без-sonar]
+allowed-tools: Read, Grep, Glob, Bash, Agent, Write, AskUserQuestion
 ---
 
-# Review
+# /review — ревью изменений
 
-Review the current changes with a code-review mindset.
+## Шаг 1 — Дифф и стек
 
-## Workflow
+Дифф: `git diff master...HEAD` плюс незакоммиченные изменения, или scope из аргумента. Стек и тип
+проекта — по `~/dev/my-claude-config/shared/stack-detection.md`. Каталог артефакта:
+`DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<ветка>")`.
 
-1. Inspect the current diff and changed files.
-2. Detect the stack and route the review:
+## Шаг 2 — Sonar (рабочий Java-проект)
 
-### Java/Spring → `java-reviewer` agent
-- Agent auto-loads: `java-service-convention`, `jpa-db-review`, `integration-patterns`, `testing`
-- Agent knows the full team convention — no need to duplicate rules here.
+Если нет `--без-sonar` и заданы `SONAR_HOST_URL` и `SONAR_TOKEN`: `scripts/helpers/sonar-local.sh` →
+`$DIR/sonar.md`. Цикл исправлений: собственные правила команды (`nurtelecomconventionjavarules`) и
+встроенные BLOCKER/HIGH — исправить сразу; MEDIUM механические — исправить, требующие переделки —
+спросить; LOW, INFO, спорные — один вопрос пакетом (исправить / пропустить / отложить), ответы
+записать в `sonar.md`. Исправления с изменением поведения — через тест. Повторный прогон; не больше
+двух кругов. Sonar не настроен — отметить и идти дальше.
 
-### Go → `go-reviewer` agent
-- Agent auto-loads: `go-best-practices`
+## Шаг 3 — Два ревьюера параллельно
 
-### Vue/Vite (`.vue`, `package.json` with vue) → `vue-reviewer` agent
-- Agent auto-loads: `vue-frontend`
+- `convention-reviewer`: дифф, тип проекта, путь к `sonar.md` (или без него — сам возьмёт правила через
+  `sonar-rules-for-diff.sh`).
+- Стек-ревьюер: Java → `java-reviewer`, Go → `go-reviewer`, Vue → `vue-reviewer`; при миграциях, индексах
+  или JPA-маппинге дополнительно `migration-reviewer`. Передай дифф и, если есть, `plan.md` и `tests.md`.
+- Web без Vue, DevOps (Docker, CI, K8s, Terraform) и прочие стеки — ревью напрямую с нужным скилом
+  по правилам ниже.
 
-### Web (generic HTML/CSS/JS, server templates)
-- No dedicated agent — load the `web-app` skill and review directly.
+## Шаг 4 — Слияние и сохранение
 
-### DevOps (Docker, CI, K8s, Terraform)
-- Load the relevant skill (`docker`, `terraform`, `gitlab-ci`, `kubernetes`, `helm`).
-- No dedicated agent — review directly.
+Порядок: коды конвенции → CRITICAL → WARNING → SUGGESTION (не больше пяти развёрнуто) → «Упростить» →
+«Тесты» (удалено, ослаблено, непокрытые кейсы). Дубли убрать. Записать в `$DIR/review.md`; в чат —
+счётчики по серьёзности и находки CRITICAL/WARNING одной строкой каждая.
 
-### Any other stack
-- No dedicated agent — review directly with general code-review judgment.
+## Правила прямого ревью
 
-For every directly-reviewed branch (Web, DevOps, other), apply the Output Rules and Severity Bands below.
-
-3. Focus on correctness, behavioral regressions, and risky assumptions.
-4. Check security-sensitive paths, input validation, and error handling.
-5. Check whether tests cover new or changed behavior.
-6. Ignore pure style nits unless they hide a real risk.
-
-## Output Rules
-
-- Findings come first.
-- Order findings by severity.
-- Include file and line references whenever possible.
-- Keep each finding concrete: what is wrong, why it matters, what can break.
-- Reference convention rule IDs when applicable — for work Java projects use the real codes from
-  `~/dev/my-claude-config/skills/java-service-convention/references/sonar-rules.md` (e.g. `LANG-410`,
-  `SPR-902`); do not invent codes. That file is internal team material — cite codes, don't paste its
-  prose or examples verbatim.
-- If there are no findings, state that explicitly and mention residual risks or test gaps.
-
-## Severity Bands
-
-- **CRITICAL**: data loss, security exposure, broken behavior, or unsafe rollout risk
-- **WARNING**: likely bug, regression risk, missing validation, or serious maintainability issue
-- **SUGGESTION**: lower-impact improvement worth considering
-
-## Persist to `.ai/` (light convention)
-
-When working inside a repo, save the findings as a durable artifact (see `docs/AI_ARTIFACTS.md`):
-
-```bash
-DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<feature-or-branch>")
-```
-
-Write the review (findings + severities) to `$DIR/review.md`. Optional when there are no findings.
+- Сначала находки, по серьёзности; файл и строка; что не так, почему важно, что сломается.
+- CRITICAL — потеря данных, безопасность, сломанное поведение, опасный выкат; WARNING — вероятный баг,
+  регрессия, нет валидации; SUGGESTION — улучшение.
+- Стилевые придирки без риска не писать. Нет находок — сказать прямо и назвать остаточные риски и
+  пробелы в тестах.
+- Коды конвенции — только реальные из `sonar-rules.md`; текст правил не цитировать.
