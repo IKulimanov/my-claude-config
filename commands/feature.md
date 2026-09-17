@@ -35,7 +35,7 @@ Surface ambiguities that would lead to wrong implementation:
 ### Step 5 — Produce phased implementation plan
 
 Present the plan for approval before implementing, using the shared format in
-`~/dev/my-claude-config/docs/shared/plan-template.md` — Russian sections, including the **mandatory
+`~/dev/my-claude-config/playbook/templates/plan-template.md` — Russian sections, including the **mandatory
 «Каким путём идём»** (explains the chosen approach and why, not just a list of steps). The plan must
 let the reader follow your reasoning, not only what changes.
 

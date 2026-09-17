@@ -31,6 +31,6 @@ Write the plan below to `$DIR/plan.md`. Optional for trivial tasks.
 
 ## Output Format
 
-Follow `~/dev/my-claude-config/docs/shared/plan-template.md` exactly — Russian, plain words, and
+Follow `~/dev/my-claude-config/playbook/templates/plan-template.md` exactly — Russian, plain words, and
 the mandatory **«Каким путём идём»** section that explains the chosen approach and why, not just a
 list of steps. The plan the user reads must let them follow your reasoning end to end.

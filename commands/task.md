@@ -70,7 +70,7 @@ External contracts (API/Kafka/DB) · Build/Test commands · Reference Implementa
 
 Запусти агента `Plan`. В промпте: прочитать `.ai/<project>/<letter>/context.md` и упомянутые в нём
 исходники, затем написать `.ai/<project>/<letter>/plan.md` по формату
-`~/dev/my-claude-config/docs/shared/plan-template.md`. **Секция «Каким путём идём» обязательна** —
+`~/dev/my-claude-config/playbook/templates/plan-template.md`. **Секция «Каким путём идём» обязательна** —
 план должен объяснять выбранный подход и почему именно он (какие варианты отклонили), простым
 русским, а не только перечислять шаги. Каждый шаг — конкретный (точные пути, имена функций, что и
 где добавить/изменить) с проверкой. Группируй шаги в фазы, если их больше ~8. В конце plan.md —

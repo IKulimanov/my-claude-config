@@ -1,0 +1,115 @@
+name: ZBX-1 Заполнение tablespace Oracle
+code: zbx-1
+source: zabbix
+external-key: tablespace-full
+# manual | auto | by-database; реакции пока не доверяем — все задачи через подтверждение DBA
+manual-mode: manual
+
+variables:
+  database_code:
+    description: Целевая БД
+    type: dictionary-item
+    dictionary: databases
+    from: event.host
+    required: true
+
+  tablespace:
+    description: Имя tablespace
+    type: string
+    from: event.tablespace
+    required: true
+
+  fill_percent:
+    description: Текущее заполнение, процент
+    type: number
+    from: event.fill_percent
+
+stages:
+  # несобравшаяся задача ничего в Zabbix не закрывает — уходит в ручной разбор
+  - code: prepare
+    name: Сборка задачи
+    handler: task-preparation
+    parameters:
+      custom-steps: allowed
+      # порядок записей — порядок выполнения на целевой БД.
+      # диск не выбирается: новый датафайл наследует ASM-диск и шаблон имени
+      # существующих датафайлов tablespace, номер — следующий по порядку.
+      # ${{ steps.<код>.<ключ> }} — выход предыдущего шага, подставляет исполнитель
+      steps:
+        - code: check-datafiles
+          name: Диск и имя следующего датафайла
+          template: ora-tbs-datafiles@1
+          # output_keys шаблона: asm_disk, next_datafile;
+          # скрипт сам роняет себя, если строка не одна или значения пустые
+          params:
+            tablespace: ${{ tablespace }}
+
+        - code: check-asm-free
+          name: На ASM-диске есть место
+          template: ora-asm-free@1
+          # упал — стоп: перенос датафайла на другой диск только вручную,
+          # с разрешения ответственного за архивацию (п. 5 инструкции)
+          params:
+            asm_disk: ${{ steps.check-datafiles.asm_disk }}
+            min_free_mb: "20480"
+
+        - code: add-datafile
+          name: Добавить датафайл
+          template: ora-add-datafile@1
+          params:
+            tablespace: ${{ tablespace }}
+            datafile: ${{ steps.check-datafiles.next_datafile }}
+
+        # месячные tablespace (датафайлов — как в прошлом месяце) — не авто:
+        # DBA добавляет недостающие add-datafile через custom-steps на confirm
+        - code: check-tablespace-free
+          name: Датафайл добавлен, место освободилось
+          template: ora-check-tablespace-free@1
+          params:
+            tablespace: ${{ tablespace }}
+            datafile: ${{ steps.check-datafiles.next_datafile }}
+            min_free_percent: "10"
+    listeners:
+      on-error:
+        - handler: notify
+          parameters:
+            to: db-engineers
+            channel: telegram
+            template: alarm-invalid
+
+  # ручной режим: реакция выполняется после подтверждения DBA (manual-mode: manual);
+  # когда реакции начнут доверять — новая версия с by-database (подтверждаем только
+  # на осторожных БД), затем auto
+  - code: confirm
+    name: Подтверждение выполнения на дашборде
+    handler: dashboard-approval
+    parameters:
+      approvers:
+        dictionary: db-assignments
+        filter: database == database_code
+    listeners:
+      on-start:
+        - handler: notify
+          parameters:
+            to: db-engineers
+            channel: telegram
+            template: alarm-task-created
+
+  - code: execute
+    name: Выполнение на БД
+    handler: database-execution
+    listeners:
+      # execute — последняя стадия: закрытие события в Zabbix на её on-success
+      on-success:
+        - handler: zabbix-close-event
+        - handler: notify
+          parameters:
+            to: db-engineers
+            channel: telegram
+            template: alarm-resolved
+      on-error:
+        - handler: notify
+          parameters:
+            to: db-engineers
+            channel: telegram
+            template: execution-failed

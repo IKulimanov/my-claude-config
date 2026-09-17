@@ -115,5 +115,5 @@ Do not write production code until the design has been reviewed. If the scope is
 ## After the decision
 
 If the user accepts an option that changes technology, a pattern with consequences, or an earlier design decision —
-record it as an ADR via `/adr` (rules and template: `~/dev/my-claude-config/docs/shared/adr-template.md`).
+record it as an ADR via `/adr` (rules and template: `~/dev/my-claude-config/playbook/templates/adr-template.md`).
 Do not inline the ADR into this output; the ADR is a separate file in the repo's `docs/adr/`.

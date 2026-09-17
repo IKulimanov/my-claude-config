@@ -1,0 +1,204 @@
+name: PG-2 Выдача прав существующей учётке PostgreSQL
+code: pg-2
+source: jira
+# id типа запроса «Центра поддержки»; проставить после заведения формы
+external-key: "100501"
+# manual | auto | by-database; by-database — подтверждаем только на БД, помеченных ручными
+manual-mode: by-database
+
+variables:
+  database_code:
+    description: Целевая БД
+    type: dictionary-item
+    dictionary: databases
+    from: customfield_10001
+    required: true
+
+  target_username:
+    description: Учётная запись
+    type: string
+    from: customfield_10002
+    required: true
+
+  scope:
+    description: Область выдачи прав
+    type: enum
+    values: [schema, owner, role]
+    from: customfield_10020
+    required: true
+
+  target_schema:
+    description: Схема
+    type: string
+    from: customfield_10011
+
+  grant_scope:
+    description: Объём — все объекты или конкретные
+    type: enum
+    values: [all, objects]
+    from: customfield_10012
+
+  objects:
+    description: Конкретные объекты
+    type: string
+    multiple: true
+    from: customfield_10013
+
+  privileges:
+    description: Привилегии
+    type: enum
+    values: [SELECT, INSERT, UPDATE, DELETE, EXECUTE, USAGE]
+    multiple: true
+    from: customfield_10021
+
+  target_role:
+    description: Существующая роль
+    type: string
+    from: customfield_10022
+
+  future_objects:
+    description: Права на будущие объекты
+    type: boolean
+    from: customfield_10023
+
+  requester:
+    description: Автор заявки
+    type: string
+    from: issue.reporter
+
+stages:
+  # согласование нужно там, где права выходят за пределы одной схемы:
+  # владелец схемы и права на будущие объекты
+  - code: approval
+    name: Согласование в Jira
+    handler: jira-approval
+    expression: scope == 'owner' or future_objects
+    parameters:
+      approvers:
+        - i.petrov
+        - s.sidorov
+    listeners:
+      on-start:
+        - handler: jira-transition
+          parameters:
+            status: На согласовании
+            fields:
+              customfield_10100: ${{ stage.approvers }}
+        - handler: notify
+          parameters:
+            to: db-engineers
+            channel: telegram
+            template: task-created
+      on-reject:
+        - handler: jira-transition
+          parameters:
+            status: Отменена
+            comment-template: task-rejected
+
+  # стейдж сборки задачи: шаги операции и подготовка скриптов.
+  # порядок записей — порядок выполнения на целевой БД
+  - code: prepare
+    name: Сборка задачи
+    handler: task-preparation
+    parameters:
+      custom-steps: allowed
+      steps:
+        - code: check-user-exists
+          name: Учётка существует
+          template: pg-check-user-exists@1
+          params:
+            username: ${{ target_username }}
+
+        - code: check-schema-exists
+          name: Схема существует
+          template: pg-check-schema-exists@1
+          expression: scope == 'schema' or scope == 'owner'
+          params:
+            schema: ${{ target_schema }}
+
+        - code: check-role-exists
+          name: Роль существует
+          template: pg-check-role-exists@1
+          expression: scope == 'role'
+          params:
+            role: ${{ target_role }}
+
+        - code: grant-schema-all
+          name: Права на все объекты схемы
+          template: pg-grant-schema-all@1
+          expression: scope == 'schema' and grant_scope == 'all'
+          params:
+            username: ${{ target_username }}
+            schema: ${{ target_schema }}
+            privileges: ${{ privileges }}
+
+        - code: grant-objects
+          name: Права на конкретные объекты
+          template: pg-grant-objects@1
+          expression: scope == 'schema' and grant_scope == 'objects'
+          params:
+            username: ${{ target_username }}
+            schema: ${{ target_schema }}
+            objects: ${{ objects }}
+            privileges: ${{ privileges }}
+
+        - code: grant-schema-owner
+          name: Права владельца схемы
+          template: pg-grant-schema-owner@1
+          expression: scope == 'owner'
+          params:
+            username: ${{ target_username }}
+            schema: ${{ target_schema }}
+
+        # ALTER DEFAULT PRIVILEGES: права на объекты, которые появятся позже
+        - code: grant-future-objects
+          name: Права на будущие объекты
+          template: pg-grant-future-objects@1
+          expression: scope == 'owner' and future_objects
+          params:
+            username: ${{ target_username }}
+            schema: ${{ target_schema }}
+            privileges: ${{ privileges }}
+
+        - code: grant-role
+          name: Выдать существующую роль
+          template: pg-grant-role@1
+          expression: scope == 'role'
+          params:
+            username: ${{ target_username }}
+            role: ${{ target_role }}
+
+  # стейдж подтверждения: активируется по manual-mode флоу (здесь by-database)
+  # или по expression; иначе пропускается
+  - code: confirm
+    name: Подтверждение выполнения на дашборде
+    handler: dashboard-approval
+    # дополнительное условие: критичные БД подтверждаем всегда
+    expression: database_code.critical
+    parameters:
+      approvers:
+        dictionary: db-assignments
+        filter: database == database_code
+    listeners:
+      on-reject:
+        - handler: jira-transition
+          parameters:
+            status: Отменена
+            comment-template: task-rejected
+
+  # стейдж исполнения; execute — последняя стадия, финальный статус на её on-success
+  - code: execute
+    name: Выполнение на БД
+    handler: database-execution
+    listeners:
+      on-success:
+        - handler: jira-transition
+          parameters:
+            status: Готово
+            comment-template: task-done
+      on-error:
+        - handler: notify
+          parameters:
+            to: db-engineers
+            channel: telegram
+            template: execution-failed

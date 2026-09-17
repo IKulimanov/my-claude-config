@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Исполнитель-агент: развертывание, пароли, выполнение, жизненный цикл</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1d1f24; --muted: #5b616e; --line: #d9dde3; --code-bg: #f4f6f8;
+    --accent: #1f5fbf; --note-bg: #f2f7ff; --note-line: #b9d0f5; --warn-bg: #fff7e8; --warn-line: #f0cf8a;
+  }
+  html { font-size: 16px; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.55; }
+  main { max-width: 1040px; margin: 0 auto; padding: 32px 24px 80px; }
+  h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 8px; }
+  h2 { font-size: 1.45rem; margin: 48px 0 12px; padding-top: 16px; border-top: 1px solid var(--line); }
+  h3 { font-size: 1.15rem; margin: 28px 0 8px; }
+  h4 { font-size: 1rem; margin: 20px 0 6px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 6px 0 10px; padding-left: 24px; }
+  li { margin: 3px 0; }
+  code, pre { font-family: "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; font-size: 0.9em; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  pre.code { background: var(--code-bg); padding: 12px 14px; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+  pre.code code { background: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0 14px; font-size: 0.95rem; }
+  th, td { border: 1px solid var(--line); padding: 7px 10px; vertical-align: top; text-align: left; }
+  th { background: var(--code-bg); }
+  .tablewrap { overflow-x: auto; }
+  .meta { color: var(--muted); font-size: 0.95rem; margin-bottom: 20px; }
+  .toc { background: var(--code-bg); padding: 12px 18px; border-radius: 6px; }
+  .toc ol { margin: 4px 0; }
+  .diagram { border: 1px solid var(--line); border-radius: 6px; padding: 12px; margin: 12px 0 8px; overflow-x: auto; background: #fff; }
+  .diagram pre.mermaid { margin: 0; }
+  .caption { color: var(--muted); font-size: 0.9rem; margin: 0 0 12px; }
+  .note { background: var(--note-bg); border: 1px solid var(--note-line); border-radius: 6px; padding: 10px 14px; margin: 12px 0; }
+  .warn { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 6px; padding: 10px 14px; margin: 12px 0; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 800px) { .two { grid-template-columns: 1fr; } }
+  dl dt { font-weight: 600; margin-top: 8px; }
+  dl dd { margin: 2px 0 0 0; }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Исполнитель-агент: развертывание, пароли, выполнение, жизненный цикл</h1>
+<p class="meta">Проект dba-ops-assistant. Статус: исследование, не принятое решение. Документ описывает, как устроена предлагаемая схема работы исполнителя (агента) на хостах СУБД; там, где есть развилки, показаны обе ветки и критерий выбора. Связанные документы: <a href="01-design.md">01-design.md</a>, <a href="adr/001-creds.md">ADR-001</a> (креды), <a href="adr/002-executor-task-channel.md">ADR-002</a> (канал заданий), <a href="adr/005-executor-deployment.md">ADR-005</a> (развертывание). Дата: 2026-08-18.</p>
+
+<div class="toc">
+<strong>Содержание</strong>
+<ol>
+  <li><a href="#s0">Участники, обозначения, что где лежит</a></li>
+  <li><a href="#s1">Развертывание и обновление агента</a></li>
+  <li><a href="#s2">Как агент получает пароль и как его хранит</a></li>
+  <li><a href="#s3">Как агент выполняет запросы</a></li>
+  <li><a href="#s4">Старт, остановка, отзыв доступа</a></li>
+  <li><a href="#s5">Что предстоит выяснить</a></li>
+  <li><a href="#s6">Глоссарий</a></li>
+</ol>
+</div>
+
+<!-- ===================================================================== -->
+<h2 id="s0">0. Участники, обозначения, что где лежит</h2>
+
+<h3>Вводные</h3>
+<ul>
+  <li>Исполнитель работает как агент на хосте СУБД (или на выделенной ВМ в сегменте СУБД — тогда к базам он ходит по сети). Входящих соединений в агент нет: все взаимодействия начинает он сам, наружу — только HTTPS к Core.</li>
+  <li>На хосте нет Vault. Vault есть только у Core (если инфраструктура его даст — это открытый вопрос).</li>
+  <li>CI/CD до хостов не дотягивается: первичная установка — руками DBA один раз, дальше агент обновляется сам.</li>
+  <li>Парк разнородный: разные версии Oracle, PostgreSQL, MySQL; часть хостов на Solaris (возможно, SPARC — тогда агент только на Java 8).</li>
+</ul>
+
+<h3>Участники</h3>
+<div class="tablewrap">
+<table>
+  <tr><th>Участник</th><th>Роль</th></tr>
+  <tr><td>DBA-администратор</td><td>Человек. Ставит агент на хост один раз, заводит пароли баз, отзывает агента, подтверждает break-glass.</td></tr>
+  <tr><td>Cockpit UI</td><td>Рабочее место DBA. Карточки агентов, enrollment-token, кнопка «отозвать», просмотр журнала.</td></tr>
+  <tr><td>Core</td><td>Центральный сервис (<code>business-dba-ops-assistant</code>). Единственная точка, куда ходит агент: регистрация, lease, ключи или расшифровка, задания, отчёты, обновления, журнал.</td></tr>
+  <tr><td>Vault</td><td>Хранилище секретов у Core. Ветка A1 — хранит ключ данных агента <code>K_agent</code>; ветка A2 — Transit-ключ, приватная часть которого Vault не покидает.</td></tr>
+  <tr><td>Хост СУБД</td><td>Сервер, на котором работают СУБД и агент. Две учётки ОС: <code>root</code> (устанавливает и обновляет) и <code>dbagent</code> (под ней работает агент; без пароля, без shell, без sudo).</td></tr>
+  <tr><td>Агент = два процесса</td><td><code>dbagent-updater</code> — под root, по таймеру: скачивает, проверяет и раскладывает новые версии, перезапускает worker. <code>dbagent</code> (worker) — под <code>dbagent</code>: lease, пароли, задания, выполнение SQL. Worker не имеет права записи в каталог с кодом.</td></tr>
+  <tr><td>СУБД</td><td>Целевая база (Oracle, PostgreSQL, MySQL). В ней есть учётка агента <code>dba_agent</code> с ограниченными привилегиями (или OS-аутентификация — профиль <code>os</code>).</td></tr>
+</table>
+</div>
+
+<h3>Что где лежит</h3>
+<div class="tablewrap">
+<table>
+  <tr><th>Где</th><th>Что</th><th>Владелец и права</th></tr>
+  <tr><td><code>/opt/dbagent/releases/&lt;ver&gt;/</code>, <code>/opt/dbagent/current</code>, <code>/opt/dbagent/updater/</code></td><td>Код worker и updater. <code>current</code> — символическая ссылка на активную версию, <code>previous</code> — на предыдущую.</td><td><code>root:root 0755</code>. <code>dbagent</code> только читает и исполняет.</td></tr>
+  <tr><td><code>/etc/dbagent/identity.json</code></td><td><code>agentId</code>, приватный ключ подписи запросов (ECDSA P-256), приватный ключ распаковки ответов (RSA-3072), отпечаток CA Core.</td><td><code>dbagent 0600</code></td></tr>
+  <tr><td><code>/etc/dbagent/agent.conf</code>, <code>/etc/dbagent/env</code></td><td>Адрес Core, профили баз (<code>dbId</code>, тип, <code>ORACLE_SID</code>, режим <code>auth: os | password</code>), окружение (<code>ORACLE_HOME</code>, <code>JAVA_HOME</code>). Секретов нет.</td><td><code>root:dbagent 0640</code></td></tr>
+  <tr><td><code>/var/lib/dbagent/creds/&lt;dbId&gt;.enc</code></td><td>Шифртекст пароля базы: <code>{v, keyId, nonce, ciphertext, aad}</code>. Открытого пароля на диске нет.</td><td><code>dbagent 0600</code></td></tr>
+  <tr><td>Память процесса worker</td><td>Пароли после расшифровки — только пока процесс работает.</td><td>—</td></tr>
+  <tr><td>Core, БД системы</td><td>Карточка агента: hostname, публичные ключи, статус (<code>enrolled / active / suspended / revoked</code>), группа обновления, разрешённые IP; журнал всех обращений агента.</td><td>—</td></tr>
+  <tr><td>Vault у Core</td><td>A1: <code>K_agent</code> (AES-256) в KV, один на агента. A2: ключ <code>agent-&lt;id&gt;</code> в Transit.</td><td>policy только для роли Core</td></tr>
+  <tr><td>Релизный пайплайн / HSM</td><td>Приватный ключ подписи релизов агента. Публичный ключ вшит в updater.</td><td>Не в Core.</td></tr>
+</table>
+</div>
+
+<div class="note">
+<strong>Почему так разложено.</strong> Ни один компонент в одиночку не восстанавливает пароль базы: хосту нужен Core (ключ или расшифровка), Core в ветке A1 — шифртекст с хоста. Код агента принадлежит root, а работает агент под <code>dbagent</code>: захвативший <code>dbagent</code> не может подменить код и закрепиться. Ключ подписи релизов лежит вне Core: захвативший Core не может подсунуть агентам свой код.
+</div>
+
+<h3>Обозначения на схемах</h3>
+<ul>
+  <li>Стрелка со сплошной линией — запрос; пунктирная — ответ. Все запросы агента к Core идут по HTTPS и подписаны ключом агента (раздел 2.4), это на схемах не повторяется.</li>
+  <li><code>alt / else</code> — развилка (например, ветка A1 и ветка A2), <code>loop</code> — повторение, <code>opt</code> — необязательный шаг.</li>
+  <li>Имена эндпоинтов Core — эскиз, для наглядности; окончательный контракт зависит от ADR-002.</li>
+</ul>
+
+<!-- ===================================================================== -->
+<h2 id="s1">1. Развертывание и обновление агента</h2>
+
+<p>Задача раздела: агент должен появиться на 100+ хостах, куда не ходит CI/CD, и потом обновляться без участия DBA. Решение: DBA ставит агент один раз, дальше root-процесс <code>dbagent-updater</code> сам забирает подписанные версии из Core.</p>
+
+<h3>1.1. Первичная установка и регистрация (один раз на хост)</h3>
+<div class="diagram"><pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor DBA as DBA-администратор
+    participant UI as Cockpit UI
+    participant Core
+    participant Host as Хост СУБД (root)
+    participant Agent as agent enroll
+    DBA->>UI: создать карточку агента (hostname, группа обновления)
+    UI->>Core: POST /agents {hostname}
+    Core-->>UI: enrollment-token (TTL 15 минут, одноразовый)
+    UI-->>DBA: показать токен один раз
+    DBA->>Host: скопировать tarball, запустить install.sh под root
+    Note over Host: useradd dbagent (без пароля и shell), каталоги и права, юнит systemd или манифест SMF, таймер updater
+    DBA->>Agent: agent enroll --core https://core.company --token T
+    Agent->>Agent: сгенерировать ключ подписи (ECDSA P-256) и ключ обёртки (RSA-3072), записать identity.json 0600
+    Agent->>Core: POST /agents/enroll {token, hostname, pubSign, pubWrap}
+    Core->>Core: токен жив и не использован, hostname совпадает: сохранить ключи, погасить токен
+    Core-->>Agent: {agentId}
+    DBA->>Host: включить сервисы: systemctl enable --now dbagent dbagent-updater.timer
+</pre></div>
+<p class="caption">Схема 1a. Установка и регистрация агента.</p>
+
+<p><strong>Что делает <code>install.sh</code>.</strong> Идемпотентный скрипт под root: создаёт группу и учётку <code>dbagent</code> (<code>useradd -r -s /usr/sbin/nologin</code>, на Solaris <code>-s /bin/false</code>; <code>passwd -l</code>), раскладывает каталоги с правами из таблицы раздела 0, ставит юнит systemd (<code>User=dbagent</code>, <code>Restart=always</code>, <code>RestartForceExitStatus=75</code>, <code>LimitCORE=0</code>) или манифест SMF (<code>method_credential user='dbagent'</code>, <code>duration=child</code>), таймер updater (systemd timer, SMF periodic на Solaris 11.3+, cron root на старых системах). Пути <code>ORACLE_HOME</code>/<code>ORACLE_SID</code>/<code>JAVA_HOME</code> берёт из <code>/etc/oratab</code> и параметров.</p>
+
+<p><strong>Что такое enrollment-token.</strong> 32 случайных байта, живёт 15 минут, используется один раз, привязан к hostname. Он не расшифровывает ничего — это только право один раз зарегистрировать публичные ключи агента. Утёкший токен через 15 минут бесполезен; повторная регистрация под тем же hostname видна в журнале Core и требует явного разрешения DBA.</p>
+
+<p><strong>Что делает DBA один раз, а что — никогда больше.</strong> Один раз: карточка агента, установка, регистрация, заведение паролей баз (раздел 2). Дальше DBA не трогает хост ради обновлений: версии приходят через updater.</p>
+
+<h3>1.2. Цикл обновления</h3>
+<div class="diagram"><pre class="mermaid">
+flowchart TD
+    T["Таймер: каждые N минут с разбросом"] --> Q["updater (root): GET /agents/me/desired"]
+    Q --> C{"Желаемая версия отличается от текущей?"}
+    C -- нет --> E["Ничего не делать до следующего тика"]
+    C -- да --> D["Скачать артефакт через Core в staging/"]
+    D --> V{"sha256 совпал и подпись ключом пайплайна верна?"}
+    V -- нет --> F["Удалить staging/, сообщить Core update_failed"]
+    V -- да --> R{"Версия ниже текущей и в манифесте нет подписанного флага downgrade?"}
+    R -- да --> F
+    R -- нет --> U["Разложить в releases/ver, владелец root, 0755"]
+    U --> S["previous = current, current = releases/ver (атомарная замена симлинка)"]
+    S --> W["Перезапустить worker: systemctl restart dbagent или svcadm restart dbagent"]
+    W --> H{"Core получил heartbeat новой версии за 2 минуты?"}
+    H -- да --> OK["Обновление завершено, updater сообщает версию Core"]
+    H -- нет --> B["Откат: current = previous, перезапуск worker, сообщить update_failed"]
+    B --> P["Core ставит rollout этой группы на паузу и уведомляет DBA"]
+</pre></div>
+<p class="caption">Схема 1b. Самообновление: updater под root, worker под dbagent.</p>
+
+<h4>Кто и что решает</h4>
+<ul>
+  <li><strong>Core — «желаемое состояние».</strong> На <code>GET /agents/me/desired</code> Core отвечает не «последней версией для всех», а версией, назначенной группе агента: сначала canary (несколько некритичных хостов), потом остальные. Rollout можно остановить одной операцией в Cockpit. Ответ: <code>{version, artifactUrl, sha256, signature, downgrade, config}</code>.</li>
+  <li><strong>Артефакты раздаёт Core.</strong> Агент видит только Core, поэтому Core проксирует Nexus/Artifactory: <code>GET /artifacts/agent/&lt;version&gt;</code>.</li>
+  <li><strong>Подпись — не у Core.</strong> Релизный пайплайн подписывает артефакт ключом, которого у Core нет (HSM или офлайн-ключ). Публичный ключ вшит в updater. Смысл: захват Core даёт возможность раздать всем агентам любую версию — но не подписать её; агенты откажутся. Иначе Core стал бы точкой удалённого выполнения кода на всех хостах СУБД. Для Java 8 без сторонних библиотек: RSA-SHA256 или ECDSA P-256 через JCA, либо подписанный <code>jarsigner</code> jar с проверкой цепочки против вшитого сертификата. Ed25519 в JDK 8 нет.</li>
+  <li><strong>Anti-rollback.</strong> Updater хранит максимальную установленную версию и не ставит более старую, если манифест не содержит подписанного флага <code>downgrade: true</code>. Так нельзя откатить агентов на версию с известной уязвимостью, подсунув старый (когда-то честно подписанный) артефакт.</li>
+  <li><strong>Атомарность.</strong> Новая версия целиком лежит в <code>releases/&lt;ver&gt;/</code>, переключение — замена одного симлинка. Нет состояния «половина файлов новые».</li>
+  <li><strong>Откат по факту, а не по надежде.</strong> Новый worker обязан за 2 минуты отправить <code>heartbeat</code> со своей версией; updater ждёт подтверждения от Core или смотрит локальный маркер. Нет подтверждения — откат на <code>previous</code>, Core останавливает rollout группы.</li>
+</ul>
+
+<h4>Почему обновляет root, а не сам worker</h4>
+<p>Если бы worker под <code>dbagent</code> сам писал в каталог с кодом, то захвативший <code>dbagent</code> мог бы подложить туда свой код и закрепиться на хосте. Разделение: код принадлежит root, updater под root делает ровно три вещи (скачать, проверить, переложить и перезапустить), worker про обновления не знает и лишь сообщает версию в heartbeat. Поверхность root-процесса минимальна: он не выполняет ничего скачанного до проверки подписи.</p>
+
+<h4>Как обновляется сам updater</h4>
+<p>Updater маленький и меняется редко. Его новая версия приходит тем же путём внутри артефакта; текущий updater после проверки подписи заменяет свой файл атомарно (<code>rename</code>), сохраняя <code>updater.prev</code>. Новый updater применяется со следующего тика таймера; при падении новой версии таймер запускает <code>updater.prev</code> (обёртка проверяет код выхода).</p>
+
+<h4>Разные ОС</h4>
+<div class="tablewrap">
+<table>
+  <tr><th>ОС</th><th>Запуск под dbagent</th><th>Перезапуск после обновления</th><th>Таймер updater</th></tr>
+  <tr><td>Linux с systemd</td><td><code>User=dbagent</code> в юните</td><td><code>systemctl restart dbagent</code>; код выхода 75 → <code>RestartForceExitStatus</code></td><td>systemd timer</td></tr>
+  <tr><td>Solaris 10/11 (SMF)</td><td><code>method_credential user='dbagent'</code></td><td><code>svcadm restart dbagent</code>; <code>duration=child</code> перезапускает упавший процесс</td><td>SMF periodic (11.3+) или cron root</td></tr>
+  <tr><td>Старый Linux без systemd</td><td>init-скрипт: <code>runuser -u dbagent</code> или <code>su -s /bin/sh dbagent -c</code></td><td>строка <code>respawn</code> в <code>/etc/inittab</code> или цикл в обёртке</td><td>cron root</td></tr>
+</table>
+</div>
+
+<!-- ===================================================================== -->
+<h2 id="s2">2. Как агент получает пароль и как его хранит</h2>
+
+<p>Здесь описан вариант, когда база требует пароль. Если СУБД допускает OS-аутентификацию (Oracle <code>ops$</code>-пользователь или <code>/ as sysdba</code>, PostgreSQL <code>peer</code>, MySQL <code>auth_socket</code>), профиль базы получает <code>auth: os</code>, и весь этот раздел для неё не нужен: пароля нет, агент подключается локально под своим uid. Профиль назначается на каждую базу отдельно по итогам инвентаризации; агент поддерживает оба режима одновременно.</p>
+
+<h3>2.1. Идея одной фразой</h3>
+<p>На хосте лежит только зашифрованный пароль. Расшифровать его можно только с участием Core — по подписанному запросу, при живом lease. Пароль появляется в памяти worker и никогда не пишется на диск открытым.</p>
+<p>Две ветки, отличающиеся одним шагом:</p>
+<ul>
+  <li><strong>A1 — ключ данных выдаётся агенту.</strong> Ключ <code>K_agent</code> хранит Core (в Vault). При старте агент получает <code>K_agent</code> и расшифровывает файл сам. Core никогда не видит пароль.</li>
+  <li><strong>A2 — расшифровка на стороне Core.</strong> Ключ не покидает Vault (Transit). Агент шлёт шифртекст, Core расшифровывает и возвращает пароль, завернув его в публичный ключ агента. Core видит пароль транзитно, каждая расшифровка попадает в аудит.</li>
+</ul>
+<p>Дополнение <strong>D</strong> к любой ветке: агент сам создаёт себе учётку в базе <code>dba_agent</code> со случайным паролем и сам её ротирует. Привилегированный пароль DBA вводит один раз при заведении, и агент его тут же забывает.</p>
+
+<h3>2.2. Заведение пароля базы</h3>
+<div class="diagram"><pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor DBA
+    participant A as agent add-db (на хосте, под dbagent)
+    participant DB as СУБД
+    participant Core
+    participant V as Vault
+    DBA->>A: agent add-db --id ORCL_HOSTA --type oracle --sid ORCL --create-account
+    A-->>DBA: запрос привилегированного пароля (ввод без эха)
+    DBA->>A: пароль
+    A->>DB: подключиться привилегированной учёткой
+    A->>DB: CREATE USER dba_agent IDENTIFIED BY случайный пароль, GRANT только нужные привилегии
+    A->>A: привилегированный пароль обнулить в памяти
+    alt A1: ключ данных выдаётся агенту
+        A->>Core: GET /agents/me/keys/current
+        Core->>V: прочитать K_agent
+        V-->>Core: K_agent
+        Core-->>A: K_agent, обёрнутый в pubWrap агента
+        A->>A: распаковать приватным ключом, AES-256-GCM(K_agent, пароль, AAD), K_agent обнулить
+    else A2: ключ не покидает Core
+        A->>Core: GET /agents/me/encryption-key
+        Core-->>A: публичный ключ шифрования (ключ Transit агента)
+        A->>A: случайный DEK, AES-256-GCM(DEK, пароль, AAD), DEK зашифровать RSA-OAEP публичным ключом
+    end
+    A->>A: записать creds/ORCL_HOSTA.enc.new (0600), fsync, rename в creds/ORCL_HOSTA.enc
+    A-->>DBA: база добавлена, пароль в открытом виде нигде не сохранён
+</pre></div>
+<p class="caption">Схема 2a. Заведение пароля базы на хосте. Пароль не проходит через Jira, Cockpit UI и журнал.</p>
+
+<ul>
+  <li>Без флага <code>--create-account</code> DBA заранее создаёт учётку агента сам и вводит её пароль; шаги 4–6 пропускаются.</li>
+  <li><code>AAD</code> (дополнительные аутентифицированные данные) = <code>agentId | dbId | keyId</code>: шифртекст одной базы нельзя подсунуть агенту как шифртекст другой — проверка GCM не сойдётся.</li>
+  <li>Запись через <code>.new</code> + <code>fsync</code> + <code>rename</code>: при сбое питания не останется полузаписанного файла.</li>
+  <li>Если ИБ запрещает ввод пароля на хосте, эта же операция делается из Cockpit UI: Core получает пароль, шифрует (A1 — <code>K_agent</code>, A2 — Transit) и отдаёт шифртекст агенту при следующем lease. Тогда Core видит пароль один раз при заведении — это ослабляет A1, и решение стоит фиксировать отдельно.</li>
+</ul>
+
+<h3>2.3. Получение пароля в память при старте</h3>
+<div class="diagram"><pre class="mermaid">
+sequenceDiagram
+    autonumber
+    participant W as worker (dbagent)
+    participant Core
+    participant V as Vault
+    W->>W: прочитать identity.json и creds/*.enc, проверить права 0600
+    W->>Core: GET /agents/me/lease
+    Core-->>W: {leaseTtl 24h, список dbId, статус active}
+    loop для каждой базы с профилем password
+        alt A1
+            W->>Core: GET /agents/me/keys/current
+            Core->>V: прочитать K_agent
+            V-->>Core: K_agent
+            Core-->>W: K_agent в обёртке pubWrap
+            W->>W: распаковать приватным ключом, расшифровать файл, K_agent обнулить
+        else A2
+            W->>Core: POST /agents/me/decrypt {dbId, ciphertext}
+            Core->>Core: rate-limit, запись в аудит (agentId, dbId, IP, время)
+            Core->>V: transit/decrypt
+            V-->>Core: открытый текст
+            Core-->>W: открытый текст в обёртке pubWrap
+            W->>W: распаковать приватным ключом
+        end
+        Note over W: пароль базы только в памяти процесса
+    end
+</pre></div>
+<p class="caption">Схема 2b. Получение паролей при старте. Одна и та же обёртка pubWrap закрывает содержимое от балансера или прокси, терминирующего TLS.</p>
+
+<h3>2.4. Как агент подписывает запросы</h3>
+<p>После регистрации каждый запрос к Core несёт заголовок:</p>
+<pre class="code"><code>X-Agent-Auth: agentId=17, ts=1755432000, nonce=&lt;16 случайных байт, base64&gt;, sig=&lt;base64&gt;
+sig = ECDSA_P256_sign(privSign, ts + "\n" + nonce + "\n" + METHOD + "\n" + path + "\n" + sha256(body))</code></pre>
+<p>Core находит агента по <code>agentId</code>, проверяет подпись его публичным ключом, что <code>|now − ts| ≤ 5 минут</code>, что <code>nonce</code> не встречался за это окно, что агент не <code>revoked</code> и IP в разрешённом списке (если ведём). Приватный ключ никогда не покидает хост. Подпись живёт внутри HTTP, поэтому балансеры и прокси между агентом и Core ей не мешают — в отличие от mTLS, который требует настройки клиентского CA на том, кто терминирует TLS.</p>
+<p>Условие: часы на хосте синхронизированы (NTP) — иначе окно ±5 минут отсечёт легитимные запросы.</p>
+
+<h3>2.5. Криптография — фиксированный набор</h3>
+<div class="tablewrap">
+<table>
+  <tr><th>Назначение</th><th>Алгоритм</th><th>JDK 8</th><th>Go</th></tr>
+  <tr><td>Шифрование пароля на диске</td><td>AES-256-GCM, nonce 96 бит случайный, AAD = agentId|dbId|keyId</td><td><code>AES/GCM/NoPadding</code></td><td><code>crypto/aes</code> + <code>cipher.NewGCM</code></td></tr>
+  <tr><td>Обёртка ответов Core агенту</td><td>RSA-3072 OAEP SHA-256</td><td><code>RSA/ECB/OAEPWithSHA-256AndMGF1Padding</code></td><td><code>rsa.EncryptOAEP</code></td></tr>
+  <tr><td>Подпись запросов агента</td><td>ECDSA P-256, подпись в DER</td><td><code>SHA256withECDSA</code></td><td><code>ecdsa.SignASN1</code></td></tr>
+  <tr><td>Подпись релизов</td><td>RSA-SHA256 или ECDSA P-256 (или <code>jarsigner</code>)</td><td>JCA</td><td>стандартная библиотека</td></tr>
+  <tr><td>Транспорт</td><td>TLS 1.2+, сертификат Core проверяется по своему CA, вшитому в агент</td><td><code>SSLContext.getInstance("TLSv1.2")</code>, свой truststore</td><td><code>tls.Config{RootCAs}</code></td></tr>
+</table>
+</div>
+<p>Всё это есть в стандартных библиотеках обоих стеков, форматы совместимы. Собственный протокол обмена ключами не изобретаем: TLS + подписанные запросы + AES-GCM закрывают задачу, а самодельная криптография — типичный источник дыр.</p>
+
+<h3>2.6. Ротация пароля (D)</h3>
+<div class="diagram"><pre class="mermaid">
+sequenceDiagram
+    autonumber
+    participant W as worker (dbagent)
+    participant DB as СУБД
+    participant Core
+    Note over W: по расписанию (например, раз в 30 дней) или по команде Core в ответе lease
+    W->>W: сгенерировать новый пароль (SecureRandom, 24 и более символов)
+    W->>DB: ALTER USER dba_agent IDENTIFIED BY новый пароль
+    DB-->>W: OK
+    W->>W: зашифровать новый пароль (A1: K_agent, A2: публичный ключ Core)
+    W->>W: записать .enc.new, fsync, переименовать .enc в .prev и .new в .enc
+    W->>DB: пробное подключение новым паролем
+    alt успех
+        W->>W: удалить .prev
+        W->>Core: POST /agents/me/credentials/rotate {dbId, keyId, ciphertext} как escrow
+    else отказ
+        W->>W: оставить .prev, при следующем старте пробовать оба файла
+        W->>Core: heartbeat со статусом rotate_failed
+    end
+</pre></div>
+<p class="caption">Схема 2c. Ротация пароля агентом.</p>
+<ul>
+  <li>Ротируется пароль учётки <code>dba_agent</code>, а не root/SYSDBA: привилегированный пароль остаётся у DBA, и его смена не ломает другие системы.</li>
+  <li>Escrow — копия шифртекста в Core на случай потери файла на хосте. Нюанс ветки A1: Core с ключом <code>K_agent</code> и escrow восстановит пароль, поэтому escrow дополнительно шифруется публичным ключом «аварийного» ключа DBA, приватная часть которого лежит офлайн. В ветке A2 Core по определению может расшифровать escrow — это осознанное доверие Core.</li>
+  <li>Сбой посередине (пароль в базе сменился, файл не записался): при следующем старте агент пробует <code>.enc</code>, затем <code>.prev</code>. Оба не подходят — алерт в Core, DBA сбрасывает пароль штатно и повторяет <code>agent add-db</code>.</li>
+</ul>
+
+<h3>2.7. Почему пароль хранится именно так</h3>
+<ul>
+  <li><strong>Не в аргументах запуска.</strong> <code>ps -ef</code> показывает аргументы всех процессов любому пользователю хоста. Это касается и шифртекста, и SQL — всё идёт через файлы <code>0600</code> и stdin.</li>
+  <li><strong>Не открытым на диске.</strong> Файл, бэкап, снимок ВМ, копия образа — не должны отдавать пароль без Core.</li>
+  <li><strong>Только в памяти worker.</strong> Против чтения памяти: процесс под отдельным <code>dbagent</code>, <code>ptrace_scope=1</code> на Linux, <code>-XX:+DisableAttachMechanism</code> и <code>-XX:-HeapDumpOnOutOfMemoryError</code> для JVM, <code>LimitCORE=0</code> / <code>coreadm -d process</code>. Root на хосте память прочитает при любой схеме — это вне модели угроз: root хоста СУБД и так владелец базы.</li>
+  <li><strong>Lease, а не «получил и забыл».</strong> Раз в <code>leaseTtl/2</code> агент продлевает lease. Отказ Core (<code>403 revoked</code>) — агент стирает пароли из памяти и перестаёт брать задания. Это и есть централизованный отзыв.</li>
+</ul>
+
+<h3>2.8. A1 или A2 — чем отличаются и как выбирать</h3>
+<div class="tablewrap">
+<table>
+  <tr><th>Критерий</th><th>A1 (+D)</th><th>A2 + обёртка (+D)</th></tr>
+  <tr><td>Видит ли Core пароль</td><td>Никогда</td><td>Транзитно при каждой расшифровке (не хранит)</td></tr>
+  <tr><td>Утечка БД Core / Vault</td><td>Только ключи; паролей нет</td><td>Ключи; инсайдер с правом менять код Core может логировать ответы decrypt</td></tr>
+  <tr><td>Кража identity и шифртекста с хоста</td><td>Пароль (запросить ключ)</td><td>Пароль (запросить decrypt), но Core видит каждое использование: чужой IP, частота → детект и блокировка</td></tr>
+  <tr><td>Отзыв</td><td>По lease; уже выданный ключ живёт в памяти до перезапуска, украденный — до ротации <code>K_agent</code></td><td>Мгновенный: без Core расшифровать нельзя</td></tr>
+  <tr><td>Аудит</td><td>Запись «ключ выдан» на старт</td><td>Запись на каждый decrypt, rate-limit</td></tr>
+  <tr><td>Крипта на агенте</td><td>AES-GCM, ключ в памяти, lease</td><td>HTTP и распаковка обёртки</td></tr>
+  <tr><td>Ротация без Core</td><td>Возможна (ключ в памяти)</td><td>Нет (нужен encrypt через Core)</td></tr>
+  <tr><td>Зависимость от инфраструктуры Core</td><td>Защищённое хранилище ключей (Vault KV или аналог)</td><td>Vault Transit. Без него A2 вырождается в «ключ в БД Core под мастер-ключом приложения» — заметно слабее</td></tr>
+</table>
+</div>
+<p><strong>Критерий выбора — чему доверяем меньше: Core или хосту.</strong> Если ИБ формулирует требование «система и её операторы не должны знать пароли баз» — A1+D. Если Core доверенный, важнее простой агент на двух стеках, мгновенный отзыв и аудит каждого обращения — A2 + обёртка + D. Интерфейс агента одинаковый («получить пароль базы в память при старте»), меняется только реализация одного шага, поэтому старт с одной ветки не запирает от другой.</p>
+
+<h3>2.9. Break-glass</h3>
+<p>Обычно пароль <code>dba_agent</code> человеку не нужен: DBA заходит <code>/ as sysdba</code> и сбрасывает его. Если всё же нужен, на хосте выполняется <code>agent reveal --db X</code>: агент вызывает <code>POST /agents/me/reveal</code>, Core выполняет его только после подтверждения DBA-администратора в Cockpit (второй человек, запись в журнал), результат печатается в терминал один раз.</p>
+
+<!-- ===================================================================== -->
+<h2 id="s3">3. Как агент выполняет запросы</h2>
+
+<p>Канал заданий — REST-опрос Core (ADR-002, рабочая гипотеза: пошаговая выдача, порядок шагов гарантирует Core, агент без состояния между шагами). Агент никогда не получает входящих вызовов: он сам спрашивает задание, сам отчитывается.</p>
+
+<div class="diagram"><pre class="mermaid">
+sequenceDiagram
+    autonumber
+    participant W as worker (dbagent)
+    participant Core
+    participant P as JDBC или подпроцесс sqlplus / psql
+    participant DB as СУБД
+    loop каждые N секунд, пока нет задания
+        W->>Core: POST /tasks/claim
+        Core-->>W: задание (taskId, dbId) или 204 нет заданий
+    end
+    W->>Core: GET /tasks/{taskId}/steps/next
+    Core-->>W: шаг: code, SQL с подставленными значениями, таймаут, output_keys
+    W->>W: дособрать значения (generator.password, выходы прошлых шагов), взять пароль по dbId из памяти
+    W->>P: открыть подключение (JDBC thin с паролем из памяти, либо sqlplus -S /nolog с CONNECT через stdin), окружение ORACLE_HOME и ORACLE_SID
+    P->>DB: выполнить SQL
+    DB-->>P: результат или ошибка
+    P-->>W: результат, код выхода, stdout и stderr
+    alt таймаут шага истёк
+        W->>P: закрыть соединение или kill подпроцесса
+        W->>W: статус шага error, причина timeout
+    end
+    W->>Core: POST /tasks/{taskId}/steps/{code}/report {status, output по output_keys, duration, error} (идемпотентно, с ретраями)
+    Core-->>W: OK, есть ли следующий шаг
+    Note over W,Core: следующий шаг тем же циклом, пока Core не ответит: задание завершено
+</pre></div>
+<p class="caption">Схема 3. Выполнение задания по шагам.</p>
+
+<h4>Подключение к базе</h4>
+<ul>
+  <li><strong>Профиль <code>password</code>.</strong> JDBC thin (Oracle, PostgreSQL, MySQL) с паролем из памяти — самый прямой путь. Через CLI: не <code>sqlplus dba_agent/пароль@alias</code> (аргументы видны в <code>ps</code>), а <code>sqlplus -S /nolog</code> и строка <code>CONNECT dba_agent/"пароль"@alias</code> через stdin. Для <code>psql</code> — временный <code>PGPASSFILE</code> <code>0600</code> в <code>/var/lib/dbagent/tmp</code>, удаляемый сразу после подключения; <code>PGPASSWORD</code> в окружении читается тем же uid и root через <code>/proc</code>, но не через <code>ps</code>.</li>
+  <li><strong>Профиль <code>os</code>.</strong> Только подпроцесс: <code>sqlplus -S /</code> (или <code>/ as sysdba</code>), <code>psql -U dba_agent</code> через unix-сокет, <code>mysql --socket=…</code>. JDBC thin OS-аутентификацию не умеет; JDBC OCI умеет, но требует совпадения версий клиента и драйвера.</li>
+  <li><strong>SQL всегда через stdin</strong>, не через аргументы. Несколько инстансов на хосте — свои <code>ORACLE_SID</code>/<code>ORACLE_HOME</code> в окружении каждого подпроцесса, из профиля базы.</li>
+</ul>
+
+<h4>Таймауты и зависания</h4>
+<p>У каждого шага есть таймаут из шаблона флоу. Для JDBC — <code>setQueryTimeout</code> и таймаут соединения; для подпроцесса — ожидание с предельным временем и <code>destroyForcibly()</code> / <code>kill -9</code> по истечении. Зависший подпроцесс без таймаута держал бы worker и, что хуже, сессию в базе — поэтому таймаут обязателен, а не желателен.</p>
+
+<h4>Что попадает в отчёт, а что нет</h4>
+<ul>
+  <li>В отчёт: статус, длительность, значения по <code>output_keys</code> (колонки итогового SELECT), текст ошибки без чувствительных данных.</li>
+  <li>Не в отчёт и не в логи агента: пароль подключения, значение <code>generator.password</code> (временный пароль новой учётки — по ADR-004 уходит в Core отдельной сущностью, не в отчёт шага), полный текст SQL, если он содержит пароли (<code>IDENTIFIED BY</code>). Агент маскирует такие фрагменты до записи в лог.</li>
+</ul>
+
+<h4>Core недоступен посреди задания</h4>
+<p>Отчёт по шагу отправляется с ретраями и backoff; шаг не повторяется, пока отчёт не доставлен (идемпотентность по <code>taskId + code + попытка</code>). Если Core не отвечает дольше порога, worker завершает текущий шаг, отчёт откладывает в память и не запрашивает следующий; при восстановлении сначала доставляет отложенный отчёт. Если worker перезапустился с недоставленным отчётом — Core по таймауту шага помечает попытку как «прервана», задача уходит DBA на разбор (автоперезапуск шагов не делаем по решению brief).</p>
+
+<!-- ===================================================================== -->
+<h2 id="s4">4. Старт, остановка, отзыв доступа</h2>
+
+<h3>4.1. Старт</h3>
+<div class="diagram"><pre class="mermaid">
+sequenceDiagram
+    autonumber
+    participant SM as systemd / SMF
+    participant W as worker (dbagent)
+    participant Core
+    SM->>W: запуск под uid dbagent, окружение из /etc/dbagent/env
+    W->>W: прочитать identity.json и agent.conf, проверить права 0600, время (NTP)
+    W->>Core: GET /agents/me/lease
+    alt Core недоступен
+        W->>W: повтор с backoff (5 с ... 5 мин), заданий не брать, паролей нет
+    else 403 revoked
+        W->>W: пароли не запрашивать, статус revoked, ждать (только heartbeat)
+    else 200 active
+        Core-->>W: leaseTtl, список баз и профили
+        W->>Core: получить пароли для профилей password (схема 2b)
+        W->>Core: POST /agents/me/heartbeat {version, ready, список баз}
+        Note over W: готов брать задания (раздел 3)
+        loop каждые leaseTtl/2
+            W->>Core: POST /agents/me/lease
+            Core-->>W: продлён или 403
+        end
+    end
+</pre></div>
+<p class="caption">Схема 4a. Старт worker.</p>
+<p>Без Core агент не стартует в рабочий режим: паролей нет, заданий нет. Это осознанно — кэш расшифрованных паролей на диске свёл бы на нет раздел 2. Если потребуется «grace-режим» (работа по кэшу при недоступном Core ограниченное время), это отдельное решение с отдельными рисками; по умолчанию его нет.</p>
+
+<h3>4.2. Остановка и перезапуск</h3>
+<div class="diagram"><pre class="mermaid">
+sequenceDiagram
+    autonumber
+    participant SM as systemd / SMF
+    participant W as worker (dbagent)
+    participant Core
+    SM->>W: SIGTERM (stop, restart, обновление от updater)
+    W->>W: новых заданий и шагов не брать
+    alt идёт шаг
+        W->>W: дождаться завершения шага, но не дольше stop-таймаута (например, 60 с)
+        W->>Core: отчёт по шагу
+    end
+    W->>W: обнулить буферы с паролями, закрыть соединения с базами
+    W->>Core: heartbeat {stopping}
+    W-->>SM: exit 0 (штатно) или exit 75 (перезапусти меня)
+    SM->>W: перезапуск по Restart=always или duration=child
+</pre></div>
+<p class="caption">Схема 4b. Остановка. Код 75 — сигнал сервис-менеджеру перезапустить процесс (после обновления, смены конфигурации).</p>
+<p>Если шаг не уложился в stop-таймаут, worker убивает подпроцесс, отправляет отчёт со статусом «прерван остановкой» и выходит; задача попадает DBA на разбор. Пароли обнуляются в любом случае перед выходом.</p>
+
+<h3>4.3. Отзыв доступа</h3>
+<div class="diagram"><pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor DBA
+    participant UI as Cockpit UI
+    participant Core
+    participant W as worker (dbagent)
+    participant DB as СУБД
+    DBA->>UI: отозвать агента host-a (причина в журнал)
+    UI->>Core: POST /agents/17/revoke
+    Core->>Core: статус revoked, A1: пометить K_agent к ротации
+    W->>Core: POST /agents/me/lease (очередное продление)
+    Core-->>W: 403 revoked
+    W->>W: обнулить пароли в памяти, закрыть соединения, задания не брать
+    W->>Core: heartbeat {revoked} (принимается и в статусе revoked)
+    Note over Core,W: A2: любой decrypt теперь отклоняется. A1: выданный ключ есть только в памяти агента и исчезнет при перезапуске
+    DBA->>DB: сменить пароль dba_agent или заблокировать учётку на базах хоста
+    Note over DB: закрывает пароль, который уже был в памяти агента до отзыва
+    opt восстановление доверия к хосту
+        DBA->>UI: новый enrollment-token
+        DBA->>W: agent enroll заново, затем agent add-db
+    end
+</pre></div>
+<p class="caption">Схема 4c. Отзыв агента. Между отзывом и следующим продлением lease проходит не больше leaseTtl/2 — этот интервал и есть цена варианта A1; в A2 decrypt отклоняется сразу.</p>
+<p>Отзыв закрывает будущие расшифровки. Пароль, уже находящийся в памяти работающего процесса, закрывается только сменой пароля в базе — поэтому шаг «сменить пароль <code>dba_agent</code>» входит в процедуру отзыва, а не остаётся на усмотрение.</p>
+
+<h3>4.4. Состояния агента</h3>
+<div class="diagram"><pre class="mermaid">
+stateDiagram-v2
+    [*] --> enrolled: agent enroll с одноразовым токеном
+    enrolled --> active: первый успешный lease
+    active --> active: продление lease каждые TTL/2
+    active --> suspended: DBA приостановил или lease не продлевался дольше TTL
+    suspended --> active: lease принят
+    active --> revoked: DBA отозвал
+    suspended --> revoked: DBA отозвал
+    revoked --> enrolled: повторный enroll новым токеном
+    revoked --> [*]: карточка удалена
+</pre></div>
+<p class="caption">Схема 4d. Состояния агента в Core.</p>
+<ul>
+  <li><code>suspended</code> — временная пауза без отзыва: агент не получает ключи/decrypt и задания, но identity и шифртексты остаются валидными; используется на время работ на хосте или при пропаже heartbeat.</li>
+  <li><code>revoked</code> — окончательно: identity недействительна, для возврата нужен новый enrollment-token и, при подозрении на компрометацию, новые пароли баз.</li>
+</ul>
+
+<!-- ===================================================================== -->
+<h2 id="s5">5. Что предстоит выяснить</h2>
+<div class="tablewrap">
+<table>
+  <tr><th>Кому</th><th>Вопрос</th><th>На что влияет</th></tr>
+  <tr><td>ИБ</td><td>Есть ли требование, чтобы Core и его операторы не знали пароли баз (zero-knowledge)?</td><td>Выбор A1+D против A2+обёртка+D</td></tr>
+  <tr><td>ИБ</td><td>Допустима ли сервисная OS-учётка <code>dbagent</code> без пароля и shell на хостах СУБД; допустим ли <code>ops$</code>-пользователь Oracle / <code>peer</code> PostgreSQL для неё; допустимо ли членство в группе <code>dba</code>?</td><td>Сколько баз пойдут по профилю <code>os</code> без пароля</td></tr>
+  <tr><td>ИБ</td><td>Можно ли вводить пароль базы на хосте (<code>agent add-db</code>) или только через UI?</td><td>Схема 2a, видит ли Core пароль при заведении</td></tr>
+  <tr><td>ИБ</td><td>Требования к аудиту: достаточно ли журнала Core и аудита СУБД по <code>os_user</code>/<code>program</code>?</td><td>Детект аномальных сессий под <code>dbagent</code></td></tr>
+  <tr><td>DBA</td><td>Агент на каждом хосте СУБД или один на сегмент/площадку (ADR-005)?</td><td>Возможность OS-аутентификации вообще; топология</td></tr>
+  <tr><td>DBA</td><td>Минимальный набор привилегий для операций флоу; где реально нужен SYSDBA/superuser?</td><td>Права <code>dba_agent</code>, ущерб при захвате агента</td></tr>
+  <tr><td>DBA</td><td>Где OS-аутентификация выключена (<code>SQLNET.AUTHENTICATION_SERVICES=(NONE)</code>, нет <code>local … peer</code>, нет <code>auth_socket</code>) и почему; готовы ли включить для одной ограниченной учётки?</td><td>Инвентаризация профилей <code>os</code>/<code>password</code></td></tr>
+  <tr><td>DBA</td><td>Политика ротации: частота, владелец учётки <code>dba_agent</code>, кто ещё пользуется привилегированными учётками</td><td>Раздел 2.6</td></tr>
+  <tr><td>Сетевики</td><td>Есть ли между хостами и Core балансер/прокси с TLS-терминацией? Доступен ли Core со всех сегментов СУБД по 443?</td><td>Подпись запросов против mTLS; обёртка ответов обязательна</td></tr>
+  <tr><td>Инфраструктура</td><td>Будет ли у Core Vault и Transit? Где хранить ключ подписи релизов (HSM, офлайн)? Есть ли Nexus/Artifactory для артефактов?</td><td>A2 без Transit слабее; раздел 1.2</td></tr>
+  <tr><td>Инвентаризация</td><td>По каждому хосту: <code>uname -sp</code>, <code>isainfo -kv</code> (SPARC?), версия и путь JDK (<code>$ORACLE_HOME/jdk</code>), СУБД и версия, наличие <code>sqlplus</code>/<code>psql</code>/<code>mysql</code>, супервизор (systemd/SMF/init), NTP, TLS-путь до Core</td><td>Стек агента (Java 8 везде; Go + Java 8 под SPARC; Go), профили баз</td></tr>
+</table>
+</div>
+
+<!-- ===================================================================== -->
+<h2 id="s6">6. Глоссарий</h2>
+<dl>
+  <dt>enrollment-token</dt><dd>Одноразовый короткоживущий токен для первичной регистрации агента в Core. Даёт право один раз зарегистрировать публичные ключи, ничего не расшифровывает.</dd>
+  <dt>identity агента</dt><dd>Пара приватных ключей (подпись запросов и распаковка ответов) плюс <code>agentId</code>. Лежит на хосте в файле <code>0600</code>, никогда не покидает хост.</dd>
+  <dt>lease</dt><dd>«Аренда» права работать: агент периодически продлевает её у Core; отказ в продлении означает отзыв — агент стирает пароли и останавливает выполнение.</dd>
+  <dt>обёртка (wrap)</dt><dd>Шифрование ответа Core публичным ключом агента (RSA-OAEP), чтобы содержимое не видел никто между Core и агентом, включая прокси с TLS-терминацией.</dd>
+  <dt>AAD</dt><dd>Additional Authenticated Data в AES-GCM: данные, которые не шифруются, но защищены от подмены. Здесь — привязка шифртекста к агенту, базе и ключу.</dd>
+  <dt>K_agent</dt><dd>Ключ данных агента (AES-256) в ветке A1: хранится у Core, выдаётся агенту на время работы.</dd>
+  <dt>Vault Transit</dt><dd>Режим Vault «шифрование как сервис»: ключ не покидает Vault, клиенты просят encrypt/decrypt/rewrap. Основа ветки A2.</dd>
+  <dt>escrow</dt><dd>Копия шифртекста пароля в Core на случай потери файла на хосте.</dd>
+  <dt>D (собственная учётка агента)</dt><dd>Агент создаёт в базе учётку <code>dba_agent</code> с ограниченными правами и случайным паролем и сам её ротирует; привилегированный пароль остаётся у DBA.</dd>
+  <dt>OS-аутентификация</dt><dd>Вход в СУБД по OS-пользователю процесса без пароля, только локально: Oracle bequeath (<code>/ as sysdba</code>, <code>ops$</code>-пользователь), PostgreSQL <code>peer</code>, MySQL <code>auth_socket</code>. Ядро ОС сообщает СУБД uid клиента.</dd>
+  <dt>canary</dt><dd>Небольшая группа агентов, получающая новую версию первой; остальные — после подтверждения, что canary работает.</dd>
+  <dt>anti-rollback</dt><dd>Запрет ставить версию ниже текущей без явно подписанного разрешения.</dd>
+  <dt>symlink swap</dt><dd>Атомарное переключение активной версии заменой символической ссылки <code>current</code>.</dd>
+  <dt>SMF</dt><dd>Service Management Facility — сервис-менеджер Solaris 10/11 (аналог systemd): манифесты, <code>svcadm</code>, автоперезапуск, запуск под заданной учёткой.</dd>
+  <dt>break-glass</dt><dd>Аварийная процедура получения пароля человеком с подтверждением второго лица и записью в журнал.</dd>
+  <dt>SPARC</dt><dd>Процессорная архитектура Sun/Oracle. Solaris бывает на SPARC и x86; под SPARC нет Go и JDK новее 8.</dd>
+</dl>
+
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "neutral",
+    sequence: { useMaxWidth: false, wrap: true, width: 200, mirrorActors: false, messageFontSize: 13, noteFontSize: 13, actorFontSize: 14 },
+    flowchart: { useMaxWidth: false, htmlLabels: true },
+    state: { useMaxWidth: false }
+  });
+</script>
+</body>
+</html>

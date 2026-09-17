@@ -6,8 +6,8 @@ allowed-tools: Read, Grep, Glob, AskUserQuestion
 
 # Jira — задача для человека
 
-Формат и правила — `~/dev/my-claude-config/docs/shared/task-template.md` (прочитать перед генерацией).
-Процесс — командный плейбук (`~/docs/lifeOS-v2/10-Work/process/Projects playbook.md`, «Рекомендации по
+Формат и правила — `~/dev/my-claude-config/playbook/templates/task-template.md` (прочитать перед генерацией).
+Процесс — плейбук `~/dev/my-claude-config/playbook/projects-playbook.md`, чек-листы по типам работ — `playbook/task-writing.md` («Рекомендации по
 описанию задач»). Задача пишется для разработчика: он придёт с «а точно так?», а не «а как?».
 
 ## Шаги

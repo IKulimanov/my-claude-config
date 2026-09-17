@@ -1,0 +1,98 @@
+name: Test
+
+variables:
+  database-code:
+    description: Код базы данных, в которой будет выполняться скрипт
+    type: dictionary-item
+    multiple: false
+    dictionary: databases
+
+  target-username:
+    description: Имя создаваемого пользователя
+    type: string
+
+  additional-grants:
+    description: Дополнительные привилегии для создаваемого пользователя (через запятую)
+    type: dictionary-item
+    dictionary: allowed-grants
+    multiple: true
+
+  requester:
+    description: Логин создателя заявки
+    type: string
+
+  supervisor:
+    description: Ответсвенный за исполнение
+    type: dictionary-item
+    dictionary: users
+    multiple: false
+
+
+stages:
+
+  - type: mapping
+    name: Сопоставление полей заявки
+    parameters:
+      mappings:
+        - from: customfield_10001
+          to: database-code
+          required: true
+        - from: customfield-10002
+          to: target-username
+          required: true
+        - from: customfield-10003
+          to: additional-grants
+          required: false
+        - from: author
+          to: requester
+          required: true
+        - from: users
+          to: supervisor
+          expression: database-code in (users.databases)
+
+
+
+  - type: approval
+    name: Согласование выполнения
+    tasks:
+      -
+    parameters:
+      approvers:
+        - name: duty
+        - name: supervisor
+
+
+
+  - type: database-execution
+    name: Выполнение базы данных
+    parameters:
+      database: database_code
+      steps:
+        - name: Учётка свободна
+          template: pg-check-user-free@1
+          kind: check
+          params:
+            target-username: target-username
+        - name: Создать учётку
+          template: pg-create-user@1
+          kind: action
+          params:
+            target-username: target-username
+            password: generator-password
+        - name: Выдать права на схему
+          template: pg-grant-schema@1
+          kind: action
+          params:
+            target-username: target-username
+            grants: additional-grants
+
+
+  - type: notify
+    name: Уведомление
+    parameters:
+      - to: requester
+        channel: email
+        template: creds-delivery
+      - to: supervisor
+        channel: telegram
+        template: supervisor-issue-compleate
