@@ -37,6 +37,8 @@ case "$TOOL" in
     [ -z "$CMD" ] && exit 0
     while IFS= read -r seg; do
       [ -z "$seg" ] && continue
+      # Имя в фильтрах исключения/поиска — не чтение: --exclude '.env', -name '.env', -not -path '*/.ssh/*'
+      seg=$(printf '%s' "$seg" | sed -E "s/(--exclude(-from)?|-name|-iname|-path|-not -name|-not -path)[= ]+('[^']*'|\"[^\"]*\"|[^[:space:]]+)//g")
       printf '%s' "$seg" | grep -qE "$SECRET_PATTERN" || continue
       printf '%s' "$seg" | grep -qE "$SAFE_PATTERN" && continue
       first=$(printf '%s' "$seg" | awk '{print $1}')

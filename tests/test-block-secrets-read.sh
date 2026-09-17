@@ -24,6 +24,9 @@ e allow Bash 'ls -la .env'
 e allow Bash 'echo "=== .env ==="'
 e allow Bash 'test -f .env && echo yes'
 e allow Bash 'git check-ignore .env'
+e allow Bash "rsync -a --exclude 'tools/.env' src/ dst/"
+e allow Bash "find . -not -path '*/.ssh/*' -type f"
+e deny  Bash "rsync -a --exclude 'x' .env dst/"
 e allow Bash 'git status --short'
 e allow Bash 'mvn -q test'
 
