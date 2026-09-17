@@ -24,4 +24,11 @@ echo '{"hook_event_name":"PreToolUse","tool_name":"Read","tool_use_id":"t2","ses
 has=$(jq -rc 'select(.tool=="Read") | .input | has("skill")' "$TMP/tools.jsonl")
 [ "$has" = "false" ] || fail "skill leaked into non-Skill summary"
 
-echo "OK: test-log-tool (skill name captured for Skill tool)"
+
+# 3. AskUserQuestion -> тексты вопросов сохраняются (иначе не измерить, спрашивал ли агент гипотезу по rule 08).
+echo '{"hook_event_name":"PreToolUse","tool_name":"AskUserQuestion","tool_use_id":"t3","session_id":"s","cwd":"/tmp/proj","tool_input":{"questions":[{"question":"Твоя гипотеза о причине?","header":"Гипотеза","options":[]},{"question":"Какой вариант?","header":"Вариант","options":[]}]}}' \
+  | bash "$SCRIPT_DIR/../hooks/scripts/log-tool.sh" pre
+q=$(jq -r 'select(.tool=="AskUserQuestion") | .input.questions' "$TMP/tools.jsonl")
+[ "$q" = "Твоя гипотеза о причине? | Какой вариант?" ] || fail "questions not captured: '$q'"
+
+echo "OK: test-log-tool (skill name and AskUserQuestion texts captured)"

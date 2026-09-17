@@ -31,7 +31,8 @@ INPUT_SUMMARY=$(echo "$INPUT" | jq -c '
         subagent_type: .subagent_type,
         skill: .skill,
         args: (.args // "" | .[0:120]),
-        prompt: (.prompt // "" | .[0:120])
+        prompt: (.prompt // "" | .[0:120]),
+        questions: ((.questions // []) | map(.question) | join(" | ") | .[0:300])
       }
       | with_entries(select(.value != null and .value != ""))
     else . end

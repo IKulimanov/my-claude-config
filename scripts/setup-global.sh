@@ -259,6 +259,30 @@ set_statusline() {
   fi
 }
 
+# Поставить cleanupPeriodDays=90 в ~/.claude/settings.json, если ключа нет: транскрипты старше 30 дней
+# удаляются, а месячный аудит читает из них модели субагентов и загрузки скилов. Заданное пользователем
+# значение не трогаем.
+set_cleanup_period() {
+  local settings="$CLAUDE_HOME/settings.json"
+  local days=90
+  if [ -f "$settings" ] && jq -e '.cleanupPeriodDays' "$settings" >/dev/null 2>&1; then
+    echo "$(prefix) settings.json: cleanupPeriodDays уже задан ($(jq -r '.cleanupPeriodDays' "$settings")), не трогаем"
+    return 0
+  fi
+  echo "$(prefix) settings.json: cleanupPeriodDays=$days"
+  if [ "$APPLY" -ne 1 ]; then return 0; fi
+
+  mkdir -p "$CLAUDE_HOME"
+  if [ -f "$settings" ]; then
+    mkdir -p "$BACKUP_DIR"
+    cp "$settings" "$BACKUP_DIR/settings.json.before-cleanup-period"
+    local tmp; tmp="$(mktemp)"
+    jq --argjson d "$days" '.cleanupPeriodDays = $d' "$settings" > "$tmp" && mv "$tmp" "$settings"
+  else
+    printf '{\n  "cleanupPeriodDays": %s\n}\n' "$days" > "$settings"
+  fi
+}
+
 # ─── Commands ────────────────────────────────────────────────────────────────
 
 cmd_status() {
@@ -327,6 +351,13 @@ cmd_status() {
     sl_state="$sl_state +cfg"
   fi
   printf '%-12s %-10s %s\n' "statusline" "$sl_state" "$sl_target"
+
+  # cleanupPeriodDays: срок хранения транскриптов (нужен ≥90 для месячного аудита)
+  local cp_state="missing"
+  if [ -f "$settings" ]; then
+    cp_state=$(jq -r '.cleanupPeriodDays // "missing"' "$settings" 2>/dev/null)
+  fi
+  printf '%-12s %-10s %s\n' "cleanupDays" "$cp_state" "in $settings"
   echo
   echo "Run '$(basename "$0") install' to see install plan, add --apply to execute."
 }
@@ -359,6 +390,7 @@ cmd_install() {
   case ",$COMPONENTS," in
     *,statusline,*) set_statusline ;;
   esac
+  set_cleanup_period
 
   echo
   if [ "$APPLY" -eq 1 ]; then
