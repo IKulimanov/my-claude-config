@@ -32,7 +32,7 @@
 | Что затронуто | Загрузить |
 |---|---|
 | Любой Go-код | `go-best-practices` |
-| HTTP-хендлеры, middleware, роутинг | `go-best-practices` + `web-app` (если отдаётся HTML) |
+| HTTP-хендлеры, middleware, роутинг | `go-best-practices` |
 | Конкурентность, горутины | `go-best-practices/references/concurrency.md` |
 | Тесты (всегда) | `go-best-practices/references/testing.md` |
 

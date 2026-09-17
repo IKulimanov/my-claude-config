@@ -24,7 +24,7 @@ Do not ask if the topic is already clear.
 
 - If the topic is Java/Spring specific: load `java-patterns` or `spring-best-practices` as needed.
 - If the topic is Go specific: load `go-best-practices` and relevant references.
-- If the topic is web/frontend specific: load `web-app` and relevant references.
+- If the topic is Vue/frontend specific: load `vue-frontend` and relevant references.
 - If the topic is infrastructure: load the relevant DevOps skill (`kubernetes`, `gitlab-ci`, etc.).
 - Read the local `CLAUDE.md` if the explanation should be grounded in the project's actual stack.
 

@@ -12,10 +12,8 @@ Look at the current working directory:
 
 - **Path starts with `/Users/ivankulimanov/dev/work/`** → this is a WORK project. The **canonical team convention** at
   `/Users/ivankulimanov/dev/work/java/convention-java/docs/` is the ONLY authoritative prose source.
-  The narrative summaries in `references/` (`java-style.md`, `spring-service.md`, `data-access.md`,
-  `db-design.md`, `kafka.md`) are outdated/derivative and MUST NOT be used as the source of truth.
-  **Exception:** `references/sonar-rules.md` is a generated mirror of the enforced Sonar rules — it
-  stays reliable as the local pre-check checklist (see Step 1).
+  `references/sonar-rules.md` is a generated mirror of the enforced Sonar rules — the local pre-check
+  checklist (see Step 1); `scripts/helpers/sonar-local.sh` runs the real server rules on the working tree.
 - **Anywhere else** → personal/side project. Canonical convention does NOT apply. Use the guardrails below as best-practices.
 
 ## Step 1 — Read canonical convention (work projects only)
@@ -40,9 +38,7 @@ compliant/non-compliant examples. It matches what **CI Sonar** enforces (`mvn ve
 so checking against these codes predicts the CI quality gate. Regenerate after rule changes:
 `scripts/gen-convention-checklist.sh`. This is INTERNAL — do not publish.
 
-When canonical conflicts with the summary in `references/` of this skill — **canonical wins, always**.
-`sonar-rules.md` is derived directly from the enforced rules and is safe to rely on; the other
-`references/*.md` are historical summaries (see below).
+`sonar-rules.md` is derived directly from the enforced rules and is safe to rely on; canonical prose wins on any conflict.
 
 ## Step 1b — Scope: convention applies to code you touch (v1.2.0, work projects)
 
@@ -84,5 +80,4 @@ These are valid for both work and personal projects. They are NOT a substitute f
 ## What lives where
 
 - `references/sonar-rules.md` — **generated Sonar-aligned checklist** (codes + examples), matches CI Sonar. Regenerate with `scripts/gen-convention-checklist.sh`. INTERNAL — do not publish. This is the concrete rule set to check against locally.
-- `references/java-style.md`, `references/spring-service.md`, `references/data-access.md`, `references/db-design.md`, `references/kafka.md` — **historical summaries**, derived from older convention. Useful for quick reference when canonical re-read is overkill. **Not authoritative for work projects.**
 - `/Users/ivankulimanov/dev/work/java/convention-java/docs/` — authoritative prose for work.

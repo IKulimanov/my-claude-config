@@ -17,7 +17,6 @@ Review changes with a focus on correctness, safety, and idiomatic Go.
 
 Before reviewing, consult these skills when relevant:
 - `skills/go-best-practices` — always
-- `skills/web-app` — if HTTP handlers or templates are involved
 - `skills/docker` — if Dockerfile or container config is involved
 
 ## Review Priorities
