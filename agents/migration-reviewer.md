@@ -3,6 +3,8 @@ name: migration-reviewer
 description: Reviews schema, query, and data-access changes for rollout safety, workload fit, and reversibility. Use for Liquibase/Flyway migrations, index changes, partitioning, or JPA mapping changes.
 tools: Read, Grep, Glob, Bash
 model: opus
+effort: high
+maxTurns: 150
 skills:
   - jpa-db-review
 ---

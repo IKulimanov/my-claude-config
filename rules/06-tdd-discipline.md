@@ -17,6 +17,7 @@ Exceptions (only these):
 - Pure documentation changes (no code).
 - Config-only changes that have no behavior (e.g., changing log level — but log assertions count as behavior).
 - Exploratory spikes that will be deleted before commit.
+- Edits made through `/quick` on the user's direct instruction (mechanical changes; see «Заморозка и быстрые правки»).
 
 If you cannot write a failing test first — STOP and discuss with the user before proceeding.
 
@@ -32,3 +33,10 @@ Iron-law в силе: падающий тест существует до про
   запускает, подтверждает корректное падение, затем пишет прод-код.
 - Вернуть Claude — «пиши тесты сам». Выбор запоминается до конца задачи.
 - Для крупной/рискованной задачи можно один раз уточнить авторство в начале; иначе — по умолчанию.
+
+## Заморозка и быстрые правки
+- В `/task` и `/feature` кейсы (`tests.md` или секция «Тесты» плана) согласуются с автором задачи до кода.
+  После согласования кейсы и код тестов не меняются и не удаляются без вопроса оператору; вопрос называет
+  кейс и причину. Хук `guard-tests` спрашивает подтверждение при правке закоммиченного теста.
+- Исключение — `/quick`: механические правки по прямому указанию пользователя выполняются без теста и без
+  ревью; ответственность за поведение — на указании. Всё остальное правило действует.

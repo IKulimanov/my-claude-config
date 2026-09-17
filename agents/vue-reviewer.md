@@ -2,7 +2,9 @@
 name: vue-reviewer
 description: Reviews Vue 3 + Vite frontend code for component design, reactivity issues, performance, security, and TypeScript correctness. Use for .vue files and projects with Vue in package.json.
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: opus
+effort: high
+maxTurns: 250
 skills:
   - vue-frontend
 ---
@@ -45,3 +47,9 @@ Review changes in the context of:
 - Include file and line references.
 - Explain the user-facing impact, not just the code-level issue.
 - Separate must-fix from suggestions.
+
+## Tests Guard
+
+- Test files must not be deleted or weakened: compare `git diff --stat` on test files and the number of assertions before and after.
+- If `tests.md` (agreed cases) is provided, check that every case is covered by name; list uncovered ones.
+- Convention codes and library versions are checked by `convention-reviewer` in parallel — do not duplicate that work.

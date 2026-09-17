@@ -2,7 +2,9 @@
 name: go-reviewer
 description: Reviews Go code for bugs, idiom violations, concurrency issues, error handling gaps, and security risks. Use after Go code changes or when reviewing a Go PR.
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: opus
+effort: high
+maxTurns: 250
 skills:
   - go-best-practices
 ---
@@ -48,3 +50,9 @@ Before reviewing, consult these skills when relevant:
 - Explain production impact, not just style preference.
 - Separate must-fix from follow-up suggestions.
 - If no findings, say so explicitly.
+
+## Tests Guard
+
+- Test files must not be deleted or weakened: compare `git diff --stat` on test files and the number of assertions before and after.
+- If `tests.md` (agreed cases) is provided, check that every case is covered by name; list uncovered ones.
+- Convention codes and library versions are checked by `convention-reviewer` in parallel — do not duplicate that work.

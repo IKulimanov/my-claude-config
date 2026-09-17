@@ -3,6 +3,8 @@ name: go-test-writer
 description: Writes idiomatic Go tests — table-driven units, httptest handlers, testcontainers for DB, benchmarks. Use when tests are missing or need to be added for Go code.
 tools: Read, Grep, Glob, Bash
 model: sonnet
+effort: medium
+maxTurns: 150
 skills:
   - go-best-practices
 ---
@@ -69,3 +71,9 @@ TestFunctionName_errorCase
 - Комментарии в коде тестов — на русском (rule 07).
 - After generating, state: test type chosen and why, scenarios covered, remaining gaps.
 - You are read-only: return the test code; the caller writes the file and runs it.
+
+## Input: Agreed Cases (`tests.md`)
+
+- When the caller passes `tests.md`, it is the contract: write test code only for the listed cases (Given/When/Then), one test per case, named after the case id (e.g. `T2_1_...`).
+- Do not invent extra cases and do not drop any. A case that cannot be implemented as specified — report it with the reason; do not silently replace it.
+- Tests are written before the production code (RED): they must compile against the planned API and fail for the right reason.

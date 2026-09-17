@@ -35,7 +35,8 @@
       {
         "matcher": "Edit|Write|MultiEdit|Bash",
         "hooks": [
-          { "type": "command", "command": "HOOKS_DIR/guard-paths.sh", "timeout": 10 }
+          { "type": "command", "command": "HOOKS_DIR/guard-paths.sh", "timeout": 10 },
+          { "type": "command", "command": "HOOKS_DIR/guard-tests.sh", "timeout": 10 }
         ]
       },
       {
