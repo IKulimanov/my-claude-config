@@ -1,0 +1,628 @@
+<title>Перестройка my-claude-config</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #F6F7F9; --surface: #FFFFFF; --text: #1A1E25; --muted: #5D6675;
+  --line: #D9DEE5; --line-strong: #B9C1CC;
+  --accent: #1D5BA6; --accent-soft: #E4EDF9; --accent-ink: #153F73;
+  --ok: #1F7A4D; --ok-soft: #E3F3EA;
+  --warn: #8F6210; --warn-soft: #FBF0D9;
+  --crit: #B23A2E; --crit-soft: #F9E3E0;
+  --code-bg: #EEF1F5;
+  --sans: "Golos Text", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --serif: "PT Serif", Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #13161B; --surface: #1B1F26; --text: #E6E9EE; --muted: #9AA4B1;
+    --line: #2C323B; --line-strong: #3E4652;
+    --accent: #7DB0F0; --accent-soft: #1E2C40; --accent-ink: #B9D3F5;
+    --ok: #5CC28C; --ok-soft: #173224;
+    --warn: #E0B255; --warn-soft: #3A2E12;
+    --crit: #F08A7E; --crit-soft: #3E1F1B;
+    --code-bg: #232830;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #13161B; --surface: #1B1F26; --text: #E6E9EE; --muted: #9AA4B1;
+  --line: #2C323B; --line-strong: #3E4652;
+  --accent: #7DB0F0; --accent-soft: #1E2C40; --accent-ink: #B9D3F5;
+  --ok: #5CC28C; --ok-soft: #173224;
+  --warn: #E0B255; --warn-soft: #3A2E12;
+  --crit: #F08A7E; --crit-soft: #3E1F1B;
+  --code-bg: #232830;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding-inline: 16px; padding-block: 32px 96px;
+  background: var(--bg); color: var(--text);
+  font-family: var(--serif); font-size: 17px; line-height: 1.6;
+}
+.wrap { max-width: 1060px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 32px; }
+@media (min-width: 1100px) {
+  .wrap { grid-template-columns: 230px minmax(0, 780px); }
+  nav.toc { position: sticky; top: env(safe-area-inset-top, 0px); align-self: start; max-height: 100vh; overflow-y: auto; padding-top: 8px; }
+}
+nav.toc { font-family: var(--sans); font-size: 14px; }
+nav.toc .toc-title { text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+nav.toc ol { list-style: none; margin: 0; padding: 0; }
+nav.toc li { margin: 0 0 6px; }
+nav.toc a { color: var(--text); text-decoration: none; border-left: 2px solid transparent; padding-left: 10px; display: block; }
+nav.toc a:hover, nav.toc a:focus-visible { border-left-color: var(--accent); color: var(--accent); outline: none; }
+main { min-width: 0; }
+a { color: var(--accent); }
+h1, h2, h3, h4 { font-family: var(--sans); text-wrap: balance; line-height: 1.25; }
+h1 { font-size: 30px; font-weight: 600; margin: 0 0 6px; }
+h2 { font-size: 22px; font-weight: 600; margin: 56px 0 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+h3 { font-size: 17px; font-weight: 600; margin: 32px 0 8px; }
+h4 { font-size: 15px; font-weight: 600; margin: 20px 0 6px; color: var(--muted); }
+p { margin: 0 0 14px; max-width: 68ch; }
+ul, ol { margin: 0 0 14px; padding-left: 22px; max-width: 72ch; }
+li { margin-bottom: 5px; }
+li > ul, li > ol { margin-top: 5px; }
+.meta { font-family: var(--sans); font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+.meta span { display: inline-block; margin-right: 18px; }
+code, kbd { font-family: var(--mono); font-size: .86em; background: var(--code-bg); border-radius: 4px; padding: 1px 5px; overflow-wrap: anywhere; }
+pre { font-family: var(--mono); font-size: 13.5px; line-height: 1.5; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 0 0 18px; }
+pre code { background: none; padding: 0; font-size: inherit; }
+.scroll { overflow-x: auto; margin: 0 0 20px; }
+table { border-collapse: collapse; width: 100%; font-family: var(--sans); font-size: 14px; line-height: 1.45; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-weight: 600; color: var(--muted); font-size: 13px; letter-spacing: .02em; border-bottom: 1px solid var(--line-strong); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td code { background: none; padding: 0; }
+.chip { display: inline-block; font-family: var(--sans); font-size: 12px; font-weight: 500; letter-spacing: .02em; padding: 1px 8px; border-radius: 999px; white-space: nowrap; vertical-align: middle; }
+.chip.add { background: var(--ok-soft); color: var(--ok); }
+.chip.del { background: var(--crit-soft); color: var(--crit); }
+.chip.mod { background: var(--accent-soft); color: var(--accent); }
+.chip.ask { background: var(--warn-soft); color: var(--warn); }
+.chip.keep { background: var(--code-bg); color: var(--muted); }
+.note { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px; padding: 12px 16px; margin: 0 0 18px; font-family: var(--sans); font-size: 15px; }
+.note.warn { border-left-color: var(--warn); }
+.summary { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; margin: 0 0 24px; }
+.summary ol { margin-bottom: 0; }
+.finding { border-top: 1px solid var(--line); padding: 14px 0 6px; }
+.finding:first-of-type { border-top: none; }
+.finding h3 { margin: 0 0 6px; font-size: 16px; }
+.finding .fact { font-family: var(--sans); font-size: 14.5px; color: var(--muted); margin-bottom: 6px; }
+.finding p { margin-bottom: 8px; }
+.cb { font-family: var(--mono); font-weight: 500; }
+.cb.todo { color: var(--muted); }
+.cb.wip { color: var(--warn); }
+.cb.done { color: var(--ok); }
+.cb.blocked { color: var(--crit); }
+.phase { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 0 0 16px; }
+.phase h3 { margin: 0 0 8px; }
+.phase .size { font-family: var(--sans); font-size: 13px; color: var(--muted); }
+.phase ul { list-style: none; padding-left: 0; }
+.phase li { padding-left: 0; font-family: var(--sans); font-size: 15px; }
+.q { border-top: 1px solid var(--line); padding: 12px 0 4px; }
+.q .qt { font-family: var(--sans); font-weight: 600; margin-bottom: 4px; }
+.q p { margin-bottom: 6px; }
+.q .rec { font-family: var(--sans); font-size: 14.5px; color: var(--accent-ink); }
+.mermaid { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; overflow-x: auto; }
+.legend { font-family: var(--sans); font-size: 13.5px; color: var(--muted); margin-bottom: 10px; }
+.src { font-family: var(--sans); font-size: 13px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Содержание">
+  <div class="toc-title">Содержание</div>
+  <ol>
+    <li><a href="#s1">1. Коротко</a></li>
+    <li><a href="#s2">2. Что показали данные</a></li>
+    <li><a href="#s3">3. Проблемы и предложения</a></li>
+    <li><a href="#s4">4. Команды: design, task, quick</a></li>
+    <li><a href="#s5">5. Состав агентов и умений</a></li>
+    <li><a href="#s6">6. Соревнование вариантов</a></li>
+    <li><a href="#s7">7. Наш Sonar локально</a></li>
+    <li><a href="#s8">8. Опыт сообщества и экономия</a></li>
+    <li><a href="#s9">9. Решения В1–В29</a></li>
+    <li><a href="#s10">10. План работ</a></li>
+    <li><a href="#s11">11. Что не делаем</a></li>
+    <li><a href="#s12">12. Что уточним по ходу</a></li>
+    <li><a href="#s13">13. Риски</a></li>
+  </ol>
+</nav>
+
+<main>
+<h1>Перестройка my-claude-config</h1>
+<div class="meta">
+  <span>Версия 4 от 2026-09-17 — согласована, открытых вопросов нет</span>
+  <span>Окно данных: 18.07–17.09 (60 дней) и 9 ISO-недель через <code>scripts/audit/</code></span>
+  <span>Источники: <code>~/.claude/logs/*.jsonl</code>, транскрипты, репозиторий, документация Claude Code, внешние источники в разделах 7–8</span>
+</div>
+
+<div class="note">Версия 4. Все вопросы В1–В29 отвечены, сводка в разделе 9. Изменения против версии 3: <code>/quick</code> без тестов и ревью (4.5); раздел 7 переписан под ваш Sonar Community Build 26.7 в режиме MQR — локальный прогон в песочницу и цикл исправлений с вопросом по спорным; <code>maxTurns</code> остаются, проверка через месяц; из аудита остаётся только <code>report.html</code>. Следующий шаг — фаза 0: вопрос «worktree или текущая ветка», затем фаза 1.</div>
+
+<h2 id="s1">1. Коротко</h2>
+<div class="summary">
+<ol>
+  <li><b>Команды живут в рабочих проектах, правила — везде.</b> За 60 дней 872 промта, со slash-командой 115 (13%). В личных проектах 350 промтов и 2 команды. Политики git, тестов и защищённых путей идут в правила и хуки.</li>
+  <li><b>Лестница команд:</b> <code>/quick</code> (сделать ровно то, что написано: без тестов, ревью и рассуждений) → <code>/fix</code> (баг, TDD) → <code>/feature</code> (план и кейсы в одном контексте) → <code>/task</code> (фазы, планировщик, критик, исполнитель, Sonar, ревьюеры). После согласования плана и кейсов <code>/task</code> не останавливается, кроме стоп-точек <code>[#]</code>.</li>
+  <li><b>Планирует свой агент.</b> Встроенный Plan не имеет инструмента записи: 33 плана ушли через heredoc в Bash. Заменяем на <code>planner</code> со скилом <code>planning</code>; код пишет <code>implementer</code>; план, кейсы и результат проверяет <code>critic</code>.</li>
+  <li><b>Наш Sonar локально.</b> Community Build не анализирует ветки, поэтому рабочее дерево анализируется в песочный проект <code>&lt;ключ&gt;-local</code> с вашим профилем. Собственные правила и серьёзные находки чинятся сразу, мелкие и спорные — вопросом пакетом. Работает в <code>/task</code> после реализации и в <code>/review</code>.</li>
+  <li><b>Удаляем:</b> <code>/plan</code>, <code>/arch</code>, <code>/test</code>, <code>/convention-check</code>, четыре скила, пять справочников конвенции, недельный пайплайн, документацию кроме <code>README.md</code>, <code>docs/TECHNICAL.md</code> и <code>report.html</code> аудита.</li>
+  <li><b>Политика git:</b> push, merge, rebase, pull, переключение на master/staging — deny; <code>.gitlab-ci.yml</code>, <code>.gitlab/</code>, <code>helm/</code> — ask; формат коммита проверяет хук; трейлер нигде.</li>
+  <li><b>Тесты:</b> кейсы в <code>tests.md</code> согласуются до кода; правка закоммиченного теста — вопрос оператору.</li>
+  <li><b>Ревью в два умения:</b> <code>convention-reviewer</code> на Sonnet с отчётом Sonar и Context7; стек-ревьюеры на Opus. Не больше двух итераций.</li>
+  <li><b>Проектирование:</b> плейбук из vault переезжает в <code>playbook/</code>, артефакты — в <code>docs/projects/&lt;проект&gt;/</code>; при выборе архитектуры три независимых варианта и судья.</li>
+  <li><b>maxTurns:</b> потолки по замеру, проверка через месяц.</li>
+</ol>
+</div>
+
+<h2 id="s2">2. Что показали данные</h2>
+
+<h3>2.1 Команды</h3>
+<div class="scroll"><table>
+<tr><th>Команда</th><th class="num">Всего</th><th class="num">60 дней</th><th class="num">30 дней после аудита</th><th>Решение</th></tr>
+<tr><td><code>/task</code></td><td class="num">107</td><td class="num">45</td><td class="num">29</td><td><span class="chip mod">изменить</span> 4.2</td></tr>
+<tr><td><code>/review</code></td><td class="num">72</td><td class="num">12</td><td class="num">6</td><td><span class="chip mod">изменить</span> Sonar и два ревьюера</td></tr>
+<tr><td><code>/plan</code></td><td class="num">50</td><td class="num">0</td><td class="num">0</td><td><span class="chip del">удалить</span></td></tr>
+<tr><td><code>/review-mr</code></td><td class="num">47</td><td class="num">24</td><td class="num">4</td><td><span class="chip mod">изменить</span> два ревьюера</td></tr>
+<tr><td><code>/fix</code></td><td class="num">20</td><td class="num">12</td><td class="num">4</td><td><span class="chip keep">оставить</span></td></tr>
+<tr><td><code>/onboard</code></td><td class="num">19</td><td class="num">5</td><td class="num">1</td><td><span class="chip mod">изменить</span> пишет проектный <code>.claude/settings.json</code></td></tr>
+<tr><td><code>/feature</code></td><td class="num">16</td><td class="num">8</td><td class="num">3</td><td><span class="chip mod">изменить</span> план, кейсы, критик, по-русски</td></tr>
+<tr><td><code>/jira</code></td><td class="num">9</td><td class="num">3</td><td class="num">3</td><td><span class="chip keep">оставить</span></td></tr>
+<tr><td><code>/arch</code></td><td class="num">9</td><td class="num">1</td><td class="num">0</td><td><span class="chip del">удалить</span></td></tr>
+<tr><td><code>/explain</code></td><td class="num">5</td><td class="num">3</td><td class="num">1</td><td><span class="chip keep">оставить</span></td></tr>
+<tr><td><code>/test</code>, <code>/convention-check</code></td><td class="num">1, 0</td><td class="num">0</td><td class="num">0</td><td><span class="chip del">удалить</span></td></tr>
+<tr><td><code>/adr</code>, <code>/reflect</code></td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td><span class="chip keep">оставить</span></td></tr>
+<tr><td><code>/quick</code>, <code>/design</code></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td><span class="chip add">новые</span></td></tr>
+</table></div>
+
+<h3>2.2 Агенты</h3>
+<div class="scroll"><table>
+<tr><th>Агент</th><th>Модель сейчас</th><th class="num">60 дней</th><th class="num">30 дней</th><th>Факт</th></tr>
+<tr><td>general-purpose (встроенный)</td><td>основная</td><td class="num">240</td><td class="num">140</td><td>исполнитель фаз; скилы грузит сам</td></tr>
+<tr><td>Plan (встроенный)</td><td>основная</td><td class="num">56</td><td class="num">42</td><td>без Write/Edit; <code>plan.md</code> через heredoc 33 раза</td></tr>
+<tr><td>Explore (встроенный)</td><td>по умолчанию</td><td class="num">60</td><td class="num">30</td><td>без изменений</td></tr>
+<tr><td><code>java-reviewer</code></td><td>sonnet</td><td class="num">77</td><td class="num">34</td><td>ревью до трёх итераций</td></tr>
+<tr><td><code>test-writer</code></td><td>sonnet</td><td class="num">23</td><td class="num">23</td><td></td></tr>
+<tr><td><code>vue-reviewer</code>, <code>vue-test-writer</code>, <code>migration-reviewer</code></td><td>sonnet, sonnet, opus</td><td class="num">17, 9, 3</td><td class="num">6, 1, 3</td><td></td></tr>
+<tr><td><code>go-reviewer</code>, <code>go-test-writer</code></td><td>sonnet</td><td class="num">0</td><td class="num">0</td><td>Go-работы не было</td></tr>
+</table></div>
+
+<h3>2.3 Скилы</h3>
+<div class="scroll"><table>
+<tr><th>Скил</th><th class="num">Вызовы Skill, 60 дней</th><th class="num">Объём</th><th>Решение</th></tr>
+<tr><td><code>java-service-convention</code></td><td class="num">146</td><td class="num">54 КБ</td><td><span class="chip del">удалить 5 справочников</span>; остаются <code>sonar-rules.md</code> и указатель на канон</td></tr>
+<tr><td><code>testing</code>, <code>vue-frontend</code>, <code>spring-best-practices</code>, <code>jpa-db-review</code>, <code>java-patterns</code>, <code>integration-patterns</code>, <code>go-best-practices</code>, DevOps-четвёрка</td><td class="num">42 … 0</td><td class="num">2–35 КБ</td><td><span class="chip keep">оставить</span></td></tr>
+<tr><td><code>git-convention</code></td><td class="num">0</td><td class="num">2 КБ</td><td><span class="chip mod">переписать</span></td></tr>
+<tr><td><code>go-service</code>, <code>repo-onboarding</code>, <code>terraform</code>, <code>web-app</code></td><td class="num">0</td><td class="num">17 КБ</td><td><span class="chip del">удалить</span></td></tr>
+</table></div>
+
+<h3>2.4 Модели и стоимость</h3>
+<div class="scroll"><table>
+<tr><th>Модель</th><th class="num">Сессии главного агента, 60 дней</th><th class="num">Токены вывода</th><th class="num">Сообщения субагентов, 9 недель</th><th class="num">Цена вход / выход, $ за 1M</th></tr>
+<tr><td>Claude Opus 5</td><td class="num">78 (+8)</td><td class="num">12.3M</td><td class="num">8 951</td><td class="num">5 / 25</td></tr>
+<tr><td>Claude Opus 4.8</td><td class="num">36 (+3)</td><td class="num">5.1M</td><td class="num">553</td><td class="num">5 / 25</td></tr>
+<tr><td>Claude Fable 5 / 5.1</td><td class="num">10 (+11)</td><td class="num">2.4M (+7.6M)</td><td class="num">2 299 / 159</td><td class="num">10 / 50</td></tr>
+<tr><td>Claude Sonnet 5</td><td class="num">8</td><td class="num">1.1M</td><td class="num">704</td><td class="num">2 / 10</td></tr>
+</table></div>
+
+<h3>2.5 Git, защищённые пути, тесты</h3>
+<ul>
+  <li>Агент выполнял <code>git push</code> 7 раз, <code>rebase</code> 6, <code>merge</code> в main, <code>reset --hard</code> на master; правил <code>helm/*-values.yml</code> 18 раз; коммитов 96, 8 с трейлером.</li>
+  <li>Тест-файлы: 939 правок против 291 создания; артефакта с кейсами нет.</li>
+</ul>
+
+<h3>2.6 Ходы субагентов (для <code>maxTurns</code>)</h3>
+<div class="scroll"><table>
+<tr><th>Агент</th><th class="num">Запусков</th><th class="num">Медиана записей</th><th class="num">p90</th><th class="num">Максимум</th></tr>
+<tr><td>general-purpose</td><td class="num">176</td><td class="num">66</td><td class="num">99</td><td class="num">180</td></tr>
+<tr><td>Plan</td><td class="num">47</td><td class="num">76</td><td class="num">109</td><td class="num">161</td></tr>
+<tr><td>Explore</td><td class="num">45</td><td class="num">58</td><td class="num">102</td><td class="num">227</td></tr>
+<tr><td><code>java-reviewer</code></td><td class="num">40</td><td class="num">71</td><td class="num">107</td><td class="num">164</td></tr>
+<tr><td><code>test-writer</code></td><td class="num">23</td><td class="num">22</td><td class="num">40</td><td class="num">108</td></tr>
+</table></div>
+<p>Считались записи ответа модели; ход с несколькими вызовами инструментов даёт несколько записей, реальных ходов меньше.</p>
+
+<h3>2.7 Rule 08, хвосты аудита, документация, Sonar</h3>
+<ul>
+  <li>Гипотеза в постановке: 0 из 52 отладочных и 0 из 59 проектных за 9 недель. Правило остаётся, чиним логирование вопросов.</li>
+  <li><code>cleanupPeriodDays</code> не применён; <code>analytics/</code> стоит с 11.07; 13 файлов документации с дублями и битыми ссылками.</li>
+  <li>Sonar: Community Build 26.7.0, режим MQR; CI-задание <code>sonarqube-check</code> из общего шаблона <code>infra/templates/gitlab-ci</code>; ключ проекта в <code>pom.xml</code> не задаётся; собственные правила — плагин <code>convention-sonar-rules-plugin</code>, репозиторий правил <code>nurtelecomconventionjavarules</code>, 27 правил в выжимке; 25 промтов за окно аудита — вставленное руками замечание Sonar.</li>
+</ul>
+
+<h2 id="s3">3. Проблемы и предложения</h2>
+<p>Факт → следствие → что делаем. Номера П1–П18 используются в плане работ.</p>
+
+<div class="finding"><h3>П1. Политики git нет <span class="chip add">добавить</span></h3><p>Правило 09, хук <code>guard-git.sh</code> (deny: push, merge, rebase, pull, защищённые ветки, <code>--no-verify</code>; ask: amend, reset --hard, clean, branch -D, stash drop, checkout -- файл), <code>permissions.deny</code> вторым слоем. <code>block-push-secrets.sh</code> удалить.</p></div>
+<div class="finding"><h3>П2. <code>.gitlab-ci.yml</code> и <code>helm/</code> правятся без запроса <span class="chip add">добавить</span></h3><p><code>guard-paths.sh</code> возвращает <code>ask</code>; <code>permissions.ask</code> вторым слоем; проектные добавки — <code>.claude/settings.json</code> от <code>/onboard</code>.</p></div>
+<div class="finding"><h3>П3. Формат коммита не проверяется <span class="chip add">добавить</span></h3><p><code>check-commit-msg.sh</code>: рабочий/личный по cwd, первая строка, трейлеры, deny с подсказкой; <code>git-convention</code> — единый источник.</p></div>
+<div class="finding"><h3>П4. Кейсы не согласуются, тесты меняются без вопроса <span class="chip add">добавить</span></h3><p><code>tests.md</code> до кода, правило 06, <code>guard-tests.sh</code> по варианту 1, проверка ревьюером.</p></div>
+<div class="finding"><h3>П5. <code>/task</code> — универсальный вход, план нечитаем, планирует чужой агент <span class="chip mod">изменить</span></h3><p>Сортировка, <code>planner</code>, <code>critic</code>, <code>implementer</code>, Sonar, формат плана, две остановки, <code>[#]</code>, ревью ≤ 2.</p></div>
+<div class="finding"><h3>П6. Нет команды проектирования по плейбуку <span class="chip add">добавить</span></h3><p><code>playbook/</code>, <code>docs/projects/</code>, <code>/design</code>, <code>architect</code>, соревнование.</p></div>
+<div class="finding"><h3>П7. Rule 08 не изменил поведение <span class="chip keep">оставить</span></h3><p><code>log-tool.sh</code> пишет тексты вопросов; brief и фаза 0 спрашивают вариант автора явно.</p></div>
+<div class="finding"><h3>П8. Ревью смешивает конвенцию и суждение <span class="chip mod">изменить</span></h3><p><code>convention-reviewer</code> (Sonnet, отчёт Sonar, Context7) и стек-ревьюеры (Opus).</p></div>
+<div class="finding"><h3>П9. Никто не спрашивает «что мы не учли» <span class="chip add">добавить</span></h3><p><code>critic</code> с тремя точками (5.8).</p></div>
+<div class="finding"><h3>П10. Нет ступени для точечных правок <span class="chip add">добавить</span></h3><p><code>/quick</code> (4.5) и уступка в правиле 06.</p></div>
+<div class="finding"><h3>П11. Замечания Sonar вставляются руками, локальной проверки по вашему профилю нет <span class="chip add">добавить</span></h3><div class="fact">25 промтов «вот замечание Sonar, почини» за окно аудита; выжимка правил — предсказание, а не прогон.</div><p>Локальный прогон в песочный проект с вашим профилем, цикл исправлений с вопросом по спорным (раздел 7).</p></div>
+<div class="finding"><h3>П12. Мёртвые команды и скилы <span class="chip del">удалить</span></h3><p><code>/plan</code>, <code>/arch</code>, <code>/test</code>, <code>/convention-check</code>; <code>go-service</code>, <code>repo-onboarding</code>, <code>terraform</code>, <code>web-app</code>; пять справочников; <code>block-push-secrets.sh</code>.</p></div>
+<div class="finding"><h3>П13. Документация раздута и врёт <span class="chip del">удалить</span></h3><p>Остаются <code>README.md</code>, <code>docs/TECHNICAL.md</code>, <code>docs/audit-2026-08/report.html</code>; <code>CLAUDE.md</code> короткий; блоки для промтов из <code>docs/shared/</code> — в <code>shared/</code>.</p></div>
+<div class="finding"><h3>П14. Хвосты аудита <span class="chip mod">закрыть</span></h3><p><code>cleanupPeriodDays: 90</code>; удалить <code>analytics/</code>, <code>digest-routine.md</code>, <code>AI_USAGE_AUDIT_2026-07.md</code>, <code>CONFIG_MAP.html</code>.</p></div>
+<div class="finding"><h3>П15. Ложные срабатывания блокирующих хуков <span class="chip mod">изменить</span></h3><p>Исключения для сборочных и scratch-каталогов; блокировать чтение, а не упоминание имени; вырезать <code>-C путь</code>.</p></div>
+<div class="finding"><h3>П16. Логи не дают измерить главное <span class="chip mod">изменить</span></h3><p><code>log-tool.sh</code>: поле <code>questions</code>; <code>cleanupPeriodDays</code>.</p></div>
+<div class="finding"><h3>П17. Дубли в правилах и язык команд <span class="chip keep">решено</span></h3><p>Git-строки из 01, 02, 05 — в правило 09; переписываемые команды по-русски.</p></div>
+<div class="finding"><h3>П18. Симлинки делают правки живыми немедленно <span class="chip keep">решено</span></h3><p>Worktree и ветка <code>refactor/config-2026-09</code>; вопрос перед каждой фазой; слияние — твоё.</p></div>
+
+<h2 id="s4">4. Команды: design, task, quick</h2>
+
+<h3>4.1 <code>/design</code></h3>
+<pre class="mermaid">flowchart LR
+  A["Запрос или ТЗ"] --> B["00-brief.md<br/>проблема, результат, scope, appetite,<br/>вариант автора"]
+  B -- "согласован" --> C["01-design.md<br/>варианты (раздел 6), схема ≤7 блоков,<br/>контракты, сценарии отказа"]
+  C -- "ревью" --> D["adr/NNN-*.md<br/>через /adr"]
+  C -- "approved" --> E["02-plan.md<br/>вехи, задачи 4–10 ч"]
+  E --> F["/jira задачи"]
+  F --> G["/task по задаче"]</pre>
+<ul>
+  <li><code>playbook/</code>: <code>projects-playbook.md</code> (слияние двух плейбуков), <code>project-naming.md</code>, выжимки из PDF — <code>task-writing.md</code>, <code>dev-process.md</code>, <code>sdlc.md</code>: <code>pdftotext -layout</code> → анализ структуры → выжимка без потери смысла, ключевых идей и пунктов, со ссылкой на страницы источника. Шаблоны — <code>playbook/templates/</code>. Vault получает указатель.</li>
+  <li><code>docs/projects/&lt;проект&gt;/</code>: brief, design, plan, <code>adr/</code>, <code>options/</code>, <code>assets/</code>. Два проекта из vault переезжают первыми без <code>tools/.env</code>. ADR для команды — копией в репозиторий проекта по просьбе.</li>
+  <li><code>/design &lt;проект&gt;</code>: автоопределение шага по файлам; подкоманды <code>brief</code>, <code>doc</code>, <code>plan</code>, <code>review</code>. Первый вопрос brief — «твой вариант в 1–3 строках или «не знаю»». Статус в шапке меняется только тобой.</li>
+  <li>Скилы: <code>design-docs</code> (≤ 200 строк) и стек-скилы по затронутому.</li>
+</ul>
+
+<h3>4.2 <code>/task</code>: поток и остановки</h3>
+<div class="scroll"><table>
+<tr><th>Шаг</th><th>Кто</th><th>Артефакт</th><th>Остановка</th></tr>
+<tr><td>0. Сортировка</td><td>главный агент</td><td>—</td><td>вопрос → ответ и стоп; правка в одно предложение → <code>/quick</code>; баг → <code>/fix</code>; фича в один контекст → <code>/feature</code>; нет варианта автора → один вопрос</td></tr>
+<tr><td>1. Контекст</td><td>Explore</td><td><code>about.md</code>, <code>context.md</code> (≤ 300 строк)</td><td>нет</td></tr>
+<tr><td>2. План</td><td><code>planner</code></td><td><code>plan.md</code></td><td>нет</td></tr>
+<tr><td>3. Критика плана</td><td><code>critic</code></td><td><code>critique1.md</code></td><td>нет; <code>planner</code> вносит «блокирует» и «стоит»</td></tr>
+<tr><td>4. Согласование плана</td><td>ты</td><td>статус «согласован»</td><td><b>да</b></td></tr>
+<tr><td>5. Кейсы</td><td><code>planner</code></td><td><code>tests.md</code></td><td>нет</td></tr>
+<tr><td>6. Критика кейсов</td><td><code>critic</code></td><td><code>critique2.md</code></td><td>нет; эдж-кейсы добавляются с пометкой «предложил критик»</td></tr>
+<tr><td>7. Согласование кейсов</td><td>ты</td><td>статус «согласованы»</td><td><b>да</b>; дальше без остановок</td></tr>
+<tr><td>8. Реализация по фазам</td><td><code>implementer</code>, тест-райтер</td><td>код, статусы</td><td>только <code>[#]</code> и <code>[!]</code></td></tr>
+<tr><td>9. Проверка и Sonar</td><td>главный агент</td><td>сборка, тесты, <code>sonar.md</code></td><td>нет; собственные правила и серьёзные находки чинятся; спорные — один вопрос пакетом (раздел 7)</td></tr>
+<tr><td>10. Критика результата и ревью</td><td><code>critic</code>, <code>convention-reviewer</code>, стек-ревьюер параллельно</td><td><code>critique3.md</code>, <code>review1.md</code></td><td>нет; фиксер; ≤ 2 итераций</td></tr>
+<tr><td>11. Итог</td><td>главный агент</td><td>сводка, журнал, время</td><td>—</td></tr>
+</table></div>
+<p>Статусы: <code>[ ]</code> не начат, <code>[~]</code> в работе, <code>[x]</code> готов, <code>[!]</code> вопрос агента, <code>[#]</code> стоп-точка оператора. План ≤ 150 строк, «Решение» ≤ 15 строк, статусы меняет <code>plan-status.sh</code>, после каждой фазы — «Шаги» и последняя строка журнала в чат.</p>
+<pre><code># План: локализация ServiceConfig (ORSP-2864)
+Статус: согласован 2026-09-17 · Обновлён: 2026-09-18 14:10
+Легенда: [ ] не начат · [~] в работе · [x] готов · [!] вопрос агента · [#] стоп-точка оператора
+
+## Цель
+Тексты конфигов сервисов хранятся по языкам в отдельной таблице; ответ API не меняется.
+
+## Решение (почему так)
+Вариант автора: отдельная таблица на сущность. Итог: совпадает.
+Подход: таблица `service_config_text(config_id, lang, text)`, чтение через кэш ServiceConfigImpl.
+Отклонили: JSON-колонка (нельзя индексировать по языку); колонки на язык (миграция на каждый новый язык).
+Критик (critique1): добавлен шаг 5 — прогрев кэша; отклонено выделение текстов в отдельный сервис.
+
+## Шаги
+### Фаза 1. Хранение
+- [x] 1. Миграция V12 — `db/migration/V12__service_config_text.sql`. Проверка: `mvn -Dtest=MigrationIT test`. Кейсы: T1.1
+- [x] 2. Сущность и репозиторий — `.../ServiceConfigTextEntity.java`, `.../ServiceConfigTextRepository.java`. Кейсы: T1.2–T1.3
+### Фаза 2. Чтение
+- [~] 3. Загрузка текстов в кэш `ServiceConfigImpl#load`. Кейсы: T2.1–T2.3
+- [#] 4. Язык по умолчанию при отсутствии перевода — посмотрю сам перед этим шагом.
+- [ ] 5. Прогрев кэша при старте. Кейсы: T2.4
+
+## Тесты
+`tests.md`, согласованы 2026-09-17.
+
+## Журнал
+- 2026-09-18 10:40 Фаза 1 готова, 12 тестов зелёные.
+- 2026-09-18 14:02 Фаза 2 начата.</code></pre>
+
+<h3>4.3 Кейсы до кода, тесты не меняются</h3>
+<pre><code># Тест-кейсы: локализация ServiceConfig (ORSP-2864)
+Статус: согласованы 2026-09-17 (T2.3 — автор задачи; T2.4 — предложил критик)
+Правило: после согласования кейсы и код тестов не меняются без вопроса оператору.
+Легенда: [ ] не написан · [~] написан, падает (RED) · [x] зелёный · [!] изменён с разрешения (дата, причина)
+
+## Фаза 2. Чтение
+- [~] T2.1 (unit) Дано тексты ru и en в кэше; когда запрашиваем en; тогда возвращается en.
+- [ ] T2.2 (unit) Дано только ru; когда запрашиваем kg; тогда возвращается ru и пишется лог уровня warn без PII.
+- [ ] T2.3 (интеграционный) Дано кэш пуст после старта; когда приходит первый запрос; тогда тексты
+      загружены одним запросом к базе (не N+1).
+- [ ] T2.4 (unit) Дано в базе конфиг без текстов; когда прогреваем кэш; тогда конфиг доступен, исключения нет.</code></pre>
+<ul>
+  <li>Кейсы пишет <code>planner</code>; тест-райтеры пишут код только для перечисленных; нереализуемый кейс — <code>[!]</code>.</li>
+  <li><code>guard-tests.sh</code> спрашивает только про закоммиченные и не изменённые тест-файлы.</li>
+</ul>
+
+<h3>4.4 Политика git и защищённых путей</h3>
+<div class="scroll"><table>
+<tr><th>Действие агента</th><th>Решение</th><th>Механизм</th></tr>
+<tr><td><code>git push</code>, <code>merge</code>, <code>rebase</code>, <code>pull</code></td><td><span class="chip del">deny</span></td><td><code>guard-git.sh</code> + <code>permissions.deny</code></td></tr>
+<tr><td><code>checkout</code>/<code>switch</code> на master, main, staging, prod*; <code>commit</code> на них; <code>--no-verify</code></td><td><span class="chip del">deny</span></td><td><code>guard-git.sh</code></td></tr>
+<tr><td><code>commit --amend</code>, <code>reset --hard</code>, <code>clean -f</code>, <code>branch -D</code>, <code>stash drop</code>, <code>checkout -- &lt;файл&gt;</code></td><td><span class="chip ask">ask</span></td><td><code>guard-git.sh</code></td></tr>
+<tr><td><code>checkout -b</code>, <code>branch</code>, <code>add</code>, <code>commit</code>, <code>stash</code>, <code>fetch</code>, <code>diff</code>, <code>log</code>, <code>status</code></td><td><span class="chip add">allow</span></td><td>ветка в рабочем проекте — <code>{type}/{JIRA-ID}-{описание}</code></td></tr>
+<tr><td>Правка <code>.gitlab-ci.yml</code>, <code>.gitlab/**</code>, <code>helm/**</code></td><td><span class="chip ask">ask</span></td><td><code>guard-paths.sh</code> + <code>permissions.ask</code></td></tr>
+<tr><td>Правка закоммиченного теста</td><td><span class="chip ask">ask</span></td><td><code>guard-tests.sh</code></td></tr>
+<tr><td>Сообщение коммита не по шаблону или с трейлером</td><td><span class="chip del">deny</span> с подсказкой</td><td><code>check-commit-msg.sh</code></td></tr>
+</table></div>
+<div class="scroll"><table>
+<tr><th></th><th>Рабочий проект</th><th>Личный проект</th></tr>
+<tr><td>Первая строка</td><td><code>ORSP-2864: Добавить ретрай отправки в Kafka</code></td><td><code>feat(api): добавить ретрай отправки в Kafka</code></td></tr>
+<tr><td>Проверка</td><td><code>^[A-Z][A-Z0-9]+-[0-9]+: [А-ЯЁ].{2,70}$</code></td><td><code>^(feat|fix|docs|refactor|test|chore|build|ci|perf)(\([a-z0-9._-]+\))?: [а-яё].{2,70}$</code></td></tr>
+</table></div>
+
+<h3>4.5 Лестница команд и <code>/quick</code> (В25)</h3>
+<div class="scroll"><table>
+<tr><th>Команда</th><th>Когда</th><th>Что внутри</th><th>Подагенты</th><th>Тесты</th></tr>
+<tr><td><code>/quick</code> <span class="chip add">новая</span></td><td>правка описывается одним предложением: переименование, перенос, текст лога, значение конфига, документация, поле DTO, что угодно мелкое по прямому указанию</td><td>читает только названные файлы, делает ровно то, что написано, без рассуждений, плана, исследования и загрузки скилов сверх авто по путям; отчёт одной строкой</td><td>0</td><td>не пишет и не запускает; хуки git, путей и закоммиченных тестов действуют</td></tr>
+<tr><td><code>/fix</code></td><td>баг или малое изменение поведения</td><td>причина до правки, RED → GREEN → REFACTOR</td><td>0–1</td><td>падающий тест первым</td></tr>
+<tr><td><code>/feature</code></td><td>фича в один контекст</td><td>план по умению <code>planning</code>, кейсы в плане, один проход <code>critic</code>, TDD</td><td>1–3</td><td>кейсы согласованы с планом</td></tr>
+<tr><td><code>/task</code></td><td>несколько фаз или контекстов</td><td>4.2</td><td>4–9</td><td><code>tests.md</code></td></tr>
+</table></div>
+<ul>
+  <li>Правило 06 получает уступку: правки по <code>/quick</code> выполняются по прямому указанию пользователя без теста и ревью; ответственность за поведение — на том, кто дал указание. Всё остальное правило без изменений.</li>
+  <li><code>/quick</code> не трогает контракты, миграции и защищённые пути; если просят больше трёх файлов или правка тянет за собой другие — команда говорит «это <code>/fix</code>» или «это <code>/feature</code>» и останавливается.</li>
+  <li>Полей <code>model</code> и <code>effort</code> у команды не ставим: смена модели или усилия внутри сессии сбрасывает кэш промта и делает частые вызовы дороже, а не дешевле. Скорость даёт сам промт: без рассуждений и исследования.</li>
+</ul>
+
+<h2 id="s5">5. Состав агентов и умений</h2>
+
+<h3>5.1 Умение плана (<code>skills/planning</code>)</h3>
+<ol>
+  <li><b>Вход.</b> <code>context.md</code> или код, brief/design, вариант автора. Не исследовать заново то, что уже в контексте.</li>
+  <li><b>Декомпозиция.</b> Шаг — одно проверяемое изменение с командой проверки и кейсами. Фаза — не больше 8 правок файлов, сборка после фазы зелёная, между фазами нет полусделанных контрактов. Больше трёх фаз — подзадачи <code>a</code>, <code>b</code>, <code>c</code>.</li>
+  <li><b>Порядок.</b> Снизу вверх, если внешний контракт не меняется; вертикальным срезом, если меняется.</li>
+  <li><b>Не переусложнять.</b> Самое простое решение, закрывающее кейсы; абстракция — при двух использованиях в этой задаче; ничего «на будущее»; код вне задачи не трогать.</li>
+  <li><b>Чёткие указания.</b> Путь, имя класса и метода, что добавить, ожидаемое поведение, команда проверки. Неизвестное — «Вопрос» с владельцем.</li>
+  <li><b>Кейсы.</b> На каждый шаг 1–3 кейса в <code>tests.md</code>.</li>
+  <li><b>Работа с критикой.</b> «Блокирует» и «стоит» — в план с пометкой «критик»; «по желанию» — в «Границы».</li>
+  <li><b>Чего не делает.</b> Не пишет код, не меняет кейсы после согласования, не расширяет scope.</li>
+</ol>
+
+<h3>5.2 Агенты</h3>
+<div class="scroll"><table>
+<tr><th>Агент</th><th>Статус</th><th>Модель / усилие / maxTurns</th><th>Инструменты и скилы</th><th>Кто зовёт</th></tr>
+<tr><td><code>planner</code></td><td><span class="chip add">новый</span></td><td>opus / high / 250</td><td>Read, Grep, Glob, Bash, Write; <code>planning</code></td><td><code>/task</code>: план, кейсы, правка по критике</td></tr>
+<tr><td><code>critic</code></td><td><span class="chip add">новый</span></td><td>opus / high / 150</td><td>только чтение; <code>planning</code> плюс стек-скил паттернов по промту</td><td><code>/task</code> ×3, <code>/feature</code> ×1</td></tr>
+<tr><td><code>implementer</code></td><td><span class="chip add">новый</span></td><td>inherit / high / 300</td><td>без Agent; стек-скил грузит сам</td><td><code>/task</code> по фазам</td></tr>
+<tr><td><code>architect</code></td><td><span class="chip add">новый</span></td><td>opus / high / 200</td><td>чтение, Context7; <code>design-docs</code>, <code>java-patterns</code>, <code>integration-patterns</code>, <code>jpa-db-review</code></td><td><code>/design</code></td></tr>
+<tr><td><code>convention-reviewer</code></td><td><span class="chip add">новый</span></td><td>sonnet / medium / 150</td><td>чтение, Context7; <code>java-service-convention</code>, <code>git-convention</code>; вход — отчёт Sonar</td><td><code>/review</code>, <code>/review-mr</code>, <code>/task</code></td></tr>
+<tr><td><code>java-reviewer</code>, <code>vue-reviewer</code>, <code>go-reviewer</code></td><td><span class="chip mod">opus, без блока конвенции</span></td><td>opus / high / 250</td><td>как сейчас; плюс «тесты не ослаблены, кейсы покрыты»</td><td>там же</td></tr>
+<tr><td><code>test-writer</code>, <code>go-test-writer</code>, <code>vue-test-writer</code></td><td><span class="chip mod">вход — tests.md</span></td><td>sonnet / medium / 150</td><td>как сейчас</td><td><code>/task</code>, <code>/feature</code></td></tr>
+<tr><td><code>migration-reviewer</code></td><td><span class="chip keep">без изменений</span></td><td>opus / — / 150</td><td></td><td>при миграциях</td></tr>
+<tr><td>Plan (встроенный)</td><td><span class="chip del">не используем</span></td><td></td><td></td><td></td></tr>
+</table></div>
+<p>Итого 12 своих агентов. Критерий добавления — официальный: объёмный вывод, ограничение инструментов или самодостаточный итог в свежем контексте. Не добавляем отладчика (<code>/fix</code>), писателя документации (<code>/adr</code>, <code>/jira</code>), исследователя (разовый general-purpose), security-ревьюера (встроенный <code>/security-review</code>). Потолки <code>maxTurns</code> — максимум по логам × 1,5; поле пока не соблюдается, пересмотр 2026-10-17.</p>
+
+<h3>5.3 Ревью в два умения</h3>
+<div class="scroll"><table>
+<tr><th></th><th><code>convention-reviewer</code></th><th>стек-ревьюеры</th></tr>
+<tr><td>Что проверяет</td><td>отчёт локального Sonar (раздел 7) — сначала собственные правила; коды из <code>sonar-rules.md</code> по тронутым методам, если прогона не было; командные стартеры и библиотеки; версии и API через Context7; формат ветки и коммитов</td><td>баги и регрессии; структура и слои; лишние абстракции и что упростить; ошибки, транзакции, JPA; тесты не ослаблены, кейсы покрыты</td></tr>
+<tr><td>Выход</td><td>нарушения с кодами; «чисто» по категориям</td><td>находки по серьёзности; «упростить» отдельным блоком</td></tr>
+</table></div>
+
+<h3>5.4 <code>critic</code> — три контрольные точки</h3>
+<div class="scroll"><table>
+<tr><th>Точка</th><th>Вход</th><th>Что ищет</th><th>Куда уходят замечания</th></tr>
+<tr><td>1. После плана</td><td><code>context.md</code>, <code>plan.md</code>, brief/design</td><td>неучтённое в постановке; пропущенные сценарии и границы; шаги, ломающие контракт или сборку между фазами; переусложнение; где напрашивается известный паттерн или где он лишний</td><td><code>critique1.md</code> → <code>planner</code> до твоего согласования</td></tr>
+<tr><td>2. После кейсов</td><td><code>plan.md</code>, <code>tests.md</code></td><td>недостающие эдж-кейсы уровня unit: границы, пустое, дубль, порядок, конкурентность, отказ зависимости, невалидный вход; дублирующие и непроверяемые кейсы</td><td><code>critique2.md</code> → кейсы «предложил критик» до твоего согласования</td></tr>
+<tr><td>3. После реализации</td><td>brief/план, <code>tests.md</code>, дифф</td><td>соответствие постановке; недоделанное и сделанное сверх; переусложнение и что упростить; сценарии, не покрытые кейсами</td><td><code>critique3.md</code> → фиксер вместе с ревьюерами; новые кейсы — в <code>tests.md</code> с согласованием</td></tr>
+</table></div>
+<p>Не больше пяти замечаний на точку: суть → почему важно → что сделать; оценка «блокирует / стоит / по желанию»; «замечаний нет» допустимо. Критик не редактирует файлы; пересечения с ревьюерами фиксер берёт один раз.</p>
+
+<h2 id="s6">6. Соревнование вариантов</h2>
+<div class="scroll"><table>
+<tr><th>Раунд</th><th>Кто</th><th>Что делает</th><th>Артефакт</th></tr>
+<tr><td>1. Варианты</td><td>3 запуска <code>architect</code> параллельно, изолированно, одинаковый вход</td><td>позиции: минималист; надёжность и эксплуатация; развитие под два следующих известных шага</td><td><code>options/A.md</code>, <code>B.md</code>, <code>C.md</code>, каждый ≤ 120 строк</td></tr>
+<tr><td>2. Судья</td><td>свежий <code>architect</code></td><td>таблица «критерий × вариант»; критерии из brief плюс простота, риск отказа, обратимость; рекомендация; что взять из проигравших</td><td><code>options/verdict.md</code></td></tr>
+<tr><td>3. Выбор</td><td>ты</td><td>A / B / C / смешать → <code>01-design.md</code>, остальные в «Alternatives considered»</td><td><code>01-design.md</code></td></tr>
+</table></div>
+<p>Перекрёстной критики по умолчанию нет (конформизм в дебатах по данным); позиции — веса критериев, не роли; порог — проект больше двух недель или флаг <code>--варианты 3</code>; цена — четыре запуска Opus.</p>
+
+<h2 id="s7">7. Наш Sonar локально (В21, В26)</h2>
+<p>Данные: SonarQube Community Build 26.7.0, режим MQR; собственный профиль на базе плагина <code>convention-sonar-rules-plugin</code> (репозиторий правил <code>nurtelecomconventionjavarules</code>); проекты привязаны к профилю; CI гоняет <code>sonarqube-check</code> из общего шаблона. Инструмента «Reflect Sonar» не нашёл; SonarQube for IDE (бывший SonarLint) работает только внутри IDE и агенту недоступен.</p>
+<p>Ограничение Community Build: анализ веток и MR не поддерживается, параметры <code>sonar.branch.*</code> отклоняются. Прогнать рабочее дерево в основной проект нельзя — это перезапишет состояние master на сервере локальным незакоммиченным кодом. Поэтому анализ идёт в отдельный <b>песочный проект</b> <code>&lt;ключ&gt;-local</code>, привязанный к вашему профилю. Правила те же, что в CI: профиль один.</p>
+
+<h3>7.1 Как это работает</h3>
+<div class="scroll"><table>
+<tr><th>Шаг</th><th>Что</th></tr>
+<tr><td>Настройка (один раз на проект)</td><td><code>sonar-local.sh --init</code>: ключ = <code>sonar.projectKey</code> из <code>sonar-project.properties</code>, иначе корневой <code>artifactId</code>, плюс суффикс <code>-local</code>; создать проект (<code>api/projects/create</code>), тег <code>sandbox</code>, привязать профиль конвенции, если он не назначен по умолчанию (<code>api/qualityprofiles/add_project</code>). Нужны права «Execute Analysis» и «Create Projects» у токена, либо проект создаёт админ. Хост и токен — только в окружении: <code>SONAR_HOST_URL</code>, <code>SONAR_TOKEN</code>.</td></tr>
+<tr><td>Прогон</td><td><code>sonar-local.sh</code>: <code>mvn -q -DskipTests compile sonar:sonar -Dsonar.projectKey=&lt;ключ&gt;-local …</code>, без параметров ветки; ожидание обработки отчёта по <code>ceTaskId</code> из <code>target/sonar/report-task.txt</code> (<code>api/ce/task</code>); выборка <code>api/issues/search</code> с полями MQR (<code>impacts</code>, серьёзность impact); по умолчанию только файлы из <code>git diff --name-only master...</code>, флаг <code>--all</code> для всего проекта. Время — минуты (компиляция и сканер).</td></tr>
+<tr><td>Отчёт</td><td><code>.ai/&lt;проект&gt;/&lt;буква&gt;/sonar.md</code> или вывод в чат: <code>файл:строка · правило · серьёзность · качество · сообщение</code>; сначала правила из <code>nurtelecomconventionjavarules</code>, потом встроенные по серьёзности. <code>sonar-rule.sh &lt;код&gt;</code> — описание правила с сервера.</td></tr>
+<tr><td>После слияния</td><td><code>sonar-issues.sh &lt;ключ&gt;</code> — issues основного проекта после CI, для сверки, что песочница и CI совпали. Quality gate CI остаётся финальным вердиктом.</td></tr>
+</table></div>
+
+<h3>7.2 Цикл исправлений</h3>
+<div class="scroll"><table>
+<tr><th>Класс находки</th><th>Действие</th></tr>
+<tr><td>Собственные правила (<code>nurtelecomconventionjavarules</code>), любая серьёзность</td><td><span class="chip add">исправить</span> без вопроса — приоритет конвенции</td></tr>
+<tr><td>Встроенные правила, серьёзность BLOCKER или HIGH</td><td><span class="chip add">исправить</span></td></tr>
+<tr><td>Встроенные MEDIUM</td><td>механическая правка (неиспользуемый импорт, модификатор, дубликат) — <span class="chip add">исправить</span>; требует переделки кода — <span class="chip ask">спросить</span></td></tr>
+<tr><td>Встроенные LOW и INFO, спорные (когнитивная сложность, число параметров, дизайн)</td><td><span class="chip ask">спросить</span> одним пакетом: исправить / пропустить / отложить; ответы записываются в <code>sonar.md</code> с причиной, на сервере ничего не помечается</td></tr>
+</table></div>
+<ul>
+  <li>Правки без изменения поведения — напрямую, затем тесты; правки с изменением поведения — через кейсы и TDD. После правок — повторный прогон; не больше двух кругов.</li>
+  <li>Где запускается: <code>/task</code> шаг 9 (после сборки и тестов, до критика и ревьюеров); <code>/review</code> — для рабочих Java-проектов по умолчанию, флаг <code>--без-sonar</code>; <code>/fix</code> — по флагу <code>--sonar</code>; <code>/quick</code> — никогда.</li>
+  <li><code>convention-reviewer</code> получает отчёт как вход и не предсказывает то, что уже измерено; выжимка <code>sonar-rules.md</code> остаётся на случай, когда сервер недоступен.</li>
+  <li>MCP-сервер SonarSource не нужен: он читает то же, что скрипт, а анализ запускать не умеет. Context7 остаётся; другие MCP не подключаем (GitLab — <code>glab</code>, Kubernetes — allowlisted <code>kubectl</code>, PostgreSQL — открытая CVE, Jira — пока не нужен).</li>
+</ul>
+
+<h2 id="s8">8. Опыт сообщества и экономия</h2>
+<h3>8.1 Что подтверждается и что берём</h3>
+<div class="scroll"><table>
+<tr><th>Рекомендация</th><th>Источник</th><th>Что делаем у нас</th></tr>
+<tr><td>CLAUDE.md короче 200 строк; ограждения в хуках, а не в тексте</td><td class="src">code.claude.com/best-practices, features-overview (2026-09)</td><td>правило 09 короткое; хуки; документация до двух файлов</td></tr>
+<tr><td>«Если дифф описывается одним предложением — план не нужен»</td><td class="src">code.claude.com/best-practices</td><td><code>/quick</code>, сортировка в <code>/task</code></td></tr>
+<tr><td>Ревьюить план, а не код; контекст 40–60%; чекбокс с командой проверки</td><td class="src">HumanLayer ACE-FCA (2025-08)</td><td>формат плана; критик на плане и кейсах; <code>context.md</code> ≤ 300 строк</td></tr>
+<tr><td>Циклы ревью убрали — 25 минут без роста качества; библиотеки-надстройки «пожирают токены»</td><td class="src">HN 2026-04, 2026-07; joanmedia.dev 2026-07</td><td>ревью ≤ 2; критик с лимитом; библиотеки целиком не берём</td></tr>
+<tr><td>Хуки: тяжёлое только в Stop; вырезать <code>-C путь</code>; хуки — код с тестами</td><td class="src">thomas-wiegold.com 2026-05; paczesny.pl 2026-07</td><td>тест на каждый хук; исключения П15</td></tr>
+<tr><td>Многоагентность ×15 токенов; кодовые задачи плохо параллелятся</td><td class="src">anthropic.com/engineering 2025-06</td><td>соревнование по порогу; параллельны только ревьюеры и критик</td></tr>
+<tr><td>Советы одинаковых моделей сходятся; конформизм в дебатах; противник находит замечания везде</td><td class="src">council-review; arXiv 2606.00820; best-practices</td><td>позиции, изоляция, судья; критик с лимитом и оценкой</td></tr>
+<tr><td>Ролевые промты не улучшают ответы</td><td class="src">arXiv 2311.10054</td><td>ролей в командах нет</td></tr>
+<tr><td>Схемы MCP грузятся по требованию; CLI дешевле MCP</td><td class="src">code.claude.com/mcp, costs</td><td>скрипты к Web API вместо MCP</td></tr>
+<tr><td>Смена модели или effort в сессии сбрасывает кэш; <code>/compact</code> — большой запрос; у субагентов TTL 5 минут</td><td class="src">code.claude.com/prompt-caching, costs</td><td>правила меняем пакетом; модель и усилие в файлах агентов; <code>/quick</code> без полей модели</td></tr>
+<tr><td><code>maxTurns</code> есть, но не соблюдается</td><td class="src">github issue #41143</td><td>потолки как страховка, проверка через месяц</td></tr>
+<tr><td>Auto-accept без ограждений: удаления домашнего каталога</td><td class="src">thomas-wiegold.com 2026-02</td><td>хуки П1, П2, П15</td></tr>
+</table></div>
+<h3>8.2 Скрипты, которые экономят токены</h3>
+<ul>
+  <li><code>plan-status.sh</code>, <code>tests-status.sh</code> — маркер меняется без чтения файла моделью.</li>
+  <li><code>sonar-local.sh</code>, <code>sonar-issues.sh</code>, <code>sonar-rule.sh</code> — раздел 7; <code>sonar-rules-for-diff.sh</code> — выжимка правил под дифф, когда сервер недоступен.</li>
+  <li><code>test-summary.sh</code> — только упавшие тесты и итог.</li>
+  <li><code>design-init.sh</code> — каркас <code>docs/projects/&lt;проект&gt;/</code>.</li>
+  <li>Встроенное: <code>/insights</code>, <code>/usage</code> в месячный протокол; <code>claude --worktree</code>.</li>
+</ul>
+<h3>8.3 Конвенция авторинга</h3>
+<p>У субагентов есть <code>effort</code>, <code>maxTurns</code>, <code>omitClaudeMd</code>, <code>isolation</code>, <code>memory</code>, <code>hooks</code>, <code>permissionMode</code>, <code>disallowedTools</code>; у скилов — <code>paths</code>, <code>context: fork</code>, <code>agent</code>, <code>model</code>, <code>effort</code>; у команд — <code>model</code>, <code>disable-model-invocation</code>. Используем <code>model</code>, <code>effort</code>, <code>maxTurns</code>, <code>skills</code>, <code>disallowedTools</code>. Войдёт в <code>TECHNICAL.md</code>.</p>
+
+<h2 id="s9">9. Решения В1–В29</h2>
+<div class="scroll"><table>
+<tr><th>Вопрос</th><th>Твой ответ</th><th>Где в плане</th></tr>
+<tr><td>В1, В15 артефакты</td><td>правила в конфиг сейчас; артефакты в <code>docs/projects/</code>; два проекта переносим</td><td>4.1, фаза 2</td></tr>
+<tr><td>В2 режим <code>/design</code></td><td>автоопределение</td><td>4.1</td></tr>
+<tr><td>В3, В17 план</td><td>удалить <code>/plan</code>, <code>/arch</code>; агент <code>planner</code> и скил <code>planning</code></td><td>5.1, 5.2</td></tr>
+<tr><td>В4 rule 08</td><td>оставить</td><td>П7</td></tr>
+<tr><td>В5 заморозка тестов</td><td>вариант 1</td><td>4.3</td></tr>
+<tr><td>В6–В8 git</td><td>rebase и pull deny; <code>тип(scope): …</code>; трейлер нигде</td><td>4.4</td></tr>
+<tr><td>В9, В20 ревью</td><td>opus для ревьюеров; конвенция и библиотеки на sonnet с Context7; ≤ 2 итераций</td><td>5.3</td></tr>
+<tr><td>В10, В24, В29 удаления</td><td>ненужные команды; весь мусор и неактуальную документацию; из аудита остаётся <code>report.html</code></td><td>П12–П14, фазы 7–8</td></tr>
+<tr><td>В11 защищённые пути</td><td>базовый набор глобально, добавки через проектный <code>.claude/settings.json</code></td><td>4.4</td></tr>
+<tr><td>В12 язык</td><td>переписываемые — по-русски</td><td>фазы 4–5</td></tr>
+<tr><td>В13 <code>/reflect</code></td><td>оставить</td><td>точка 11.10</td></tr>
+<tr><td>В14 worktree</td><td>пробуем, спрашивать перед фазой</td><td>фаза 0</td></tr>
+<tr><td>В16 PDF</td><td><code>pdftotext</code> → анализ → выжимка без потери смысла</td><td>фаза 2</td></tr>
+<tr><td>В18 исполнитель</td><td>один</td><td>5.2</td></tr>
+<tr><td>В19 соревнование</td><td>да</td><td>раздел 6</td></tr>
+<tr><td>В21, В26 Sonar</td><td>только Sonar; Community Build 26.7, MQR; свой профиль в приоритете; прогон при ревью и после кода; спорное — спросить</td><td>раздел 7, фаза 6</td></tr>
+<tr><td>В22 скрипты</td><td>делаем</td><td>8.2, фаза 3</td></tr>
+<tr><td>В23 остановки</td><td>после согласования — только утверждение тестов и стоп-точки</td><td>4.2</td></tr>
+<tr><td>В25 <code>/quick</code></td><td>очень быстро: без тестов, ревью и рассуждений</td><td>4.5</td></tr>
+<tr><td>В27 критик</td><td>делать</td><td>5.4</td></tr>
+<tr><td>В28 maxTurns</td><td>оставить, проверить через месяц</td><td>5.2</td></tr>
+</table></div>
+
+<h2 id="s10">10. План работ</h2>
+<div class="legend">Легенда: <span class="cb todo">[ ]</span> не начат · <span class="cb wip">[~]</span> в работе · <span class="cb done">[x]</span> готов · <span class="cb blocked">[!]</span> нужен твой ответ. Объём: S — до часа, M — 2–4 часа, L — день. Каждая фаза — коммит в ветке <code>refactor/config-2026-09</code> в формате <code>тип(scope): …</code>; перед фазой — вопрос «worktree или текущая ветка»; после — <code>bash tests/test-*.sh</code> и <code>scripts/setup-global.sh status</code>. Хуки и скрипты — по TDD.</div>
+
+<div class="phase">
+<h3>Фаза 0. Старт <span class="size">S</span></h3>
+<ul>
+  <li><span class="cb blocked">[!]</span> Worktree <code>~/dev/my-claude-config-wt</code> или текущая ветка — вопрос в чате.</li>
+  <li><span class="cb todo">[ ]</span> Ветка <code>refactor/config-2026-09</code>; закоммитить этот план как первый коммит.</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Фаза 1. Ограждения (П1–П3, П15) <span class="size">L</span></h3>
+<ul>
+  <li><span class="cb todo">[ ]</span> 1. <code>rules/09-git-and-protected-paths.md</code>; дубли из 01, 02, 05 убрать; <code>wc -c rules/*.md</code> не больше 15,5 КБ.</li>
+  <li><span class="cb todo">[ ]</span> 2. <code>guard-git.sh</code> + тест.</li>
+  <li><span class="cb todo">[ ]</span> 3. <code>guard-paths.sh</code> + тест.</li>
+  <li><span class="cb todo">[ ]</span> 4. <code>check-commit-msg.sh</code> + тест.</li>
+  <li><span class="cb todo">[ ]</span> 5. <code>skills/git-convention</code> переписать.</li>
+  <li><span class="cb todo">[ ]</span> 6. <code>hooks/settings.json</code>, <code>install-hooks.sh</code>: новые хуки, минус <code>block-push-secrets.sh</code>, слияние <code>permissions.ask</code>/<code>deny</code> + тест.</li>
+  <li><span class="cb todo">[ ]</span> 7. <code>block-destructive.sh</code>, <code>block-secrets.sh</code>: исключения + тесты.</li>
+  <li><span class="cb todo">[ ]</span> 8. <code>templates/settings*.json.template</code> с <code>ask</code>-списками; <code>/onboard</code> пишет проектный <code>.claude/settings.json</code>.</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Фаза 2. Плейбук и артефакты <span class="size">M</span></h3>
+<ul>
+  <li><span class="cb todo">[ ]</span> 1. <code>pdftotext -layout</code> трёх PDF в scratchpad; анализ структуры; выжимки <code>task-writing.md</code>, <code>dev-process.md</code>, <code>sdlc.md</code>.</li>
+  <li><span class="cb todo">[ ]</span> 2. <code>playbook/projects-playbook.md</code>, <code>project-naming.md</code>, <code>templates/</code>; ссылки в <code>/adr</code>, <code>/jira</code>, правиле 07.</li>
+  <li><span class="cb todo">[ ]</span> 3. <code>docs/projects/</code>: два проекта из vault без <code>tools/.env</code>; указатель в vault.</li>
+  <li><span class="cb todo">[ ]</span> 4. <code>design-init.sh</code> + тест.</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Фаза 3. Умения, агенты, скрипты <span class="size">L</span></h3>
+<ul>
+  <li><span class="cb todo">[ ]</span> 1. <code>skills/planning</code>, <code>skills/design-docs</code>.</li>
+  <li><span class="cb todo">[ ]</span> 2. Агенты <code>planner</code>, <code>critic</code>, <code>implementer</code>, <code>architect</code>, <code>convention-reviewer</code>; <code>maxTurns</code> и <code>effort</code> у всех двенадцати.</li>
+  <li><span class="cb todo">[ ]</span> 3. Стек-ревьюеры: opus, без блока конвенции, плюс проверка тестов. Тест-райтеры: вход <code>tests.md</code>.</li>
+  <li><span class="cb todo">[ ]</span> 4. <code>rules/06</code>: заморозка и уступка для <code>/quick</code>. <code>guard-tests.sh</code> + тест.</li>
+  <li><span class="cb todo">[ ]</span> 5. <code>plan-status.sh</code>, <code>tests-status.sh</code>, <code>test-summary.sh</code>, <code>sonar-rules-for-diff.sh</code> + тесты.</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Фаза 4. <code>/task</code>, <code>/feature</code>, <code>/quick</code>, <code>/review</code> <span class="size">L</span></h3>
+<ul>
+  <li><span class="cb todo">[ ]</span> 1. <code>commands/task.md</code> по потоку 4.2.</li>
+  <li><span class="cb todo">[ ]</span> 2. <code>commands/feature.md</code>: план и кейсы, один проход критика.</li>
+  <li><span class="cb todo">[ ]</span> 3. <code>commands/quick.md</code> по 4.5.</li>
+  <li><span class="cb todo">[ ]</span> 4. <code>commands/review.md</code>, <code>review-mr.md</code>: Sonar, два ревьюера параллельно.</li>
+  <li><span class="cb todo">[ ]</span> 5. Прогон: <code>/quick</code> на переименовании; <code>/task</code> на средней задаче.</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Фаза 5. <code>/design</code> <span class="size">L</span></h3>
+<ul>
+  <li><span class="cb todo">[ ]</span> 1. <code>commands/design.md</code>: автоопределение, подкоманды, вариант автора, соревнование, ревью.</li>
+  <li><span class="cb todo">[ ]</span> 2. Удалить <code>arch.md</code>, <code>plan.md</code>; ссылки в <code>/fix</code>, <code>/task</code>, <code>/adr</code>, <code>/jira</code>, <code>java-patterns</code>.</li>
+  <li><span class="cb todo">[ ]</span> 3. Прогон на реальном ТЗ.</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Фаза 6. Наш Sonar локально (раздел 7) <span class="size">M</span></h3>
+<ul>
+  <li><span class="cb todo">[ ]</span> 1. <code>sonar-local.sh</code> (<code>--init</code>, прогон, ожидание, выборка MQR, фильтр по диффу), <code>sonar-issues.sh</code>, <code>sonar-rule.sh</code> + тесты на подставном ответе API.</li>
+  <li><span class="cb todo">[ ]</span> 2. Ты: токен с правами «Execute Analysis», «Create Projects» (или админ создаёт песочницу), <code>SONAR_HOST_URL</code> и <code>SONAR_TOKEN</code> в окружении; проверка, что профиль конвенции назначен песочнице.</li>
+  <li><span class="cb todo">[ ]</span> 3. Пробный прогон на одном рабочем репозитории; сверка списка с CI после ближайшего слияния.</li>
+  <li><span class="cb todo">[ ]</span> 4. Цикл исправлений 7.2 в <code>/task</code> шаг 9 и в <code>/review</code>; <code>convention-reviewer</code> читает отчёт.</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Фаза 7. Чистка (П12–П14) <span class="size">M</span></h3>
+<ul>
+  <li><span class="cb todo">[ ]</span> 1. Команды <code>/test</code>, <code>/convention-check</code>; скилы <code>go-service</code>, <code>repo-onboarding</code>, <code>terraform</code>, <code>web-app</code>; пять справочников; ссылка в <code>integration-patterns</code>.</li>
+  <li><span class="cb todo">[ ]</span> 2. Документация: удалить <code>docs/WORKFLOW.md</code>, <code>USAGE_GUIDE.md</code>, <code>EXTENSION_GUIDE.md</code>, <code>DEVELOPER_TIPS.md</code>, <code>HOOKS_GUIDE.md</code>, <code>ROADMAP.md</code>, <code>ARCHITECTURE.md</code>, <code>AI_ARTIFACTS.md</code>, <code>AI_USAGE_AUDIT_2026-07.md</code>, <code>CONFIG_MAP.html</code>, <code>skills/README.md</code>, <code>scripts/audit/README.md</code>; в <code>docs/audit-2026-08/</code> оставить только <code>report.html</code>; <code>docs/shared/</code> → <code>shared/</code>.</li>
+  <li><span class="cb todo">[ ]</span> 3. Не в git, удаляешь сам: <code>analytics/</code>, четыре weekly-скрипта, шаблон дашборда, четыре weekly-теста, <code>digest-routine.md</code>; память <code>weekly_analytics_pipeline.md</code>.</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Фаза 8. Два документа, установка, измеримость (П13, П16) <span class="size">M</span></h3>
+<ul>
+  <li><span class="cb todo">[ ]</span> 1. <code>README.md</code> ≤ 80 строк: что это, быстрый старт, карта каталогов, ссылка на <code>TECHNICAL.md</code>.</li>
+  <li><span class="cb todo">[ ]</span> 2. <code>docs/TECHNICAL.md</code> ≤ 300 строк: сборка контекста; таблицы команд, агентов, скилов, хуков, скриптов; политика git и путей; Sonar локально; артефакты; установка; аналитика и пять индикаторов месячной проверки (из <code>05-growth.md</code> до его удаления); конвенция авторинга.</li>
+  <li><span class="cb todo">[ ]</span> 3. <code>CLAUDE.md</code> ≤ 60 строк.</li>
+  <li><span class="cb todo">[ ]</span> 4. <code>log-tool.sh</code>: тексты вопросов + тест; <code>setup-global.sh</code>: <code>cleanupPeriodDays: 90</code>.</li>
+  <li><span class="cb todo">[ ]</span> 5. Слияние в <code>main</code> и <code>setup-global.sh install --apply</code> — ты; проверка в новой сессии: <code>/task</code> на вопросе, <code>/quick</code>, <code>git push</code> — deny, <code>helm/values.yml</code> — ask, закоммиченный тест — ask, <code>sonar-local.sh</code> на рабочем репо.</li>
+  <li><span class="cb todo">[ ]</span> 6. Этот план удалить после завершения; итог — в <code>TECHNICAL.md</code>. Контрольная точка 2026-10-17: <code>maxTurns</code>; 2026-11-15: <code>scripts/audit/</code>, <code>/insights</code>, блокировки по новым хукам, <code>[!]</code> и <code>[#]</code>, итерации ревью, замечания критика, доля вопросов по Sonar.</li>
+</ul>
+</div>
+
+<h2 id="s11">11. Что не делаем</h2>
+<ul>
+  <li>Не переводим команды, которые не переписываем (<code>/fix</code>, <code>/onboard</code>, <code>/explain</code>).</li>
+  <li>Не берём Superpowers целиком, agent teams, параллельных исполнителей, перекрёстную критику по умолчанию.</li>
+  <li>Не заводим Stop-хук с тестами, MCP кроме Context7, анализ Sonar в основной проект с локальной машины.</li>
+  <li>Не трогаем стиль вывода, правило 07, статуслайн, логирующие хуки сверх П16.</li>
+  <li>Не сокращаем <code>sonar-rules.md</code> и не меняем описания скилов ради триггеринга.</li>
+  <li>Не вносим ничего в <code>~/.claude/</code> напрямую.</li>
+</ul>
+
+<h2 id="s12">12. Что уточним по ходу</h2>
+<ul>
+  <li>Права токена Sonar и кто создаёт песочный проект — при настройке в фазе 6.</li>
+  <li>Назначен ли профиль конвенции по умолчанию для Java на сервере — проверит <code>sonar-local.sh --init</code>.</li>
+  <li>Выжимки PDF — покажу структуру каждой до включения в <code>playbook/</code>.</li>
+  <li>Перед каждой фазой — «worktree или текущая ветка».</li>
+</ul>
+
+<h2 id="s13">13. Риски</h2>
+<ul>
+  <li><b>Sonar-прогон долгий.</b> Компиляция и сканер — минуты на многомодульном проекте. Страховка: в <code>/task</code> один прогон после реализации и один после правок; в <code>/review</code> — флаг отключения.</li>
+  <li><b>Песочница отличается от CI.</b> Без тестов нет покрытия, но правила те же. Сверка после ближайшего слияния; quality gate CI — финальный.</li>
+  <li><b>Шум критика и вопросов по Sonar.</b> Лимит пять замечаний; спорные Sonar-находки одним пакетом; на контрольной точке считаем долю «по желанию» и «пропустить».</li>
+  <li><b><code>/quick</code> как лазейка.</b> Без тестов по прямому указанию; ответственность на указании; следующее ревью увидит непокрытые изменения.</li>
+  <li><b>Обход хуков.</b> Строка команды не покрывает <code>sh -c</code>, скрипты, питон. Слои: хук, <code>permissions</code>, правило 09.</li>
+  <li><b>Рост числа агентов (12).</b> Без вызовов на контрольной точке — удаляются.</li>
+  <li><b>Плейбук в двух местах.</b> После переноса vault получает только указатель.</li>
+  <li><b>Сломать <code>/task</code> посреди недели.</b> Worktree, прогон на реальной задаче, слияние — твоё действие.</li>
+</ul>
+</main>
+</div>
