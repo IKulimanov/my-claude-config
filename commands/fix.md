@@ -29,9 +29,9 @@ If the bug cannot be reproduced in a test (e.g., environment-specific), pause an
 ## What This Command Is NOT For
 
 - New features (use `/feature`)
-- Architecture changes (use `/arch`)
-- Multi-file refactors (use `/plan` first)
-- Database/schema changes (use `/plan`; migration safety — agent `migration-reviewer`)
+- Architecture and design work (use `/design`)
+- Multi-file refactors (use `/feature`)
+- Database/schema changes (use `/feature`; migration safety — agent `migration-reviewer`)
 
 ## Output Format
 
@@ -53,4 +53,4 @@ If the bug cannot be reproduced in a test (e.g., environment-specific), pause an
 - Do not load skills unless explicitly needed.
 - Do not explore unrelated files.
 - Do not refactor surrounding code.
-- If the fix turns out to be non-trivial, stop and suggest using `/plan` or `/feature` instead.
+- If the fix turns out to be non-trivial, stop and suggest using `/feature` instead.
