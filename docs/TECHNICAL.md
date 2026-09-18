@@ -5,7 +5,7 @@
 ## 1. Каталоги
 
 ```
-rules/            8 правил, всегда включены через ~/.claude/CLAUDE.md (@import)
+rules/            9 правил, всегда включены через ~/.claude/CLAUDE.md (@import)
 commands/         12 slash-команд
 agents/           12 субагентов
 skills/           15 скилов (SKILL.md + references/)
@@ -15,6 +15,7 @@ hooks/            settings.json (хуки + permissions) и scripts/ (ограж
 scripts/          setup-global.sh, install-hooks.sh, analyze-usage.sh, gen-convention-checklist.sh,
                   helpers/ (скрипты для команд), lib/, audit/ (месячный аудит)
 templates/        CLAUDE.<profile>.md.template, settings.<profile>.json.template
+workspace.conf.example  каталоги машины: work, personal, конвенция, плагин Sonar, ревью; копия workspace.conf не в git
 docs/             TECHNICAL.md, projects/<проект>/, audit-<месяц>/report.html
 tests/            bash-тесты хуков и скриптов
 output-styles/    personal.md — стиль вывода главного агента
@@ -27,13 +28,17 @@ statusline/       statusline.sh
   на каталоги репозитория, генерирует `~/.claude/CLAUDE.md` с `@import` каждого `rules/*.md` (управляемый
   блок), ставит хуки и `permissions` через `install-hooks.sh`, `outputStyle`, `statusLine`, `cleanupPeriodDays`
   и управляемый блок в глобальном excludes git (`.claude/tasks/`, `.claude/settings.local.json`, `.ai/`;
-  файл — `core.excludesFile` или `~/.config/git/ignore`).
+  файл — `core.excludesFile` или `~/.config/git/ignore`). Ещё два компонента отвязывают конфиг от машины:
+  `config` — symlink `~/.claude/my-claude-config` на репозиторий, через который команды и правила читают
+  `shared/`, `playbook/`, `scripts/helpers` (клон может лежать где угодно); `workspace` — `~/.claude/workspace.md`
+  из `workspace.conf` (каталоги work и personal, конвенция, плагин Sonar, ревью), подключается в управляемый блок.
 - Symlink означает: правка в репозитории живёт в следующей сессии сразу. Большие переделки — в worktree
   на ветке, слияние в `main` включает их.
-- Правила читаются всегда (≈ 17 КБ). Скилы грузятся по описанию и по `paths:` (например,
+- Правила читаются всегда (9 файлов, ≈ 21 КБ). Правило 10 задаёт профиль: строка `Тип проекта:` в `CLAUDE.md`
+  проекта (пишет `/onboard`), иначе каталог work из `workspace.md`, иначе personal — без Jira, Sonar и канона. Скилы грузятся по описанию и по `paths:` (например,
   `java-service-convention` на `**/*.java`), явно из команд и через `skills:` у агентов. Главный агент сам
   скилы почти не берёт — поэтому команды называют нужные скилы явно.
-- `shared/stack-detection.md` — общий блок: стек, рабочий или личный проект (`~/dev/work/`), какие скилы
+- `shared/stack-detection.md` — общий блок: стек, профиль work или personal (правило 10), какие скилы
   грузить; `shared/affected-layers.md` — карта слоёв для планов.
 - `playbook/` читают `/design`, `/jira`, `/adr`, `planner`; шаблоны документов — `playbook/templates/`.
 
@@ -79,7 +84,7 @@ statusline/       statusline.sh
 
 | Скил | Триггер | Что |
 |---|---|---|
-| `java-service-convention` | `**/*.java`, явно | рабочий проект → канон `~/dev/work/java/convention-java/docs/`; `references/sonar-rules.md` — выжимка правил CI Sonar (`gen-convention-checklist.sh`) |
+| `java-service-convention` | `**/*.java`, явно | профиль work → канон по пути из `~/.claude/workspace.md`; `references/sonar-rules.md` — выжимка правил CI Sonar (`gen-convention-checklist.sh`) |
 | `spring-best-practices`, `java-patterns`, `testing`, `jpa-db-review`, `integration-patterns` | описание, `paths` | Spring, паттерны и SOLID, тесты Java, JPA и БД, Kafka и REST |
 | `go-best-practices`, `vue-frontend` | `**/*.go`; `**/*.vue` | Go и Vue 3 |
 | `docker`, `gitlab-ci`, `helm`, `kubernetes` | пути манифестов | DevOps; правка CI и helm — только по явной просьбе |
@@ -90,7 +95,7 @@ statusline/       statusline.sh
 ## 6. Хуки и permissions
 
 `hooks/settings.json` устанавливается `scripts/install-hooks.sh --write`: секция `hooks` заменяется целиком,
-`permissions.deny` и `permissions.ask` объединяются с существующими, `allow` не трогается. Логи —
+`permissions.allow`, `deny` и `ask` объединяются с существующими без дублей. Логи —
 `~/.claude/logs/*.jsonl` (`tools`, `prompts`, `sessions`, `subagents`, `stops`, `blocks`, `instructions`).
 
 | Хук | Событие | Решение |
@@ -101,10 +106,12 @@ statusline/       statusline.sh
 | `guard-tests.sh` | Edit, Write, MultiEdit, Bash | ask на правку тест-файла, который есть в git и не изменён относительно HEAD |
 | `guard-scope.sh` | Edit, Write, MultiEdit | ask на запись в файл репозитория вне `agent/scope.txt` задачи текущей ветки, пока scope активен; Bash-записи не смотрит |
 | `block-destructive.sh` | Bash | deny: `rm -rf` вне `target/`, `build/`, `dist/`, `node_modules/` и scratch-каталогов; DROP/TRUNCATE, chmod 777, mkfs |
-| `block-secrets.sh` | Read, Edit, Write, MultiEdit, Bash | deny: чтение `.env`, ключей, `~/.ssh`, credentials; имя в `ls`, `find -name`, `--exclude` — проходит |
-| `log-*.sh`, `notify-stop.sh` | все события | логи для аналитики (вопросы `AskUserQuestion` пишутся текстом), уведомление на Stop |
+| `block-secrets.sh` | Read, Edit, Write, MultiEdit, Bash | deny: чтение `.env` и вариантов, ключей `.pem`/`.p12`/`.jks`, `~/.ssh`, `~/.aws`, `~/.gnupg`, kubeconfig; проверяются только аргументы-пути: имя в `ls`, `find -name`, `--exclude`, шаблон `grep` проходят; `.envrc` и `node_modules/` безопасны |
+| `log-*.sh`, `notify-stop.sh` | все события | логи для аналитики (вопросы `AskUserQuestion` пишутся текстом), уведомление на Stop; помечены `async` (замер 2026-09-04: 51 мс на хук, два на вызов); журнал больше 20 МБ (`CLAUDE_LOG_MAX_MB`) отрезается в `<имя>-<дата>.jsonl`, срезы не удаляются |
 
-`permissions.deny`: `Bash(git push*)`, `Bash(git merge *)`, `Bash(git rebase *)`, `Bash(git pull*)`.
+`permissions.allow`: только чтение — `git status/diff/log/branch/show`, `ls`, `rg`, `find`. `permissions.deny`:
+`Bash(git push*)`, `Bash(git merge *)`, `Bash(git rebase *)`, `Bash(git pull*)` и `Read` секретов (`.env`, `~/.ssh/**`,
+`~/.aws/credentials`, `~/.kube/config`, `~/.gnupg/**`, `*.pem`, `*.p12`, `*.jks`, `id_rsa`, `id_ed25519`) — второй слой за хуком.
 `permissions.ask`: Edit/Write/MultiEdit на `**/.gitlab-ci.yml`, `**/.gitlab/**`, `**/helm/**`. Проектные
 добавки — `.claude/settings.local.json` (пишет `/onboard` из `templates/settings.<profile>.json.template`).
 Хуки — код: у каждого есть тест в `tests/`; перед сопоставлением вырезаются `cd`, `git -C`, тела heredoc.
@@ -165,7 +172,7 @@ MEDIUM механические — исправить, требующие пе�
 
 | Скрипт | Назначение |
 |---|---|
-| `scripts/setup-global.sh status\|install\|uninstall [--apply]` | развернуть или откатить конфиг в `~/.claude/` и блок в глобальном excludes git |
+| `scripts/setup-global.sh status\|install\|uninstall [--apply]` | развернуть или откатить конфиг: компоненты skills, agents, commands, hooks, claude-md, output-styles, statusline, git-excludes, config, workspace |
 | `scripts/install-hooks.sh [--write]` | хуки и permissions в `settings.json` (`CLAUDE_SETTINGS_TARGET` для тестов) |
 | `scripts/helpers/ai-init.sh`, `scope.sh`, `design-init.sh` | каталог задачи `.claude/tasks/<ключ>/` (ключ из ветки, `--new`, перенос `.ai/`; `scripts/lib/task-dir.sh`), scope файлов задачи, каркас `docs/projects/` |
 | `scripts/helpers/plan-status.sh`, `tests-status.sh` | статусы шагов и кейсов без чтения файла моделью |
@@ -215,5 +222,6 @@ for t in tests/test-*.sh; do bash "$t"; done
 Каждый хук и скрипт покрыт тестом (`tests/lib/hooktest.sh` — общие функции для PreToolUse-хуков;
 `test-sonar-scripts.sh` поднимает поддельный сервер Sonar). Тесты не трогают `~/.claude/`: цели
 переопределяются переменными `CLAUDE_LOG_DIR`, `CLAUDE_SETTINGS_TARGET`, `CLAUDE_HOME`,
-`CLAUDE_WORK_ROOT`, `DESIGN_PROJECTS_ROOT`, `SONAR_RULES_FILE`; тест `git-excludes` подменяет `HOME` и
-`XDG_CONFIG_HOME`, поэтому git читает конфиг из временного каталога.
+`CLAUDE_WORK_ROOT`, `DESIGN_PROJECTS_ROOT`, `SONAR_RULES_FILE`; тесты `git-excludes` и `workspace` подменяют `HOME` и
+`XDG_CONFIG_HOME` (git читает конфиг из временного каталога, каталоги машины создаются там же); для хуков —
+`CLAUDE_WORKSPACE_CONF`, `CLAUDE_LOG_MAX_MB`.

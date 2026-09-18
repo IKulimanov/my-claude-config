@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Устанавливает хуки и permissions из hooks/settings.json в ~/.claude/settings.json — глобально.
 # Подменяет плейсхолдер HOOKS_DIR на абсолютный путь к скриптам.
-# Слияние: секция hooks заменяется целиком; permissions.deny и permissions.ask объединяются
-# с существующими без дублей; permissions.allow и прочие ключи не трогаются. Повторный запуск
-# ничего не меняет.
+# Слияние: секция hooks заменяется целиком; permissions.allow, deny и ask объединяются с существующими
+# без дублей (свои записи пользователя остаются); прочие ключи не трогаются. Повторный запуск ничего
+# не меняет.
 #
 # Использование:
 #   ./scripts/install-hooks.sh         # печатает, что будет установлено
@@ -43,6 +43,7 @@ if [ "$MODE" = "--write" ]; then
       $cur
       | .hooks = $new.hooks
       | .permissions = (($cur.permissions // {})
+          | .allow = (((.allow // []) + ($new.permissions.allow // [])) | unique)
           | .deny = (((.deny // []) + ($new.permissions.deny // [])) | unique)
           | .ask  = (((.ask  // []) + ($new.permissions.ask  // [])) | unique))
     ' "$TARGET" <(printf '%s' "$RENDERED"))
@@ -52,7 +53,7 @@ if [ "$MODE" = "--write" ]; then
   fi
   echo "Installed hooks and permissions to: $TARGET"
 else
-  echo "# Будет установлено в $TARGET (секции hooks и permissions.deny/ask):"
+  echo "# Будет установлено в $TARGET (секции hooks и permissions.allow/deny/ask):"
   echo
   printf '%s\n' "$RENDERED" | jq '{permissions, hooks}'
   echo

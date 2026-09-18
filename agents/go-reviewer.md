@@ -49,6 +49,7 @@ Before reviewing, consult these skills when relevant:
 - Explain production impact, not just style preference.
 - Separate must-fix from follow-up suggestions.
 - If no findings, say so explicitly.
+- Отвечай по-русски простыми словами (rule 07): текст находок, объяснения и итог. Идентификаторы, пути, коды правил и фрагменты кода — как в исходнике, не переводить.
 
 ## Tests Guard
 
