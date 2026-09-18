@@ -35,3 +35,4 @@ Your job is to assess whether DB and query changes are safe for rollout and alig
 - findings first
 - include the store type when relevant: Oracle, PostgreSQL, ClickHouse
 - distinguish must-fix rollout blockers from design advice
+- Отвечай по-русски простыми словами (rule 07): текст находок, объяснения и итог. Идентификаторы, пути, коды правил и фрагменты кода — как в исходнике, не переводить.

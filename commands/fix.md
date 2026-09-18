@@ -6,51 +6,54 @@ allowed-tools: Read, Edit, Grep, Glob, Bash
 
 # Fix
 
-Use this command for small, focused changes: bug fixes, NPE fixes, adding a field, renaming, small refactors.
+Команда для маленьких точечных изменений: правка бага, починка NPE, добавление поля, переименование,
+небольшой рефакторинг.
 
-**This command is optimized for minimal token usage.** It does NOT load the full skill set.
+**Команда рассчитана на минимальный расход токенов.** Полный набор скилов она НЕ грузит.
 
-## Workflow (TDD-first)
+## Порядок работы (сначала тест)
 
-1. Read the local `CLAUDE.md` (if exists) — only the Runbook and Invariants sections.
-2. **If cwd is under `/Users/ivankulimanov/dev/work/`** → work project. For Java/Spring, load `java-service-convention` skill before changes; it will point you to the canonical convention.
-3. Read only the file(s) being changed and their direct test files.
-3a. **Root cause before patch (ex-`/debug`).** If the symptom is «не работает / падает / ошибка» and the
-    user gave no hypothesis — ask for it once (rule 08), then state your own root-cause hypothesis and confirm
-    it with code, logs, or a failing test. Do not patch the symptom. Report at the end:
+1. Прочитай локальный `CLAUDE.md` (если есть) — только секции Runbook и Invariants.
+2. **Профиль проекта** — по rule «Профили проектов» (пути в `~/.claude/workspace.md`). В профиле **work** для Java/Spring загрузи скил `java-service-convention` до правок; он укажет на каноническую конвенцию. В профиле **personal** конвенция команды не применяется.
+3. Читай только изменяемые файлы и их тесты.
+3a. **Сначала причина, потом правка (бывшая `/debug`).** Если симптом звучит как «не работает / падает /
+    ошибка», а гипотезы у пользователя не было — спроси её один раз (rule 08), затем назови свою гипотезу
+    о причине и подтверди её кодом, логами или падающим тестом. Не лечи симптом. В конце напиши:
     `Гипотеза пользователя: совпала | не совпала | не было`.
-4. **RED:** Write a test that reproduces the bug (or let the user write it — see test authorship in `rules/06-tdd-discipline.md`). Run it. Confirm it fails with the symptom you're trying to fix.
-5. **GREEN:** Make the smallest change that turns the test green.
-6. **REFACTOR (optional):** Clean up if needed without changing behavior. Re-run test.
-7. Run the full nearby test class to ensure no regression. Report results.
+4. **RED:** напиши тест, который воспроизводит баг (или пусть его напишет пользователь — про авторство
+   тестов см. `rules/06-tdd-discipline.md`). Запусти. Убедись, что он падает именно с тем симптомом, который чинишь.
+5. **GREEN:** сделай минимальное изменение, чтобы тест стал зелёным.
+6. **REFACTOR (по желанию):** почисти код без смены поведения. Перезапусти тест.
+7. Прогони весь соседний тестовый класс, чтобы не было регрессии. Доложи результат.
 
-If the bug cannot be reproduced in a test (e.g., environment-specific), pause and discuss before patching blindly. See `rules/06-tdd-discipline.md`.
+Если баг нельзя воспроизвести тестом (например, он зависит от окружения) — остановись и обсуди,
+не правь вслепую. См. `rules/06-tdd-discipline.md`.
 
-## What This Command Is NOT For
+## Для чего команда НЕ нужна
 
-- New features (use `/feature`)
-- Architecture and design work (use `/design`)
-- Multi-file refactors (use `/feature`)
-- Database/schema changes (use `/feature`; migration safety — agent `migration-reviewer`)
+- Новые фичи — `/feature`
+- Архитектура и проектирование — `/design`
+- Рефакторинг по многим файлам — `/feature`
+- Изменения БД и схемы — `/feature`; безопасность миграций — агент `migration-reviewer`
 
-## Output Format
+## Формат вывода
 
 ```text
-## Fix: <brief description>
+## Правка: <краткое описание>
 
-### Change
-- <file>:<lines> — <what changed and why>
+### Изменение
+- <файл>:<строки> — <что изменилось и зачем>
 
-### Test
-- <test file> — <what is tested>
+### Тест
+- <файл теста> — <что проверяется>
 
-### Validation
-- <command run> — <result>
+### Проверка
+- <запущенная команда> — <результат>
 ```
 
-## Rules
+## Правила
 
-- Do not load skills unless explicitly needed.
-- Do not explore unrelated files.
-- Do not refactor surrounding code.
-- If the fix turns out to be non-trivial, stop and suggest using `/feature` instead.
+- Не грузи скилы без явной необходимости.
+- Не лазай по посторонним файлам.
+- Не рефактори код вокруг правки.
+- Если правка оказалась нетривиальной — остановись и предложи `/feature`.

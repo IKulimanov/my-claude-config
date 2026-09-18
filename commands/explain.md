@@ -6,68 +6,77 @@ allowed-tools: Read, Grep, Glob
 
 # Explain
 
-Use this command when you need a clear, deep explanation of a technology, framework concept, design pattern, architectural practice, or any technical topic.
+Команда для понятного и глубокого разбора технологии, концепции фреймворка, паттерна проектирования,
+архитектурной практики или любой технической темы.
 
-Not a quick definition — a structured explanation that builds real understanding.
+Не короткое определение — структурированное объяснение, после которого тема реально становится ясна.
 
-## Workflow
+## Порядок работы
 
-### Step 1 — Clarify the topic
+### Шаг 1 — Уточнить тему
 
-If the topic is ambiguous, ask one targeted question:
-- "Explain transactions" → ask: JPA/Spring transactions specifically, or the general concept?
-- "Explain CQRS" → ask: as a general pattern, or for implementation in your specific stack?
+Если тема неоднозначна, задай один точный вопрос:
+- «Объясни транзакции» → спроси: именно транзакции JPA/Spring или понятие в целом?
+- «Объясни CQRS» → спроси: как общий паттерн или как реализацию в конкретном стеке?
 
-Do not ask if the topic is already clear.
+Если тема уже ясна — не спрашивай.
 
-### Step 2 — Load relevant context
+### Шаг 2 — Загрузить нужный контекст
 
-- If the topic is Java/Spring specific: load `java-patterns` or `spring-best-practices` as needed.
-- If the topic is Go specific: load `go-best-practices` and relevant references.
-- If the topic is Vue/frontend specific: load `vue-frontend` and relevant references.
-- If the topic is infrastructure: load the relevant DevOps skill (`kubernetes`, `gitlab-ci`, etc.).
-- Read the local `CLAUDE.md` if the explanation should be grounded in the project's actual stack.
+- Тема про Java/Spring — загрузи `java-patterns` или `spring-best-practices`, что нужно.
+- Тема про Go — загрузи `go-best-practices` и нужные references.
+- Тема про Vue/фронтенд — загрузи `vue-frontend` и нужные references.
+- Тема про инфраструктуру — загрузи подходящий DevOps-скил (`kubernetes`, `gitlab-ci` и т.д.).
+- Прочитай локальный `CLAUDE.md`, если объяснение надо привязать к реальному стеку проекта.
 
-### Step 3 — Produce structured explanation
+### Шаг 3 — Дать структурированное объяснение
 
-Use this structure every time:
+Используй эту структуру каждый раз:
 
 ```
-## What It Is
-One-paragraph definition. No jargon without immediate explanation.
+## Что это
 
-## Why It Exists (Problem It Solves)
-What problem existed before this solution? What is it optimizing for?
+Определение в один абзац. Ни одного термина без немедленного пояснения.
 
-## How It Works
-Internal mechanics. Enough detail to predict behavior, not just use it.
-Use a diagram (ASCII or text) when structure or flow is the point.
+## Зачем появилось (какую проблему решает)
 
-## When To Use
-Specific conditions that make this the right choice.
+Какая проблема была до этого решения? Что оно оптимизирует?
 
-## When NOT To Use
-Conditions where this would be wrong or over-engineered.
+## Как работает
 
-## Practical Example
-Working code example grounded in the project's stack (Java/Spring, Go, or Web).
-No toy examples — use realistic domain names and scenarios.
+Внутреннее устройство. Столько деталей, чтобы можно было предсказывать поведение, а не просто применять.
+Если суть в структуре или потоке — нарисуй схему (ASCII или текстом).
 
-## Common Pitfalls
-2–4 specific mistakes people make with this. Not general advice.
+## Когда применять
 
-## Further Reading (if relevant)
-2–3 specific references, not a list of everything ever written.
+Конкретные условия, при которых это правильный выбор.
+
+## Когда НЕ применять
+
+Условия, при которых это будет ошибкой или переусложнением.
+
+## Практический пример
+
+Рабочий пример кода на стеке проекта (Java/Spring, Go или Web).
+Никаких игрушечных примеров — реальные доменные имена и сценарии.
+
+## Частые ошибки
+
+2–4 конкретные ошибки, которые тут допускают. Не общие советы.
+
+## Что почитать (если уместно)
+
+2–3 конкретные ссылки, а не список всего написанного по теме.
 ```
 
-### Step 4 — Connect to the project context
+### Шаг 4 — Связать с контекстом проекта
 
-If a local `CLAUDE.md` exists and the topic is directly relevant to the project:
-- Point out where this concept applies in the codebase
-- Flag if the current code violates or correctly applies the pattern
+Если локальный `CLAUDE.md` есть и тема прямо относится к проекту:
+- покажи, где эта концепция применяется в коде;
+- отметь, нарушает текущий код паттерн или применяет его правильно.
 
-## Tone
+## Тон
 
-- Use analogies when they make the concept clearer, not just for decoration.
-- Be direct about trade-offs — avoid "it depends" without explaining what it depends on.
-- If the topic has competing schools of thought, present them with their trade-offs rather than picking arbitrarily.
+- Аналогии — только когда они делают идею яснее, не для украшения.
+- Про компромиссы говори прямо. Не пиши «зависит от», не объяснив, от чего именно.
+- Если по теме есть конкурирующие подходы — покажи их с компромиссами, а не выбирай наугад.

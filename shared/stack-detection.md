@@ -11,9 +11,10 @@
    - **Go**: `go.mod` → версия Go, основные пакеты, HTTP-фреймворк
    - **Vue/Vite**: `package.json` с `vue`, `vite.config.ts` → версия Vue, Pinia, Router, TypeScript
    - **Web (прочее)**: `package.json` без Vue, либо статический HTML → бандлер, CSS-фреймворк
-3. **Тип проекта:** если cwd под `/Users/ivankulimanov/dev/work/` → WORK-проект, действует каноническая
-   конвенция. Для Java work-проектов загрузить скил `java-service-convention` — он перенаправит на
-   каноническую конвенцию в `/Users/ivankulimanov/dev/work/java/convention-java/docs/`.
+3. **Профиль проекта:** по rule «Профили проектов» — строка `Тип проекта:` в локальном `CLAUDE.md`,
+   иначе каталог из `~/.claude/workspace.md`. В профиле **work** действует каноническая конвенция:
+   для Java загрузить скил `java-service-convention`, он направит на канон (путь — в `~/.claude/workspace.md`).
+   В профиле **personal** командная конвенция не применяется.
 4. Переформулировать требование в конкретных технических терминах до планирования.
 
 ## Загрузить скилы по тому, что затронуто
