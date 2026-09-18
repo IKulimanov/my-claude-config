@@ -1,6 +1,6 @@
 # Техническое описание my-claude-config
 
-Обновлено 2026-09-17 после перестройки (план — `docs/refactor-2026-09/plan.html`).
+Обновлено 2026-09-18 после перестройки (план — `docs/refactor-2026-09/plan.html`).
 
 ## 1. Каталоги
 
@@ -25,7 +25,9 @@ statusline/       statusline.sh
 
 - `scripts/setup-global.sh install --apply` делает symlink `~/.claude/{skills,agents,commands,output-styles}`
   на каталоги репозитория, генерирует `~/.claude/CLAUDE.md` с `@import` каждого `rules/*.md` (управляемый
-  блок), ставит хуки и `permissions` через `install-hooks.sh`, `outputStyle`, `statusLine`, `cleanupPeriodDays`.
+  блок), ставит хуки и `permissions` через `install-hooks.sh`, `outputStyle`, `statusLine`, `cleanupPeriodDays`
+  и управляемый блок в глобальном excludes git (`.claude/tasks/`, `.claude/settings.local.json`, `.ai/`;
+  файл — `core.excludesFile` или `~/.config/git/ignore`).
 - Symlink означает: правка в репозитории живёт в следующей сессии сразу. Большие переделки — в worktree
   на ветке, слияние в `main` включает их.
 - Правила читаются всегда (≈ 17 КБ). Скилы грузятся по описанию и по `paths:` (например,
@@ -42,9 +44,9 @@ statusline/       statusline.sh
 | `/quick` | точечная правка по прямому указанию | ровно то, что написано; без плана, тестов, ревью | 0 |
 | `/fix` | баг, малое изменение поведения | причина до правки (rule 08), RED → GREEN → REFACTOR | 0–1 |
 | `/feature` | фича в один контекст | стек → план с кейсами (skill `planning`) → critic → согласование → TDD → Sonar → два ревьюера | critic, тест-райтер, два ревьюера |
-| `/task` | несколько фаз или контекстов | сортировка → Explore → planner → critic → **согласование плана** → кейсы → critic → **согласование кейсов** → implementer по фазам → Sonar → critic + два ревьюера → фиксер | 4–9 |
+| `/task` | несколько фаз или контекстов | сортировка → Explore → planner → critic → **согласование плана** → кейсы → critic → **согласование кейсов** → implementer по фазам в границах `scope.txt` → Sonar → critic + два ревьюера → фиксер | 4–9 |
 | `/design` | brief → design → план проекта | шаг по статусам файлов в `docs/projects/<проект>/`; вариант автора; соревнование трёх `architect` с судьёй; ревью | architect ×1–4 |
-| `/review` | ревью своих изменений | Sonar → convention-reviewer ∥ стек-ревьюер → `.ai/<ветка>/review.md` | 2–3 |
+| `/review` | ревью своих изменений | Sonar → convention-reviewer ∥ стек-ревьюер → `.claude/tasks/<ключ>/review.md` | 2–3 |
 | `/review-mr` | ревью MR коллеги против master | glab-дифф → convention-reviewer ∥ java-reviewer → файл в `~/docs/work/reviews/` | 2 |
 | `/adr` | записать решение | шаблон репозитория или `playbook/templates/adr-template.md` | 0 |
 | `/jira` | задача для человека | `playbook/templates/task-template.md`, Дано/Когда/Тогда | 0 |
@@ -59,7 +61,7 @@ statusline/       statusline.sh
 
 | Агент | Модель / усилие / maxTurns | Скилы | Кто зовёт |
 |---|---|---|---|
-| `planner` | opus / high / 250 | planning | `/task`: план, кейсы, правка по критике |
+| `planner` | opus / high / 250 | planning | `/task`: план и scope, кейсы, правка по критике |
 | `critic` | opus / high / 150 | planning (+ java-patterns по промпту) | `/task` ×3, `/feature` ×1 |
 | `implementer` | inherit / high / 300, без Agent | стек-скил грузит сам | `/task` по фазам, фиксер |
 | `architect` | opus / high / 200 | design-docs, java-patterns, integration-patterns, jpa-db-review | `/design` |
@@ -97,6 +99,7 @@ statusline/       statusline.sh
 | `check-commit-msg.sh` | PreToolUse Bash | deny с подсказкой формата: рабочий проект `JIRA-ID: Описание…` (ID из имени ветки), личный `тип(scope): описание…`; русский; ≤ 72; без трейлеров |
 | `guard-paths.sh` | Edit, Write, MultiEdit, Bash | ask на запись в `.gitlab-ci.yml`, `.gitlab/`, `helm/` |
 | `guard-tests.sh` | Edit, Write, MultiEdit, Bash | ask на правку тест-файла, который есть в git и не изменён относительно HEAD |
+| `guard-scope.sh` | Edit, Write, MultiEdit | ask на запись в файл репозитория вне `agent/scope.txt` задачи текущей ветки, пока scope активен; Bash-записи не смотрит |
 | `block-destructive.sh` | Bash | deny: `rm -rf` вне `target/`, `build/`, `dist/`, `node_modules/` и scratch-каталогов; DROP/TRUNCATE, chmod 777, mkfs |
 | `block-secrets.sh` | Read, Edit, Write, MultiEdit, Bash | deny: чтение `.env`, ключей, `~/.ssh`, credentials; имя в `ls`, `find -name`, `--exclude` — проходит |
 | `log-*.sh`, `notify-stop.sh` | все события | логи для аналитики (вопросы `AskUserQuestion` пишутся текстом), уведомление на Stop |
@@ -117,11 +120,28 @@ statusline/       statusline.sh
 
 ## 8. Артефакты
 
-`.ai/<фича>/` (лёгкий вариант, `/feature`, `/review`): `plan.md`, `review.md`, `sonar.md`.
-`.ai/<проект>/<буква>/` (`/task`): `about.md` (слепок проекта), `context.md` (≤ 300 строк), `plan.md`,
-`tests.md`, `critique1..3.md`, `sonar.md`, `review1..2.md`. Создаёт `scripts/helpers/ai-init.sh`; `.ai/`
-в `.gitignore` проекта. Форматы: `playbook/templates/plan-template.md` (статусы `[ ] [~] [x] [!] [#]`,
-≤ 150 строк) и `tests-template.md` (Дано/Когда/Тогда, статусы `[ ] [~] [x] [!]`).
+Каталог задачи — `.claude/tasks/<ключ>/` в репозитории проекта. Ключ — Jira-ID из имени ветки, иначе имя
+ветки без типового префикса (`feature/export-csv` → `export-csv`, `release/1.2` → `release-1.2`); доработки
+той же ветки — `<ключ>-2`, `-3`. Создаёт `scripts/helpers/ai-init.sh`: без аргументов — последний каталог
+текущей ветки, `--new` — доработка, `<имя>` — явный ключ (ветка коллеги для `/review-mr`); старый `.ai/`
+он переносит сюда сам. Git игнорирует `.claude/tasks/` через глобальный excludes (`setup-global.sh`,
+компонент `git-excludes`), `.gitignore` проектов не трогается. Артефакты не удаляются, скрипта чистки нет.
+
+| Для кого | Файлы |
+|---|---|
+| человек, `<ключ>/` | `plan.md` (шаги со статусами, журнал), `tests.md` (кейсы), `review.md` (итог ревью: закрыто, осталось, отклонено), `summary.md` (итог задачи; его наличие = задача завершена) |
+| агенты, `<ключ>/agent/` | `context.md` (≤ 300 строк), `scope.txt` (куда можно писать), `critique1..3.md`, `sonar.md`, `review-raw-1..2.md` |
+| репозиторий | `.claude/tasks/about.md` — слепок проекта, пишет Explore |
+
+`/feature` пишет `plan.md` (кейсы внутри), `review.md`, `summary.md`, `agent/{critique1,sonar}.md`, `agent/scope.txt`;
+`/review` — `review.md`, `agent/sonar.md`. Форматы: `playbook/templates/plan-template.md` (статусы
+`[ ] [~] [x] [!] [#]`, ≤ 150 строк), `tests-template.md` (Дано/Когда/Тогда, статусы `[ ] [~] [x] [!]`).
+
+Границы задачи. Требования агенты берут только из `plan.md`, `tests.md` и `agent/context.md`; недостающее —
+вопрос `[!]`, а не допущение. Писать можно только в файлы из `agent/scope.txt` (первая строка —
+`# scope: active|done`, дальше пути и маски от корня: `*` захватывает `/`, строка с `/` на конце — каталог).
+Хук `guard-scope.sh` спрашивает на запись вне списка, пока scope активен; список ведёт
+`scripts/helpers/scope.sh <каталог> add|done|active|check`, расширяет его оператор, не исполнитель.
 
 `docs/projects/<проект>/` (`/design`): `00-brief.md`, `01-design.md`, `02-plan.md`, `adr/`, `options/`
 (варианты A–C и `verdict.md`), `assets/`. Каркас — `scripts/helpers/design-init.sh <проект>`.
@@ -145,9 +165,9 @@ MEDIUM механические — исправить, требующие пе�
 
 | Скрипт | Назначение |
 |---|---|
-| `scripts/setup-global.sh status\|install\|uninstall [--apply]` | развернуть или откатить конфиг в `~/.claude/` |
+| `scripts/setup-global.sh status\|install\|uninstall [--apply]` | развернуть или откатить конфиг в `~/.claude/` и блок в глобальном excludes git |
 | `scripts/install-hooks.sh [--write]` | хуки и permissions в `settings.json` (`CLAUDE_SETTINGS_TARGET` для тестов) |
-| `scripts/helpers/ai-init.sh`, `design-init.sh` | каркасы `.ai/` и `docs/projects/` |
+| `scripts/helpers/ai-init.sh`, `scope.sh`, `design-init.sh` | каталог задачи `.claude/tasks/<ключ>/` (ключ из ветки, `--new`, перенос `.ai/`; `scripts/lib/task-dir.sh`), scope файлов задачи, каркас `docs/projects/` |
 | `scripts/helpers/plan-status.sh`, `tests-status.sh` | статусы шагов и кейсов без чтения файла моделью |
 | `scripts/helpers/test-summary.sh <команда>` | только упавшие тесты и итог; полный вывод в файл |
 | `scripts/helpers/sonar-local.sh`, `sonar-issues.sh`, `sonar-rule.sh`, `sonar-rules-for-diff.sh` | раздел 9; выжимка правил по составу диффа, когда сервер недоступен |
@@ -195,4 +215,5 @@ for t in tests/test-*.sh; do bash "$t"; done
 Каждый хук и скрипт покрыт тестом (`tests/lib/hooktest.sh` — общие функции для PreToolUse-хуков;
 `test-sonar-scripts.sh` поднимает поддельный сервер Sonar). Тесты не трогают `~/.claude/`: цели
 переопределяются переменными `CLAUDE_LOG_DIR`, `CLAUDE_SETTINGS_TARGET`, `CLAUDE_HOME`,
-`CLAUDE_WORK_ROOT`, `DESIGN_PROJECTS_ROOT`, `SONAR_RULES_FILE`.
+`CLAUDE_WORK_ROOT`, `DESIGN_PROJECTS_ROOT`, `SONAR_RULES_FILE`; тест `git-excludes` подменяет `HOME` и
+`XDG_CONFIG_HOME`, поэтому git читает конфиг из временного каталога.

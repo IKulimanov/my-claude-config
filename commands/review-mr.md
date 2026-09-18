@@ -98,11 +98,11 @@ allowed-tools: Read, Grep, Glob, Bash, Agent, Write
 
 Строку `MR:` указывать только если метаданные получены через `glab`; иначе пропустить.
 
-Опционально (конвенция `.ai/`, см. `docs/TECHNICAL.md`): если работаешь внутри репозитория,
-продублируй ревью локально, чтобы оно было под рукой при доработках:
+Опционально (каталоги задач `.claude/tasks/`, см. `docs/TECHNICAL.md`, раздел «Артефакты»): если работаешь
+внутри репозитория, продублируй ревью локально, чтобы оно было под рукой при доработках:
 
 ```bash
-DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<branch>")   # создаст .ai/<branch>/, заигнорит .ai/
+DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<branch>")   # .claude/tasks/<ключ ветки коллеги>/
 ```
 
 Скопировать тот же текст в `$DIR/review.md`. Основной файл в `~/docs/work/reviews/...` остаётся

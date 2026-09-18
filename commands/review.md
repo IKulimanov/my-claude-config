@@ -1,5 +1,5 @@
 ---
-description: Ревью текущих изменений — локальный Sonar для рабочих Java-проектов с циклом исправлений, затем параллельно convention-reviewer (коды конвенции, библиотеки, git) и стек-ревьюер (баги, структура, переусложнение, тесты). Прочие стеки — напрямую. Итог в .ai/<ветка>/review.md.
+description: Ревью текущих изменений — локальный Sonar для рабочих Java-проектов с циклом исправлений, затем параллельно convention-reviewer (коды конвенции, библиотеки, git) и стек-ревьюер (баги, структура, переусложнение, тесты). Прочие стеки — напрямую. Итог в .claude/tasks/<ключ>/review.md.
 argument-hint: [путь или scope] [--без-sonar]
 allowed-tools: Read, Grep, Glob, Bash, Agent, Write, AskUserQuestion
 ---
@@ -9,24 +9,24 @@ allowed-tools: Read, Grep, Glob, Bash, Agent, Write, AskUserQuestion
 ## Шаг 1 — Дифф и стек
 
 Дифф: `git diff master...HEAD` плюс незакоммиченные изменения, или scope из аргумента. Стек и тип
-проекта — по `~/dev/my-claude-config/shared/stack-detection.md`. Каталог артефакта:
-`DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<ветка>")`.
+проекта — по `~/dev/my-claude-config/shared/stack-detection.md`. Каталог задачи текущей
+ветки: `DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh)` (`.claude/tasks/<ключ>/`).
 
 ## Шаг 2 — Sonar (рабочий Java-проект)
 
 Если нет `--без-sonar` и заданы `SONAR_HOST_URL` и `SONAR_TOKEN`: `scripts/helpers/sonar-local.sh` →
-`$DIR/sonar.md`. Цикл исправлений: собственные правила команды (`nurtelecomconventionjavarules`) и
+`$DIR/agent/sonar.md`. Цикл исправлений: собственные правила команды (`nurtelecomconventionjavarules`) и
 встроенные BLOCKER/HIGH — исправить сразу; MEDIUM механические — исправить, требующие переделки —
 спросить; LOW, INFO, спорные — один вопрос пакетом (исправить / пропустить / отложить), ответы
-записать в `sonar.md`. Исправления с изменением поведения — через тест. Повторный прогон; не больше
+записать в `agent/sonar.md`. Исправления с изменением поведения — через тест. Повторный прогон; не больше
 двух кругов. Sonar не настроен — отметить и идти дальше.
 
 ## Шаг 3 — Два ревьюера параллельно
 
-- `convention-reviewer`: дифф, тип проекта, путь к `sonar.md` (или без него — сам возьмёт правила через
+- `convention-reviewer`: дифф, тип проекта, путь к `agent/sonar.md` (или без него — сам возьмёт правила через
   `sonar-rules-for-diff.sh`).
 - Стек-ревьюер: Java → `java-reviewer`, Go → `go-reviewer`, Vue → `vue-reviewer`; при миграциях, индексах
-  или JPA-маппинге дополнительно `migration-reviewer`. Передай дифф и, если есть, `plan.md` и `tests.md`.
+  или JPA-маппинге дополнительно `migration-reviewer`. Передай дифф и, если есть, `$DIR/plan.md` и `$DIR/tests.md`.
 - Web без Vue, DevOps (Docker, CI, K8s, Terraform) и прочие стеки — ревью напрямую с нужным скилом
   по правилам ниже.
 

@@ -1,6 +1,6 @@
 ---
 description: Learn from corrections — compare what the agent wrote in this session (or staged) with what you fixed by hand, record the size of the fix, distill one general rule, and propose it into the right layer (memory, skill, project CLAUDE.md, or rules). Call after you edited agent output by hand.
-argument-hint: [optional feature name from .ai/ for extra context]
+argument-hint: [ключ задачи из .claude/tasks/ для контекста]
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash(git diff:*), Bash(git status:*), Bash(git log:*), Bash(git show:*), Bash(ls:*), AskUserQuestion
 ---
 
@@ -17,9 +17,10 @@ allowed-tools: Read, Edit, Write, Grep, Glob, Bash(git diff:*), Bash(git status:
 
 `$ARGUMENTS` = "$ARGUMENTS"
 
-Если задан — это имя фичи в `.ai/<name>/` (конвенция `.ai/` — `~/dev/my-claude-config/docs/TECHNICAL.md`). Тогда прочитай
-`.ai/<name>/plan.md` (и `review.md`, если есть), чтобы понять, что агент пытался сделать. Это резко
-улучшает различение частного и общего. Если пусто — работай только по диффам.
+Если задан — это ключ задачи в `.claude/tasks/<ключ>/` (конвенция — `~/dev/my-claude-config/docs/TECHNICAL.md`,
+раздел «Артефакты»). Тогда прочитай `.claude/tasks/<ключ>/plan.md` (и `review.md`, `summary.md`, если есть),
+чтобы понять, что агент пытался сделать. Это резко улучшает различение частного и общего. Если пусто —
+возьми каталог текущей ветки (`scripts/helpers/ai-init.sh -n`), а без него работай только по диффам.
 
 ## Контекст (рабочий процесс)
 

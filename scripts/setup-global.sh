@@ -15,7 +15,7 @@ CLAUDE_HOME="${CLAUDE_HOME:-$HOME/.claude}"
 # ─── Defaults ────────────────────────────────────────────────────────────────
 APPLY=0
 MODE="symlink"          # symlink | copy
-COMPONENTS="skills,agents,commands,hooks,claude-md,output-styles,statusline"
+COMPONENTS="skills,agents,commands,hooks,claude-md,output-styles,statusline,git-excludes"
 COMMAND=""
 
 # ─── Args ────────────────────────────────────────────────────────────────────
@@ -32,7 +32,7 @@ Options:
   --apply             Реально применить. Без этого — dry-run, ничего не меняем.
   --copy              Использовать copy вместо symlink (по умолчанию: symlink)
   --components LIST   Список компонентов через запятую (default: $COMPONENTS)
-                      Доступно: skills,agents,commands,hooks,claude-md,output-styles,statusline
+                      Доступно: skills,agents,commands,hooks,claude-md,output-styles,statusline,git-excludes
   --config-dir DIR    Откуда брать (default: $ROOT_DIR)
   -h, --help
 
@@ -82,8 +82,8 @@ fi
 
 for comp in $(echo "$COMPONENTS" | tr ',' ' '); do
   case "$comp" in
-    skills|agents|commands|hooks|claude-md|output-styles|statusline) ;;
-    *) echo "Error: unknown component '$comp'. Valid: skills,agents,commands,hooks,claude-md,output-styles,statusline" >&2; exit 1 ;;
+    skills|agents|commands|hooks|claude-md|output-styles|statusline|git-excludes) ;;
+    *) echo "Error: unknown component '$comp'. Valid: skills,agents,commands,hooks,claude-md,output-styles,statusline,git-excludes" >&2; exit 1 ;;
   esac
 done
 
@@ -283,6 +283,64 @@ set_cleanup_period() {
   fi
 }
 
+# ─── Глобальный excludes git ─────────────────────────────────────────────────
+# Артефакты задач (.claude/tasks/), проектный settings.local.json и старый .ai/ игнорируются во всех
+# репозиториях через глобальный excludes git, а не через .gitignore каждого проекта.
+GIT_EXCLUDES_BEGIN="# BEGIN my-claude-config (managed)"
+GIT_EXCLUDES_END="# END my-claude-config (managed)"
+GIT_EXCLUDES_LINES=".claude/tasks/
+.claude/settings.local.json
+.ai/"
+
+# Файл excludes: core.excludesFile пользователя (с раскрытием ~), иначе значение git по умолчанию.
+git_excludes_file() {
+  local f
+  f=$(git config --global --path --get core.excludesFile 2>/dev/null || true)
+  [ -n "$f" ] || f="${XDG_CONFIG_HOME:-$HOME/.config}/git/ignore"
+  printf '%s' "$f"
+}
+
+# Вырезать управляемый блок из файла (stdin → stdout).
+git_excludes_strip() {
+  awk -v b="$GIT_EXCLUDES_BEGIN" -v e="$GIT_EXCLUDES_END" '
+    $0==b {skip=1}
+    skip==0 {print}
+    $0==e {skip=0; next}
+  '
+}
+
+install_git_excludes() {
+  local dst; dst=$(git_excludes_file)
+  echo "$(prefix) git-excludes → $dst ($(printf '%s' "$GIT_EXCLUDES_LINES" | tr '\n' ' '))"
+  [ "$APPLY" -eq 1 ] || return 0
+
+  local block="$GIT_EXCLUDES_BEGIN"$'\n'"$GIT_EXCLUDES_LINES"$'\n'"$GIT_EXCLUDES_END"
+  mkdir -p "$(dirname "$dst")"
+  if [ -f "$dst" ]; then
+    mkdir -p "$BACKUP_DIR"
+    cp "$dst" "$BACKUP_DIR/git-ignore"
+    local tmp; tmp="$(mktemp)"
+    git_excludes_strip < "$dst" > "$tmp"
+    printf '%s\n' "$block" >> "$tmp"
+    mv "$tmp" "$dst"
+  else
+    printf '%s\n' "$block" > "$dst"
+  fi
+}
+
+uninstall_git_excludes() {
+  local dst; dst=$(git_excludes_file)
+  if [ -f "$dst" ] && grep -qF "$GIT_EXCLUDES_BEGIN" "$dst"; then
+    echo "$(prefix) git-excludes: убрать управляемый блок из $dst"
+    [ "$APPLY" -eq 1 ] || return 0
+    local tmp; tmp="$(mktemp)"
+    git_excludes_strip < "$dst" > "$tmp"
+    mv "$tmp" "$dst"
+  else
+    echo "$(prefix) git-excludes — управляемый блок не найден в $dst"
+  fi
+}
+
 # ─── Commands ────────────────────────────────────────────────────────────────
 
 cmd_status() {
@@ -358,6 +416,14 @@ cmd_status() {
     cp_state=$(jq -r '.cleanupPeriodDays // "missing"' "$settings" 2>/dev/null)
   fi
   printf '%-12s %-10s %s\n' "cleanupDays" "$cp_state" "in $settings"
+
+  # git-excludes: управляемый блок в глобальном excludes git
+  local ge_file ge_state="missing"
+  ge_file=$(git_excludes_file)
+  if [ -f "$ge_file" ] && grep -qF "$GIT_EXCLUDES_BEGIN" "$ge_file" 2>/dev/null; then
+    ge_state="present"
+  fi
+  printf '%-12s %-10s %s\n' "git-excludes" "$ge_state" "$ge_file"
   echo
   echo "Run '$(basename "$0") install' to see install plan, add --apply to execute."
 }
@@ -381,6 +447,7 @@ cmd_install() {
       hooks)                                 install_hooks ;;
       claude-md)                             install_claude_md ;;
       statusline)                            install_statusline_file ;;
+      git-excludes)                          install_git_excludes ;;
     esac
   done
   # Настройки в settings.json ставим ПОСЛЕ hooks, чтобы merge хуков не затёр их.
@@ -472,6 +539,8 @@ cmd_uninstall() {
   else
     echo "$(prefix) settings.json: statusLine not present"
   fi
+
+  uninstall_git_excludes
 
   echo
   if [ "$APPLY" -ne 1 ]; then

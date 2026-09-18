@@ -127,8 +127,8 @@ Use `AskUserQuestion` for things that cannot be detected from code. Ask in a sin
    (`java-service` → `pom.xml`, `go-service` → `go.mod`, `web-app` → `package.json`, `docker-service` → compose).
 2. Если `.claude/settings.local.json` нет — создай с секцией `permissions.ask` из шаблона. Если есть — добавь
    недостающие элементы в `permissions.ask`, остальное не трогай.
-3. Убедись, что `.claude/settings.local.json` есть в `.gitignore` проекта (добавь строку один раз, как
-   `ai-init.sh` делает для `.ai/`).
+3. В `.gitignore` проекта ничего не добавляй: `.claude/settings.local.json` и `.claude/tasks/` игнорируются
+   глобальным excludes git, который ставит `setup-global.sh` (компонент `git-excludes`).
 4. Спроси пользователя одним вопросом, есть ли в проекте другие папки «не трогать без запроса», и добавь их
    в тот же список (`Edit(<путь>/**)`, `Write(<путь>/**)`).
 

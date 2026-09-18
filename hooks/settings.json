@@ -40,6 +40,12 @@
         ]
       },
       {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "HOOKS_DIR/guard-scope.sh", "timeout": 10 }
+        ]
+      },
+      {
         "matcher": "Read|Edit|Write|MultiEdit|Bash",
         "hooks": [
           { "type": "command", "command": "HOOKS_DIR/block-secrets.sh", "timeout": 5 }
