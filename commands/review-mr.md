@@ -29,10 +29,11 @@ allowed-tools: Read, Grep, Glob, Bash, Agent, Write
 
 ## Шаг 2 — Загрузить конвенцию (приоритет №1)
 
-- Рабочий проект (cwd под `/Users/ivankulimanov/dev/work/`): коды правил брать из Sonar-выжимки
-  `~/dev/my-claude-config/skills/java-service-convention/references/sonar-rules.md` (совпадает с CI
+- Рабочий проект (профиль work, правило 10): коды правил брать из Sonar-выжимки
+  `~/.claude/my-claude-config/skills/java-service-convention/references/sonar-rules.md` (совпадает с CI
   Sonar по кодам LANG-/SPR-/DB-). За «почему» и детали — каноническая конвенция
-  `/Users/ivankulimanov/dev/work/java/convention-java/docs/` (`index.md` + релевантные диффу разделы).
+  по пути «Каноническая Java-конвенция» из `~/.claude/workspace.md` (`index.md` + релевантные диффу разделы);
+  канон на этой машине не задан — работать по выжимке.
   Если выжимки нет — коды из заголовков канона (`### LANG-410`, `### SPR-902`).
   `sonar-rules.md` — внутренний материал: цитируй коды, не вставляй его текст дословно.
 - Прочий проект: guardrails из скила `java-service-convention`.
@@ -79,7 +80,9 @@ allowed-tools: Read, Grep, Glob, Bash, Agent, Write
 Записать файл (папку проекта создать при отсутствии). В `<branch>`/`<author>` заменить `/` и
 пробелы на `-`:
 
-`/Users/ivankulimanov/docs/work/reviews/<project>/<YYYY-MM-DD>__<branch>__<author>.md`
+`<каталог ревью>/<project>/<YYYY-MM-DD>__<branch>__<author>.md`
+
+Каталог ревью — строка «Ревью чужих веток сохраняются в» из `~/.claude/workspace.md`.
 
 Шапка файла, затем находки из Шага 4:
 
@@ -102,7 +105,7 @@ allowed-tools: Read, Grep, Glob, Bash, Agent, Write
 внутри репозитория, продублируй ревью локально, чтобы оно было под рукой при доработках:
 
 ```bash
-DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh "<branch>")   # .claude/tasks/<ключ ветки коллеги>/
+DIR=$(~/.claude/my-claude-config/scripts/helpers/ai-init.sh "<branch>")   # .claude/tasks/<ключ ветки коллеги>/
 ```
 
 Скопировать тот же текст в `$DIR/review.md`. Основной файл в `~/docs/work/reviews/...` остаётся

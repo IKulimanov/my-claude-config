@@ -8,24 +8,24 @@ allowed-tools: Read, Edit, Write, Grep, Glob, Bash, Agent, AskUserQuestion
 
 ## Шаг 1 — Контекст и стек
 
-`~/dev/my-claude-config/shared/stack-detection.md`: локальный `CLAUDE.md`, стек, рабочий или личный
+`~/.claude/my-claude-config/shared/stack-detection.md`: локальный `CLAUDE.md`, стек, рабочий или личный
 проект, нужные скилы. Переформулируй требование в конкретных технических терминах.
 
 ## Шаг 2 — Слои и вопросы
 
-Перечисли затронутые слои по `~/dev/my-claude-config/shared/affected-layers.md`. Вопросы — только
+Перечисли затронутые слои по `~/.claude/my-claude-config/shared/affected-layers.md`. Вопросы — только
 настоящие блокеры: нехватка требований, развилка с важным выбором, внешняя зависимость, риск выката,
 безопасность. Правило 08: нет варианта автора — один вопрос «Твой вариант в 1–3 строках?».
 
 ## Шаг 3 — План, кейсы и scope
 
-Загрузи скил `planning`. Напиши план по `~/dev/my-claude-config/playbook/templates/plan-template.md`;
+Загрузи скил `planning`. Напиши план по `~/.claude/my-claude-config/playbook/templates/plan-template.md`;
 кейсы — в секции «Тесты» плана в формате Дано/Когда/Тогда с уровнем (1–3 на шаг, обязательно граница
 и ошибка). Требования — только из постановки и кода; чего там нет — в «Вопросы», а не в допущения.
 Каталог задачи текущей ветки (`.claude/tasks/<ключ>/`; есть `summary.md` прошлой задачи — `--new`):
 
 ```bash
-DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh)
+DIR=$(~/.claude/my-claude-config/scripts/helpers/ai-init.sh)
 ```
 
 Сохрани план в `$DIR/plan.md`; файлы всех шагов и каталоги тестов — в scope:

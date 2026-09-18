@@ -1,6 +1,6 @@
 ---
 name: java-service-convention
-description: Use for Maven-based Spring Boot services. For work projects (cwd under ~/dev/work/) the canonical team convention at /Users/ivankulimanov/dev/work/java/convention-java/docs/ is the AUTHORITATIVE source — read it directly, do not rely on summary in this skill. For personal Spring projects, the guardrails below are best-practices.
+description: Use for Maven-based Spring Boot services. For work-profile projects (rule 10) the canonical team convention (directory named in ~/.claude/workspace.md) is the AUTHORITATIVE source — read it directly, do not rely on summary in this skill. For personal Spring projects, the guardrails below are best-practices.
 paths: "**/*.java"
 ---
 
@@ -8,19 +8,21 @@ paths: "**/*.java"
 
 ## Step 0 — Determine project type (CRITICAL)
 
-Look at the current working directory:
+Profile per rule 10: the line `Тип проекта:` in the local `CLAUDE.md`, otherwise the work directory from
+`~/.claude/workspace.md`; undecided → personal.
 
-- **Path starts with `/Users/ivankulimanov/dev/work/`** → this is a WORK project. The **canonical team convention** at
-  `/Users/ivankulimanov/dev/work/java/convention-java/docs/` is the ONLY authoritative prose source.
+- **Profile work** → the **canonical team convention** (line «Каноническая Java-конвенция» in `~/.claude/workspace.md`)
+  is the ONLY authoritative prose source. If that line says «не задана», work from `references/sonar-rules.md`
+  and tell the user the canon is not configured on this machine.
   `references/sonar-rules.md` is a generated mirror of the enforced Sonar rules — the local pre-check
   checklist (see Step 1); `scripts/helpers/sonar-local.sh` runs the real server rules on the working tree.
-- **Anywhere else** → personal/side project. Canonical convention does NOT apply. Use the guardrails below as best-practices.
+- **Profile personal** → canonical convention does NOT apply. Use the guardrails below as best-practices.
 
 ## Step 1 — Read canonical convention (work projects only)
 
 If this is a work project, before writing any non-trivial Java code:
 
-1. Read the index: `/Users/ivankulimanov/dev/work/java/convention-java/docs/index.md`
+1. Read the index: `<canonical convention directory>/index.md`
 2. Read the specific section(s) for your task — examples:
    - Git / branches / commits → `docs/001_git.md`
    - Project dependencies → `docs/002_project_deps.md`
@@ -80,4 +82,4 @@ These are valid for both work and personal projects. They are NOT a substitute f
 ## What lives where
 
 - `references/sonar-rules.md` — **generated Sonar-aligned checklist** (codes + examples), matches CI Sonar. Regenerate with `scripts/gen-convention-checklist.sh`. INTERNAL — do not publish. This is the concrete rule set to check against locally.
-- `/Users/ivankulimanov/dev/work/java/convention-java/docs/` — authoritative prose for work.
+- canonical convention directory from `~/.claude/workspace.md` — authoritative prose for work.

@@ -6,9 +6,9 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Agent, AskUserQuestion
 
 # /design — документы проектирования
 
-Процесс и форматы — `~/dev/my-claude-config/playbook/projects-playbook.md`, шаблоны —
+Процесс и форматы — `~/.claude/my-claude-config/playbook/projects-playbook.md`, шаблоны —
 `playbook/templates/`, чек-листы и позиции для вариантов — скил `design-docs` (загрузи первым).
-Артефакты живут в `~/dev/my-claude-config/docs/projects/<проект>/`.
+Артефакты живут в `~/.claude/my-claude-config/docs/projects/<проект>/`.
 
 Аргументы: `$ARGUMENTS` = "$ARGUMENTS". Первый токен — имя проекта по `playbook/project-naming.md`
 (`префикс-домен-функциональность`); нет имени — спроси. Второй токен — шаг; без него шаг определяется
@@ -17,7 +17,7 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Agent, AskUserQuestion
 ## Шаг 0 — Состояние
 
 ```bash
-DIR=$(~/dev/my-claude-config/scripts/helpers/design-init.sh "<проект>")
+DIR=$(~/.claude/my-claude-config/scripts/helpers/design-init.sh "<проект>")
 ```
 
 Прочитай статусы в шапках `00-brief.md` и `01-design.md`:

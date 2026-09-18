@@ -15,7 +15,7 @@ CLAUDE_HOME="${CLAUDE_HOME:-$HOME/.claude}"
 # ─── Defaults ────────────────────────────────────────────────────────────────
 APPLY=0
 MODE="symlink"          # symlink | copy
-COMPONENTS="skills,agents,commands,hooks,claude-md,output-styles,statusline,git-excludes"
+COMPONENTS="skills,agents,commands,hooks,claude-md,output-styles,statusline,git-excludes,config,workspace"
 COMMAND=""
 
 # ─── Args ────────────────────────────────────────────────────────────────────
@@ -32,7 +32,11 @@ Options:
   --apply             Реально применить. Без этого — dry-run, ничего не меняем.
   --copy              Использовать copy вместо symlink (по умолчанию: symlink)
   --components LIST   Список компонентов через запятую (default: $COMPONENTS)
-                      Доступно: skills,agents,commands,hooks,claude-md,output-styles,statusline,git-excludes
+                      Доступно: skills,agents,commands,hooks,claude-md,output-styles,statusline,git-excludes,
+                                config,workspace
+                      config    — symlink репозитория в ~/.claude/my-claude-config (через него команды и
+                                  правила читают shared/, playbook/, scripts/helpers)
+                      workspace — каталоги машины из workspace.conf → ~/.claude/workspace.md
   --config-dir DIR    Откуда брать (default: $ROOT_DIR)
   -h, --help
 
@@ -82,8 +86,8 @@ fi
 
 for comp in $(echo "$COMPONENTS" | tr ',' ' '); do
   case "$comp" in
-    skills|agents|commands|hooks|claude-md|output-styles|statusline|git-excludes) ;;
-    *) echo "Error: unknown component '$comp'. Valid: skills,agents,commands,hooks,claude-md,output-styles,statusline,git-excludes" >&2; exit 1 ;;
+    skills|agents|commands|hooks|claude-md|output-styles|statusline|git-excludes|config|workspace) ;;
+    *) echo "Error: unknown component '$comp'. Valid: skills,agents,commands,hooks,claude-md,output-styles,statusline,git-excludes,config,workspace" >&2; exit 1 ;;
   esac
 done
 
@@ -183,6 +187,10 @@ install_claude_md() {
     [ -e "$f" ] || continue
     block+="@$f"$'\n'
   done
+  # Каталоги этой машины — файл, который генерирует компонент workspace.
+  if [ -f "$CLAUDE_HOME/workspace.md" ] || case ",$COMPONENTS," in *,workspace,*) true ;; *) false ;; esac; then
+    block+="@$CLAUDE_HOME/workspace.md"$'\n'
+  fi
   block+="$end"
 
   if [ -f "$dst" ]; then
@@ -341,6 +349,95 @@ uninstall_git_excludes() {
   fi
 }
 
+# ─── Symlink репозитория и каталоги машины ───────────────────────────────────
+# Команды, правила и агенты ссылаются на репозиторий только через ~/.claude/my-claude-config, поэтому клон
+# может лежать где угодно. Каталоги машины (work, personal, конвенция, плагин Sonar, ревью) — из workspace.conf;
+# из него генерируется ~/.claude/workspace.md, который подключается в управляемый блок CLAUDE.md.
+install_config_link() {
+  local dst="$CLAUDE_HOME/my-claude-config"
+  if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$ROOT_DIR" ]; then
+    echo "$(prefix) config → уже указывает на $ROOT_DIR"
+    return
+  fi
+  backup_if_exists "$dst" || true
+  do_or_echo "ln -s '$ROOT_DIR' '$dst'"
+}
+
+install_workspace() {
+  local conf="$ROOT_DIR/workspace.conf" example="$ROOT_DIR/workspace.conf.example" dst="$CLAUDE_HOME/workspace.md"
+  if [ ! -f "$conf" ]; then
+    if [ ! -f "$example" ]; then
+      echo "$(prefix) skip workspace — нет ни workspace.conf, ни workspace.conf.example"
+      return
+    fi
+    echo "$(prefix) workspace.conf отсутствует → создаю из workspace.conf.example"
+    [ "$APPLY" -eq 1 ] && cp "$example" "$conf"
+  fi
+
+  # Значения по умолчанию на случай неполного конфига; workspace.conf их переопределяет.
+  local WORK_ROOT="$HOME/dev/work" PERSONAL_ROOT="$HOME/dev/personal" CONVENTION_DIR="" CONVENTION_PLUGIN=""
+  local REVIEWS_DIR="$HOME/dev/work/reviews"
+  if [ -f "$conf" ]; then
+    # shellcheck source=/dev/null
+    . "$conf"
+  fi
+  echo "$(prefix) workspace: work=$WORK_ROOT personal=$PERSONAL_ROOT → $dst"
+  [ "$APPLY" -eq 1 ] || return 0
+
+  mkdir -p "$CLAUDE_HOME" "$WORK_ROOT" "$PERSONAL_ROOT"
+  [ -n "$REVIEWS_DIR" ] && mkdir -p "$REVIEWS_DIR"
+
+  local conv_line plugin_line
+  if [ -n "$CONVENTION_DIR" ]; then
+    conv_line="- Каноническая Java-конвенция: \`$CONVENTION_DIR\`"
+  else
+    conv_line="- Каноническая Java-конвенция: не задана. Источник для work-проектов — выжимка \`sonar-rules.md\` в скиле \`java-service-convention\`."
+  fi
+  if [ -n "$CONVENTION_PLUGIN" ]; then
+    plugin_line="- Репозиторий Sonar-плагина конвенции: \`$CONVENTION_PLUGIN\`"
+  else
+    plugin_line="- Репозиторий Sonar-плагина конвенции: не задан."
+  fi
+
+  cat > "$dst" <<EOF
+# Каталоги этой машины
+
+Сгенерировано \`setup-global.sh\` из \`workspace.conf\`. Не править руками — правь \`workspace.conf\`
+в репозитории конфига и перезапусти установщик.
+
+- Рабочие проекты (профиль **work**): \`$WORK_ROOT\`
+- Личные проекты (профиль **personal**): \`$PERSONAL_ROOT\`
+$conv_line
+$plugin_line
+- Ревью чужих веток сохраняются в: \`$REVIEWS_DIR\`
+
+Что означают профили — правило 10 «Профили проектов: work и personal».
+EOF
+}
+
+uninstall_config_link() {
+  local dst="$CLAUDE_HOME/my-claude-config"
+  if [ -L "$dst" ]; then
+    if [ "$(readlink "$dst")" = "$ROOT_DIR" ]; then
+      do_or_echo "rm '$dst'"
+    else
+      echo "$(prefix) skip config — symlink ведёт не к нам: $(readlink "$dst")"
+    fi
+  else
+    echo "$(prefix) skip config — not present"
+  fi
+}
+
+# Каталоги work/personal не трогаем — это данные пользователя.
+uninstall_workspace() {
+  local dst="$CLAUDE_HOME/workspace.md"
+  if [ -f "$dst" ] && grep -qF 'setup-global.sh' "$dst"; then
+    do_or_echo "rm '$dst'"
+  else
+    echo "$(prefix) skip workspace — not present"
+  fi
+}
+
 # ─── Commands ────────────────────────────────────────────────────────────────
 
 cmd_status() {
@@ -424,6 +521,23 @@ cmd_status() {
     ge_state="present"
   fi
   printf '%-12s %-10s %s\n' "git-excludes" "$ge_state" "$ge_file"
+
+  # config: symlink репозитория, через который команды читают shared/, playbook/, scripts/helpers
+  local cfg_dst="$CLAUDE_HOME/my-claude-config" cfg_state cfg_target
+  if [ -L "$cfg_dst" ]; then
+    cfg_target=$(readlink "$cfg_dst")
+    [ "$cfg_target" = "$ROOT_DIR" ] && cfg_state="linked-ok" || cfg_state="linked-foreign"
+  elif [ -e "$cfg_dst" ]; then
+    cfg_state="dir-present"; cfg_target="(not a symlink)"
+  else
+    cfg_state="missing"; cfg_target="—"
+  fi
+  printf '%-12s %-10s %s\n' "config" "$cfg_state" "$cfg_target"
+
+  # workspace: сгенерированный ~/.claude/workspace.md
+  local ws_dst="$CLAUDE_HOME/workspace.md" ws_state="missing"
+  [ -f "$ws_dst" ] && ws_state="present"
+  printf '%-12s %-10s %s\n' "workspace" "$ws_state" "$ws_dst"
   echo
   echo "Run '$(basename "$0") install' to see install plan, add --apply to execute."
 }
@@ -441,6 +555,9 @@ cmd_install() {
     mkdir -p "$CLAUDE_HOME"
   fi
 
+  # workspace идёт до claude-md: управляемый блок подключает сгенерированный workspace.md.
+  case ",$COMPONENTS," in *,workspace,*) install_workspace ;; esac
+
   for comp in $(echo "$COMPONENTS" | tr ',' ' '); do
     case "$comp" in
       skills|agents|commands|output-styles) install_component "$comp" ;;
@@ -448,6 +565,8 @@ cmd_install() {
       claude-md)                             install_claude_md ;;
       statusline)                            install_statusline_file ;;
       git-excludes)                          install_git_excludes ;;
+      config)                                install_config_link ;;
+      workspace)                             : ;;   # поставлен выше
     esac
   done
   # Настройки в settings.json ставим ПОСЛЕ hooks, чтобы merge хуков не затёр их.
@@ -540,6 +659,8 @@ cmd_uninstall() {
     echo "$(prefix) settings.json: statusLine not present"
   fi
 
+  uninstall_config_link
+  uninstall_workspace
   uninstall_git_excludes
 
   echo

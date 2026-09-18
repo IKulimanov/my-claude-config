@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob, Write, Edit, AskUserQuestion
 
 # ADR — записать решение
 
-Правила и формат — `~/dev/my-claude-config/playbook/templates/adr-template.md` (прочитать перед работой).
+Правила и формат — `~/.claude/my-claude-config/playbook/templates/adr-template.md` (прочитать перед работой).
 Rule 08: если пользователь просит «предложи решение», а не «запиши решение» — сначала его вариант.
 
 ## Шаги

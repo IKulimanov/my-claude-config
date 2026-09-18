@@ -32,7 +32,7 @@ Follow-up вида «продолжай», «следующая фаза» — �
 (`feature/export-csv` → `export-csv`). Старый `.ai/` скрипт переносит сюда сам.
 
 ```bash
-DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh)   # .claude/tasks/<ключ>/ — последний каталог ветки
+DIR=$(~/.claude/my-claude-config/scripts/helpers/ai-init.sh)   # .claude/tasks/<ключ>/ — последний каталог ветки
 ```
 
 - В `$DIR` нет `plan.md` — новая задача, дальше по шагам.
@@ -48,7 +48,7 @@ DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh)   # .claude/tasks/<кл
 
 ## Шаг 2 — Контекст (`Explore`)
 
-Промпт: сначала `~/dev/my-claude-config/shared/stack-detection.md`; прочитать локальный `CLAUDE.md` и весь
+Промпт: сначала `~/.claude/my-claude-config/shared/stack-detection.md`; прочитать локальный `CLAUDE.md` и весь
 код, относящийся к задаче; для доработки — `summary.md` и `plan.md` из `$PREV`. Написать
 `.claude/tasks/about.md` (проект как будто уже готов: архитектура, решения, области кода, без «TODO»;
 если файл есть и не старше месяца — только дополнить) и `$DIR/agent/context.md` — не длиннее 300 строк:
@@ -59,7 +59,7 @@ DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh)   # .claude/tasks/<кл
 ## Шаг 3 — План (`planner`, режим «план»)
 
 Промпт: пути к `$DIR/agent/context.md`, `.claude/tasks/about.md`, brief и design из `docs/projects/`, если
-есть; вариант автора; формат — `~/dev/my-claude-config/playbook/templates/plan-template.md`; выход —
+есть; вариант автора; формат — `~/.claude/my-claude-config/playbook/templates/plan-template.md`; выход —
 `$DIR/plan.md` и `$DIR/agent/scope.txt` (все файлы, которые шаги создают или меняют, и каталоги тестов).
 После агента проверь: план не длиннее 150 строк, у шагов статусы `[ ]`, проверка и номера кейсов,
 «Решение» называет вариант автора, каждый файл из шагов есть в `scope.txt`. Не так — перезапусти

@@ -16,6 +16,8 @@
   `disable-model-invocation`; агент — `name`, `description`, `tools`, `disallowedTools`, `model`, `effort`,
   `maxTurns`, `skills`; скил — `name`, `description`, `paths`.
 - В `templates/settings*.json.template` не добавлять `Bash(sed *)` и `Bash(cat *)` в allow.
+- Абсолютных путей к самому репозиторию не писать: только `~/.claude/my-claude-config/…` (symlink ставит
+  установщик). Каталоги машины (work, personal, конвенция, ревью) — из `workspace.conf` и `~/.claude/workspace.md`.
 
 ## Язык
 
@@ -34,6 +36,7 @@
 - Управляемый блок `BEGIN/END my-claude-config (managed)` в любом `CLAUDE.md`.
 - `skills/java-service-convention/references/sonar-rules.md` — генерируется скриптом из плагина команды.
 - `docs/projects/` — артефакты проектирования; меняются через `/design`.
+- `workspace.conf` — каталоги этой машины, в git не идёт; пример — `workspace.conf.example`.
 
 ## Контрольные точки
 

@@ -21,6 +21,7 @@
 | `shared/` | блоки для промптов команд: определение стека, карта слоёв |
 | `scripts/` | установка, вспомогательные скрипты (`helpers/`), аналитика (`analyze-usage.sh`, `audit/`) |
 | `templates/` | шаблоны `CLAUDE.md` и проектных `settings` по профилям для `/onboard` |
+| `workspace.conf.example` | каталоги машины: work, personal, конвенция, плагин Sonar, ревью; копия `workspace.conf` в git не идёт |
 | `tests/` | bash-тесты хуков и скриптов: `for t in tests/test-*.sh; do bash "$t"; done` |
 
 Полное техническое описание — [docs/TECHNICAL.md](docs/TECHNICAL.md).
@@ -28,11 +29,15 @@
 ## Быстрый старт
 
 ```bash
-git clone <repo-url> ~/dev/my-claude-config
+git clone <repo-url> ~/dev/my-claude-config      # каталог любой
 cd ~/dev/my-claude-config
-scripts/setup-global.sh install            # dry-run: покажет план
-scripts/setup-global.sh install --apply    # symlink в ~/.claude/, хуки и permissions в settings.json
+cp workspace.conf.example workspace.conf         # каталоги этой машины
+scripts/setup-global.sh install                  # dry-run: покажет план
+scripts/setup-global.sh install --apply          # symlink ~/.claude/my-claude-config, хуки, permissions, excludes git
 ```
+
+Команды и правила ссылаются на репозиторий только через `~/.claude/my-claude-config`, каталоги машины берут
+из `~/.claude/workspace.md`, который установщик генерирует из `workspace.conf`. На второй машине те же три шага.
 
 В новом проекте: `/onboard` — определит стек, задаст вопросы, сгенерирует `CLAUDE.md` и проектный
 `.claude/settings.local.json`. Требуются `jq`, `perl`, `python3` ≥ 3.11; для Sonar — `SONAR_HOST_URL`
@@ -62,6 +67,18 @@ git игнорирует каталог глобально, ничего из н
 Агент не пушит, не мержит, не делает rebase и pull, не коммитит в master/staging; `.gitlab-ci.yml`,
 `.gitlab/` и `helm/` меняет только по явной просьбе; правка закоммиченного теста или файла вне
 scope задачи — вопрос; формат коммита проверяет хук. Подробности — правило 09 и `docs/TECHNICAL.md`.
+
+## MCP
+
+Один сервер в user-scope (`~/.claude.json`, секция `mcpServers`): `context7`, HTTP `https://mcp.context7.com/mcp`,
+актуальная документация библиотек для `convention-reviewer` и `architect`. Восстановить на новой машине:
+
+```bash
+claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
+```
+
+Другие серверы не подключены: описания инструментов каждого сервера попадают в контекст каждой сессии,
+поэтому сервер добавляется под конкретную команду и по данным аудита, а не на всякий случай.
 
 ## Аналитика
 

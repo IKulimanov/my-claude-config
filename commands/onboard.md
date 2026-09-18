@@ -71,15 +71,15 @@ pwd
 
 ### Шаг 4 — Выбрать шаблон
 
-Сопоставь определённый стек с шаблоном в `templates/`:
+Сопоставь определённый стек с шаблоном в `~/.claude/my-claude-config/templates/`:
 
 | Стек | Шаблон |
 |---|---|
-| java-service | `templates/CLAUDE.java-service.md.template` |
-| go-service | `templates/CLAUDE.go-service.md.template` |
-| vue-app | `templates/CLAUDE.vue-app.md.template` |
-| web-app | `templates/CLAUDE.web-app.md.template` |
-| docker-service | `templates/CLAUDE.docker-service.md.template` |
+| java-service | `~/.claude/my-claude-config/templates/CLAUDE.java-service.md.template` |
+| go-service | `~/.claude/my-claude-config/templates/CLAUDE.go-service.md.template` |
+| vue-app | `~/.claude/my-claude-config/templates/CLAUDE.vue-app.md.template` |
+| web-app | `~/.claude/my-claude-config/templates/CLAUDE.web-app.md.template` |
+| docker-service | `~/.claude/my-claude-config/templates/CLAUDE.docker-service.md.template` |
 
 Если детект получился неоднозначным (например, есть и `pom.xml`, и `package.json` — Java-сервис с фронтендом), спроси через `AskUserQuestion`.
 
@@ -129,7 +129,7 @@ pwd
 Глобальные ограждения (правило 09) закрывают git, `.gitlab-ci.yml`, `.gitlab/`, `helm/`. Проектные добавки
 (Dockerfile, манифесты зависимостей) живут в `.claude/settings.local.json` проекта — файл личный, в git не идёт.
 
-1. Возьми `permissions.ask` из шаблона профиля: `templates/settings.<profile>.json.template`
+1. Возьми `permissions.ask` из шаблона профиля: `~/.claude/my-claude-config/templates/settings.<profile>.json.template`
    (`java-service` → `pom.xml`, `go-service` → `go.mod`, `web-app` → `package.json`, `docker-service` → compose).
 2. Если `.claude/settings.local.json` нет — создай с секцией `permissions.ask` из шаблона. Если есть — добавь
    недостающие элементы в `permissions.ask`, остальное не трогай.

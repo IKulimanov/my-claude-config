@@ -9,8 +9,8 @@ allowed-tools: Read, Grep, Glob, Bash, Agent, Write, AskUserQuestion
 ## Шаг 1 — Дифф и стек
 
 Дифф: `git diff master...HEAD` плюс незакоммиченные изменения, или scope из аргумента. Стек и тип
-проекта — по `~/dev/my-claude-config/shared/stack-detection.md`. Каталог задачи текущей
-ветки: `DIR=$(~/dev/my-claude-config/scripts/helpers/ai-init.sh)` (`.claude/tasks/<ключ>/`).
+проекта — по `~/.claude/my-claude-config/shared/stack-detection.md`. Каталог задачи текущей
+ветки: `DIR=$(~/.claude/my-claude-config/scripts/helpers/ai-init.sh)` (`.claude/tasks/<ключ>/`).
 
 ## Шаг 2 — Sonar (рабочий Java-проект)
 
