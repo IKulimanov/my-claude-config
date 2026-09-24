@@ -1,5 +1,5 @@
 ---
-description: Проектирование по плейбуку — brief → design → ADR → план проекта → задачи. Определяет шаг по файлам в docs/projects/<проект>/, спрашивает вариант автора, для больших проектов запускает соревнование трёх вариантов с судьёй, умеет ревьюить brief и design. Реализация задач — /task.
+description: Проектирование по плейбуку — brief → design → ADR → план проекта → задачи. Определяет шаг по файлам в каталоге проекта, спрашивает вариант автора, для больших проектов запускает соревнование трёх вариантов с судьёй, умеет ревьюить brief и design. Реализация задач — /task.
 argument-hint: <проект> [brief|doc|plan|review <файл>] [--варианты N] [--критика]
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Agent, AskUserQuestion
 ---
@@ -8,7 +8,8 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Agent, AskUserQuestion
 
 Процесс и форматы — `~/.claude/my-claude-config/playbook/projects-playbook.md`, шаблоны —
 `playbook/templates/`, чек-листы и позиции для вариантов — скил `design-docs` (загрузи первым).
-Артефакты живут в `~/.claude/my-claude-config/docs/projects/<проект>/`.
+Артефакты живут в каталоге, который печатает `design-init.sh`: `$DESIGN_PROJECTS_ROOT/<проект>/`, а если переменная
+не задана, — в `~/.claude/my-claude-config/docs/projects/<проект>/`.
 
 Аргументы: `$ARGUMENTS` = "$ARGUMENTS". Первый токен — имя проекта по `playbook/project-naming.md`
 (`префикс-домен-функциональность`); нет имени — спроси. Второй токен — шаг; без него шаг определяется
