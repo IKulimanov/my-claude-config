@@ -4,14 +4,43 @@
 # читать и переписывать файл.
 #
 #   plan-status.sh <plan.md> <номер-шага> <todo|wip|done|ask|stop> [--journal "текст"]
+#   plan-status.sh <plan.md> --summary   # сводка без правки файла: строка «Тесты:», счётчики готовых
+#                                        # шагов по разделам ###, [!] [#] [~] (до пяти), следующий шаг,
+#                                        # последняя строка журнала — оркестратор не читает план целиком
 # Статусы: todo [ ] · wip [~] · done [x] · ask [!] вопрос агента · stop [#] стоп-точка оператора.
 
 set -euo pipefail
 
 usage() {
-  echo "Usage: $(basename "$0") <plan.md> <step> <todo|wip|done|ask|stop> [--journal \"text\"]" >&2
+  echo "Usage: $(basename "$0") <plan.md> <step> <todo|wip|done|ask|stop> [--journal \"text\"] | <plan.md> --summary" >&2
   exit 1
 }
+
+if [ $# -eq 2 ] && [ "$2" = "--summary" ]; then
+  [ -f "$1" ] || { echo "Нет файла: $1" >&2; exit 1; }
+  perl -CSD -Mutf8 -ne '
+    chomp;
+    if (/^Тесты:/) { print "$_\n"; next }
+    if (/^## /) { $in_steps = /^## Шаги/; $in_journal = /^## Журнал/; next }
+    if ($in_journal && /^- /) { $journal = $_; next }
+    next unless $in_steps;
+    if (/^### (.+)$/) { push @sec, $1; $total{$1} = 0; $done{$1} = 0; next }
+    if (/^- \[(.)\] \d+\. /) {
+      my $m = $1; my $sec = @sec ? $sec[-1] : "Шаги";
+      push @sec, $sec unless exists $total{$sec};
+      $total{$sec}++; $done{$sec}++ if $m eq "x";
+      push @flag, $_ if $m =~ /[!#~]/;
+      $next //= $_ if $m eq " ";
+    }
+    END {
+      print "$_: $done{$_}/$total{$_}\n" for @sec;
+      print "$_\n" for @flag[0 .. ($#flag < 4 ? $#flag : 4)];
+      print "Следующий: $next\n" if defined $next;
+      print "Журнал: $journal\n" if defined $journal;
+    }
+  ' "$1"
+  exit 0
+fi
 
 [ $# -ge 3 ] || usage
 PLAN="$1"; STEP="$2"; STATUS="$3"; shift 3
