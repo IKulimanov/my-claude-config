@@ -72,7 +72,7 @@ cd "$REPO4"; "$AI_INIT" >/dev/null 2>&1 || fail "ai-init упал на чист�
 
 REPO5="$TMP/tracked"; new_repo "$REPO5" feature/ORSP-3-x
 mkdir -p "$REPO5/.ai/kept"; echo x > "$REPO5/.ai/kept/plan.md"
-git -C "$REPO5" add .ai && git -C "$REPO5" -c user.name=t -c user.email=t@t commit -q -m ai
+git -C "$REPO5" add -f .ai && git -C "$REPO5" -c user.name=t -c user.email=t@t commit -q -m ai
 cd "$REPO5"; "$AI_INIT" >/dev/null 2>&1 || fail "ai-init упал на отслеживаемом .ai"
 [ -f "$REPO5/.ai/kept/plan.md" ] || fail "отслеживаемый .ai/ перемещён"
 
