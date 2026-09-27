@@ -92,3 +92,35 @@ hook_ask() {
   jq -n --arg r "$reason" \
     '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "ask", permissionDecisionReason: $r}}'
 }
+
+# Профиль проекта по правилу 10: строка «Тип проекта: work|personal» в CLAUDE.md корня репозитория →
+# каталог WORK_ROOT (CLAUDE_WORK_ROOT для тестов → workspace.conf репозитория конфига, файл задаёт
+# CLAUDE_WORKSPACE_CONF → $HOME/dev/work) → personal. Пути сравниваются после pwd -P: /var и /private/var.
+# Args: <каталог> -> печатает work | personal
+hook_project_profile() {
+  local dir="${1:-$(pwd)}" root line work_root conf conf_root
+  root=$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null) || root="$dir"
+  if [ -f "$root/CLAUDE.md" ]; then
+    line=$(grep -m1 -oE 'Тип проекта:[[:space:]]*(work|personal)' "$root/CLAUDE.md" 2>/dev/null || true)
+    case "$line" in
+      *work) echo work; return 0 ;;
+      *personal) echo personal; return 0 ;;
+    esac
+  fi
+  if [ -n "${CLAUDE_WORK_ROOT:-}" ]; then
+    work_root="$CLAUDE_WORK_ROOT"
+  else
+    work_root="$HOME/dev/work"
+    conf="${CLAUDE_WORKSPACE_CONF:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/workspace.conf}"
+    if [ -f "$conf" ]; then
+      conf_root=$(sh -c ". '$conf' 2>/dev/null; printf '%s' \"\${WORK_ROOT:-}\"") || conf_root=""
+      [ -n "$conf_root" ] && work_root="$conf_root"
+    fi
+  fi
+  work_root=$(cd "$work_root" 2>/dev/null && pwd -P) || { echo personal; return 0; }
+  root=$(cd "$root" 2>/dev/null && pwd -P) || root="$dir"
+  case "$root/" in
+    "$work_root"/*) echo work ;;
+    *) echo personal ;;
+  esac
+}

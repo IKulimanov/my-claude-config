@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # PreToolUse / Bash — формат сообщения коммита (правило 09, скил git-convention).
-# Рабочий проект (cwd под WORK_ROOT из workspace.conf, по умолчанию ~/dev/work): `JIRA-ID: Глагол …` — латинский ключ, русское описание с заглавной.
+# Рабочий проект (профиль work по правилу 10: «Тип проекта» в CLAUDE.md, иначе cwd под WORK_ROOT): `JIRA-ID: Глагол …` — латинский ключ, русское описание с заглавной.
 # Личный проект: `тип(scope): глагол …` — тип из списка, русское описание со строчной.
 # Первая строка ≤ 72 символов; трейлеры (Co-Authored-By и подобные) запрещены везде.
 # Сообщение берётся из -m/--message (несколько -m допустимы) или из heredoc (-F - / $(cat <<EOF)).
@@ -69,20 +69,10 @@ if [ -z "$MSG" ]; then
   deny "Коммит без сообщения: редактор недоступен. Укажи сообщение через -m (правило 09)."
 fi
 
-# Рабочий проект — под каталогом WORK_ROOT: CLAUDE_WORK_ROOT (тесты) → workspace.conf репозитория конфига
-# (CLAUDE_WORKSPACE_CONF задаёт файл для тестов) → $HOME/dev/work. Jira-ID берётся из имени ветки: если он
-# там есть, коммит обязан начинаться с того же ID; если ветка без ID — ID не нужен.
-WORKSPACE_CONF="${CLAUDE_WORKSPACE_CONF:-$SCRIPT_DIR/../../workspace.conf}"
-if [ -n "${CLAUDE_WORK_ROOT:-}" ]; then
-  WORK_ROOT="$CLAUDE_WORK_ROOT"
-else
-  WORK_ROOT="$HOME/dev/work"
-  if [ -f "$WORKSPACE_CONF" ]; then
-    conf_root=$(sh -c ". '$WORKSPACE_CONF' 2>/dev/null; printf '%s' \"\${WORK_ROOT:-}\"") || conf_root=""
-    [ -n "$conf_root" ] && WORK_ROOT="$conf_root"
-  fi
-fi
-if [[ "$commit_dir" == "$WORK_ROOT/"* ]]; then PROJECT_TYPE=work; else PROJECT_TYPE=personal; fi
+# Профиль — по правилу 10 (hook_project_profile: «Тип проекта» в CLAUDE.md → WORK_ROOT → personal).
+# Jira-ID берётся из имени ветки: если он там есть, коммит обязан начинаться с того же ID; если ветка
+# без ID — ID не нужен.
+PROJECT_TYPE=$(hook_project_profile "$commit_dir")
 BRANCH=$(git -C "$commit_dir" rev-parse --abbrev-ref HEAD 2>/dev/null || true)
 BRANCH_ID=$(printf '%s' "$BRANCH" | grep -oE '[A-Z][A-Z0-9]+-[0-9]+' | head -1 || true)
 

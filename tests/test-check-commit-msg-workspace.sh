@@ -25,4 +25,9 @@ export CLAUDE_WORKSPACE_CONF="$TMP/absent.conf"
 expect_decision "$HOOK" allow Bash "$REPO" 'git commit -m "feat(x): добавить что-то"'
 expect_decision "$HOOK" deny  Bash "$REPO" 'git commit -m "Что-то без типа"'
 
-echo "OK: test-check-commit-msg-workspace (WORK_ROOT из workspace.conf, по умолчанию \$HOME/dev/work)"
+# 3) Строка «Тип проекта: work» в CLAUDE.md главнее каталога (правило 10): личный каталог, рабочий формат.
+printf 'Тип проекта: work\n' > "$REPO/CLAUDE.md"
+expect_decision "$HOOK" deny  Bash "$REPO" 'git commit -m "feat(x): добавить что-то"'
+expect_decision "$HOOK" allow Bash "$REPO" 'git commit -m "ORSP-1: Добавить что-то"'
+
+echo "OK: test-check-commit-msg-workspace (WORK_ROOT из workspace.conf, по умолчанию \$HOME/dev/work, «Тип проекта» в CLAUDE.md главнее)"

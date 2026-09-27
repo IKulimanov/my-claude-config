@@ -2,7 +2,8 @@
 # PreToolUse / Edit|Write|MultiEdit|Bash — заморозка тестов (правило 06, вариант 1).
 # Тест-файл, который есть в git и не изменён относительно HEAD, считается принятым: его правка,
 # перезапись или удаление требует подтверждения (ask). Новые и уже изменённые тест-файлы,
-# прод-код и чтение проходят без вопросов.
+# прод-код и чтение проходят без вопросов. Только профиль work: в личном проекте заморозки нет
+# (правило 06), а вопрос держал фоновых агентов часами.
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -12,6 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INPUT=$(hook_read_input)
 TOOL=$(hook_field "$INPUT" '.tool_name')
 CWD=$(hook_field "$INPUT" '.cwd' "$(pwd)")
+[ "$(hook_project_profile "$CWD")" = work ] || exit 0
 
 TEST_RE='((Test|Tests|IT)\.java|_test\.go|\.(spec|test)\.(ts|tsx|js|jsx))$'
 WRITE_VERBS='^(tee|cp|mv|rm|rsync|ln|truncate|dd|patch|perl|python|python3|ruby)$'
