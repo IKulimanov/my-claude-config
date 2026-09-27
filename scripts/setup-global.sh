@@ -291,6 +291,31 @@ set_cleanup_period() {
   fi
 }
 
+# Поставить autoCompactWindow=300000, если ключа нет: у моделей с окном 1M автосжатие срабатывает около
+# 967 тыс. токенов, и главный поток дорастал до 950 тыс. — каждый шаг перечитывал этот контекст из кэша
+# (разбор сессий 2026-09-27: 74% стоимости главных потоков — шаги с контекстом больше 300 тыс.).
+# Заданное пользователем значение не трогаем.
+set_autocompact_window() {
+  local settings="$CLAUDE_HOME/settings.json"
+  local window=300000
+  if [ -f "$settings" ] && jq -e '.autoCompactWindow' "$settings" >/dev/null 2>&1; then
+    echo "$(prefix) settings.json: autoCompactWindow уже задан ($(jq -r '.autoCompactWindow' "$settings")), не трогаем"
+    return 0
+  fi
+  echo "$(prefix) settings.json: autoCompactWindow=$window"
+  if [ "$APPLY" -ne 1 ]; then return 0; fi
+
+  mkdir -p "$CLAUDE_HOME"
+  if [ -f "$settings" ]; then
+    mkdir -p "$BACKUP_DIR"
+    cp "$settings" "$BACKUP_DIR/settings.json.before-autocompact"
+    local tmp; tmp="$(mktemp)"
+    jq --argjson w "$window" '.autoCompactWindow = $w' "$settings" > "$tmp" && mv "$tmp" "$settings"
+  else
+    printf '{\n  "autoCompactWindow": %s\n}\n' "$window" > "$settings"
+  fi
+}
+
 # ─── Глобальный excludes git ─────────────────────────────────────────────────
 # Артефакты задач (.claude/tasks/), проектный settings.local.json и старый .ai/ игнорируются во всех
 # репозиториях через глобальный excludes git, а не через .gitignore каждого проекта.
@@ -513,6 +538,11 @@ cmd_status() {
     cp_state=$(jq -r '.cleanupPeriodDays // "missing"' "$settings" 2>/dev/null)
   fi
   printf '%-12s %-10s %s\n' "cleanupDays" "$cp_state" "in $settings"
+  local ac_state="missing"
+  if [ -f "$settings" ]; then
+    ac_state=$(jq -r '.autoCompactWindow // "missing"' "$settings" 2>/dev/null)
+  fi
+  printf '%-12s %-10s %s\n' "autoCompact" "$ac_state" "in $settings"
 
   # git-excludes: управляемый блок в глобальном excludes git
   local ge_file ge_state="missing"
@@ -577,6 +607,7 @@ cmd_install() {
     *,statusline,*) set_statusline ;;
   esac
   set_cleanup_period
+  set_autocompact_window
 
   echo
   if [ "$APPLY" -eq 1 ]; then
