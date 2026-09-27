@@ -1,7 +1,7 @@
 ---
 name: test-writer
 description: Writes professional tests for Java/Spring services — JUnit 5, Mockito, AssertJ, Testcontainers. Use when tests are missing for Java code or need to be added for new behavior.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Write, Edit
 model: sonnet
 effort: medium
 maxTurns: 150
@@ -74,8 +74,9 @@ Match existing convention. Default: `methodName_shouldDoExpectedBehavior_whenCon
 
 - Produce complete, compilable test classes with all imports.
 - Комментарии в коде тестов — на русском, параметризованные логи без PII (rule 07).
-- After generating, state: layer chosen (why), scenarios covered, gaps remaining.
-- You are read-only: return the test code; the caller writes the file and runs it.
+- Mention in the report: layer chosen (why), gaps remaining.
+- Write the test files yourself (Write/Edit) — only test files: paths from the plan, `tests.md` or the caller; never production code. Run them and confirm RED (compile errors for not-yet-written production code are fine).
+- Report to the caller in at most 10 lines: files written, test names or case ids, RED result. Do not paste test code into the report.
 
 ## Input: Agreed Cases (`tests.md`)
 

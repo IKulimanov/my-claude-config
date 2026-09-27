@@ -1,7 +1,7 @@
 ---
 name: go-test-writer
 description: Writes idiomatic Go tests — table-driven units, httptest handlers, testcontainers for DB, benchmarks. Use when tests are missing or need to be added for Go code.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Write, Edit
 model: sonnet
 effort: medium
 maxTurns: 150
@@ -69,8 +69,9 @@ TestFunctionName_errorCase
 
 - Produce complete, compilable test code with all imports.
 - Комментарии в коде тестов — на русском (rule 07).
-- After generating, state: test type chosen and why, scenarios covered, remaining gaps.
-- You are read-only: return the test code; the caller writes the file and runs it.
+- Mention in the report: test type chosen and why, remaining gaps.
+- Write the test files yourself (Write/Edit) — only test files: paths from the plan, `tests.md` or the caller; never production code. Run them and confirm RED (compile errors for not-yet-written production code are fine).
+- Report to the caller in at most 10 lines: files written, test names or case ids, RED result. Do not paste test code into the report.
 
 ## Input: Agreed Cases (`tests.md`)
 

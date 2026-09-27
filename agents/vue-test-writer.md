@@ -1,7 +1,7 @@
 ---
 name: vue-test-writer
 description: Writes tests for Vue 3 + Vite projects using Vitest and Vue Test Utils. Covers components, composables, Pinia stores, and router integration. Use when adding/expanding tests for a Vue codebase.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Write, Edit
 model: sonnet
 effort: medium
 maxTurns: 150
@@ -53,7 +53,8 @@ Before writing tests, always:
 - Комментарии в коде тестов — на русском (rule 07).
 - State which layer was chosen and why.
 - List covered scenarios and remaining gaps.
-- You are read-only: return the test code; the caller writes the file and runs it.
+- Write the test files yourself (Write/Edit) — only test files: paths from the plan, `tests.md` or the caller; never production code. Run them and confirm RED (compile errors for not-yet-written production code are fine).
+- Report to the caller in at most 10 lines: files written, test names or case ids, RED result. Do not paste test code into the report.
 
 ## Input: Agreed Cases (`tests.md`)
 

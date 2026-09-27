@@ -1,9 +1,9 @@
 ---
 name: go-reviewer
 description: Reviews Go code for bugs, idiom violations, concurrency issues, error handling gaps, and security risks. Use after Go code changes or when reviewing a Go PR.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Write
 model: opus
-effort: high
+effort: medium
 maxTurns: 250
 skills:
   - go-best-practices
@@ -56,3 +56,10 @@ Before reviewing, consult these skills when relevant:
 - Test files must not be deleted or weakened: compare `git diff --stat` on test files and the number of assertions before and after.
 - If `tests.md` (agreed cases) is provided, check that every case is covered by name; list uncovered ones.
 - Convention codes and library versions are checked by `convention-reviewer` in parallel — do not duplicate that work.
+
+## Файл отчёта
+
+Промпт называет путь (`.claude/tasks/<ключ>/agent/review-<агент>-<веха>.md`) — запиши находки туда (Write),
+а вызывающему верни не больше 10 строк: счётчики по серьёзности и CRITICAL и WARNING по строке. Пути нет —
+верни находки текстом. Ищи только ошибки корректности и расхождения с требованиями; находки ради отчёта не
+выдумывай — «находок нет» нормальный ответ.
