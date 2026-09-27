@@ -2,6 +2,7 @@
 description: Deep explanation of any technology, pattern, or practice. Structured: what it is → why it exists → how it works → when to use → practical example (Java/Spring, Go, or Web) → common pitfalls.
 argument-hint: <topic to explain>
 allowed-tools: Read, Grep, Glob
+effort: medium
 ---
 
 # Explain

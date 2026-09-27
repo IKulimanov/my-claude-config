@@ -2,6 +2,7 @@
 description: Write a Jira task or sub-task in the team format (Russian, Jira markup, Given/When/Then acceptance criteria, open questions, out of scope). Use for dev-tasks, sub-tasks, bugs, spikes; follows the team playbook, not a generic template.
 argument-hint: <тип: подзадача|дев-задача|баг|спайк + суть; можно черновик текста>
 allowed-tools: Read, Grep, Glob, AskUserQuestion
+effort: medium
 ---
 
 # Jira — задача для человека

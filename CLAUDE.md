@@ -13,7 +13,7 @@
   `set -euo pipefail`, dry-run по умолчанию у установщиков, идемпотентность, бэкапы перед перезаписью.
 - Тесты не трогают `~/.claude/`: цели переопределяются переменными окружения (`docs/TECHNICAL.md`, §13).
 - Не выдумывай поля frontmatter: команда — `description`, `argument-hint`, `allowed-tools`,
-  `disable-model-invocation`; агент — `name`, `description`, `tools`, `disallowedTools`, `model`, `effort`,
+  `disable-model-invocation`, `effort`; агент — `name`, `description`, `tools`, `disallowedTools`, `model`, `effort`,
   `maxTurns`, `skills`; скил — `name`, `description`, `paths`.
 - В `templates/settings*.json.template` не добавлять `Bash(sed *)` и `Bash(cat *)` в allow.
 - Абсолютных путей к самому репозиторию не писать: только `~/.claude/my-claude-config/…` (symlink ставит

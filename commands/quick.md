@@ -3,6 +3,7 @@ description: Точечная правка по прямому указанию 
 argument-hint: <что именно поправить и где>
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 disable-model-invocation: true
+effort: low
 ---
 
 # /quick — точечная правка

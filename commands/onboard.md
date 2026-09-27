@@ -2,6 +2,7 @@
 description: Analyze a fresh project, detect stack, ask targeted questions, and generate a tailored CLAUDE.md. Use in a new repo before any real work.
 argument-hint: [optional: --force to overwrite existing CLAUDE.md]
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion
+effort: medium
 ---
 
 # /onboard — Project Bootstrap

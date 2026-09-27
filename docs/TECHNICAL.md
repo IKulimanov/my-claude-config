@@ -1,13 +1,13 @@
 # Техническое описание my-claude-config
 
-Обновлено 2026-09-18 после перестройки (план — `docs/refactor-2026-09/plan.html`).
+Обновлено 2026-09-27: лёгкий `/task` по разбору сессий 24–27.09 (перестройка — `docs/refactor-2026-09/plan.html`).
 
 ## 1. Каталоги
 
 ```
 rules/            9 правил, всегда включены через ~/.claude/CLAUDE.md (@import)
 commands/         12 slash-команд
-agents/           12 субагентов
+agents/           14 субагентов (свой `Explore` заменяет встроенного)
 skills/           15 скилов (SKILL.md + references/)
 playbook/         плейбук проектирования, нейминг, выжимки PDF, templates/
 shared/           блоки для промптов команд: stack-detection.md, affected-layers.md
@@ -26,7 +26,7 @@ statusline/       statusline.sh
 
 - `scripts/setup-global.sh install --apply` делает symlink `~/.claude/{skills,agents,commands,output-styles}`
   на каталоги репозитория, генерирует `~/.claude/CLAUDE.md` с `@import` каждого `rules/*.md` (управляемый
-  блок), ставит хуки и `permissions` через `install-hooks.sh`, `outputStyle`, `statusLine`, `cleanupPeriodDays`
+  блок), ставит хуки и `permissions` через `install-hooks.sh`, `outputStyle`, `statusLine`, `cleanupPeriodDays`, `autoCompactWindow`
   и управляемый блок в глобальном excludes git (`.claude/tasks/`, `.claude/settings.local.json`, `.ai/`;
   файл — `core.excludesFile` или `~/.config/git/ignore`). Ещё два компонента отвязывают конфиг от машины:
   `config` — symlink `~/.claude/my-claude-config` на репозиторий, через который команды и правила читают
@@ -47,9 +47,9 @@ statusline/       statusline.sh
 | Команда | Когда | Поток | Подагенты |
 |---|---|---|---|
 | `/quick` | точечная правка по прямому указанию | ровно то, что написано; без плана, тестов, ревью | 0 |
-| `/fix` | баг, малое изменение поведения | причина до правки (rule 08), RED → GREEN → REFACTOR | 0–1 |
-| `/feature` | фича в один контекст | стек → план с кейсами (skill `planning`) → critic → согласование → TDD → Sonar → два ревьюера | critic, тест-райтер, два ревьюера |
-| `/task` | несколько фаз или контекстов | сортировка → Explore → planner → critic → **согласование плана** → кейсы → critic → **согласование кейсов** → implementer по фазам в границах `scope.txt` → Sonar → critic + два ревьюера → фиксер | 4–9 |
+| `/fix` | баг, малое изменение поведения | причина до правки (rule 08); в personal — вопрос, нужен ли тест; RED → GREEN → REFACTOR | 0–1 |
+| `/feature` | фича в один контекст | стек и вопросы в начале → план с кейсами (skill `planning`) → critic → согласование → реализация по режиму тестов → Sonar → ревью (personal — один стек-ревьюер) | critic, тест-райтер, 1–2 ревьюера |
+| `/task` | несколько фаз или вех | вопросы в начале → `scout` (один раз) → `planner`: план всей задачи с вехами и кейсами → `critic` (один раз) → **согласование** → фазы всех вех: тест-райтер (tdd) и `implementer` → Sonar и ревью по вехе → фиксер; перепланирование только по `[!]` | 4–6 на подготовку и по 1–2 на фазу |
 | `/design` | brief → design → план проекта | шаг по статусам файлов в `docs/projects/<проект>/`; вариант автора; соревнование трёх `architect` с судьёй; ревью | architect ×1–4 |
 | `/review` | ревью своих изменений | Sonar → convention-reviewer ∥ стек-ревьюер → `.claude/tasks/<ключ>/review.md` | 2–3 |
 | `/review-mr` | ревью MR коллеги против master | glab-дифф → convention-reviewer ∥ java-reviewer → файл в `~/docs/work/reviews/` | 2 |
@@ -59,26 +59,42 @@ statusline/       statusline.sh
 | `/explain` | объяснить технологию или паттерн | структура «что → зачем → как → когда → пример → ошибки» | 0 |
 | `/reflect` | после ручных правок агентского результата | размер правки, один урок в память, скил или правило | 0 |
 
-Остановки в `/task` — только две согласования, стоп-точки `[#]` в плане и `[!]` от агента.
+Остановка в `/task` — одно согласование плана; дальше только стоп-точки `[#]` и вопросы `[!]`.
+В начале задачи вне work пользователь выбирает тесты (`ключевые`, `tdd`, `нет`) и коммиты — строки шапки плана.
 Статусы шагов и кейсов меняются скриптами `plan-status.sh`, `tests-status.sh`.
 
 ## 4. Агенты
 
 | Агент | Модель / усилие / maxTurns | Скилы | Кто зовёт |
 |---|---|---|---|
-| `planner` | opus / high / 250 | planning | `/task`: план и scope, кейсы, правка по критике |
-| `critic` | opus / high / 150 | planning (+ java-patterns по промпту) | `/task` ×3, `/feature` ×1 |
-| `implementer` | inherit / high / 300, без Agent | стек-скил грузит сам | `/task` по фазам, фиксер |
+| `scout` | sonnet / medium / 150 | — | `/task`: `context.md` и `about.md` один раз на задачу, «дельта» для доработки |
+| `Explore` | sonnet / medium / 100, только чтение | — | заменяет встроенного: любой поиск в любой сессии |
+| `planner` | opus / high / 250 | planning | `/task`: план всей задачи с вехами и кейсами; правка по критике или по `[!]` |
+| `critic` | opus / high / 150 | planning | `/task`, `/feature`: один проход до кода → `agent/critique.md` |
+| `implementer` | opus / high / 300, без Agent | стек-скил грузит сам | `/task` по фазам, фиксер (пишет `review.md`) |
 | `architect` | opus / high / 200 | design-docs, java-patterns, integration-patterns, jpa-db-review | `/design` |
-| `convention-reviewer` | sonnet / medium / 150 | java-service-convention, git-convention | `/review`, `/review-mr`, `/task` |
-| `java-reviewer` | opus / high / 250 | jpa-db-review, integration-patterns, testing | там же |
-| `go-reviewer`, `vue-reviewer` | opus / high / 250 | go-best-practices; vue-frontend | там же |
-| `test-writer`, `go-test-writer`, `vue-test-writer` | sonnet / medium / 150 | testing; go-best-practices; vue-frontend | RED-тесты по `tests.md` |
-| `migration-reviewer` | opus / high / 150 | jpa-db-review | миграции, индексы, JPA-маппинг |
+| `convention-reviewer` | sonnet / medium / 150 | java-service-convention, git-convention | `/review`, `/review-mr`, `/task` (work) |
+| `java-reviewer` | opus / medium / 250 | jpa-db-review, integration-patterns, testing | там же |
+| `go-reviewer`, `vue-reviewer` | opus / medium / 250 | go-best-practices; vue-frontend | там же |
+| `test-writer`, `go-test-writer`, `vue-test-writer` | sonnet / medium / 150 | testing; go-best-practices; vue-frontend | режим `tdd`: сами пишут файлы тестов и подтверждают RED |
+| `migration-reviewer` | opus / medium / 150 | jpa-db-review | миграции, индексы, JPA-маппинг |
 
-Встроенные: `Explore` — контекст для `/task`; `general-purpose` — разовые задачи. Встроенный `Plan` не
-используется: у него нет Write, планы уходили через heredoc. Потолки `maxTurns` — максимум по логам × 1,5;
-поле пока не соблюдается Claude Code, пересмотр 2026-10-17.
+Тест-райтеры, критик и ревьюеры пишут свои файлы сами и возвращают вызывающему не больше 10 строк: главный
+поток не пересказывает и не переписывает их вывод. `general-purpose` и встроенный `Plan` в командах не
+используются: они наследуют модель и effort сессии (в разборе 24–27.09 `general-purpose` на max — 38% стоимости).
+Потолки `maxTurns` — максимум по логам × 1,5; поле пока не соблюдается Claude Code, пересмотр 2026-10-17.
+
+### Effort и модели
+
+- Главная сессия — high: меню effort в приложении (Cmd+Shift+E) или `/effort high` и Enter в CLI.
+  max — вручную на сложную отладку и архитектуру; `ultrathink` — на один запрос.
+- Агент без `effort:` наследует effort сессии; у вызова Agent есть параметр `model`, параметра effort нет —
+  поэтому модель и effort задаются у каждого своего агента.
+- Команды: `effort: low` у `/quick`, `medium` у `/explain`, `/jira`, `/adr`, `/onboard`; у остальных поля нет,
+  чтобы не перебивать max, если автор поднял его сам. `model:` в командах не ставим: смена модели сбрасывает кэш.
+- `CLAUDE_CODE_EFFORT_LEVEL` не задаём: он перебивает даже `effort:` агентов.
+- `autoCompactWindow: 300000` ставит `setup-global.sh`: у моделей с окном 1M автосжатие иначе срабатывает
+  около 967 тыс. токенов. После перерыва дольше часа — «Resume from summary» или `/clear` и `/task продолжай`.
 
 ## 5. Скилы
 
@@ -137,12 +153,12 @@ statusline/       statusline.sh
 | Для кого | Файлы |
 |---|---|
 | человек, `<ключ>/` | `plan.md` (шаги со статусами, журнал), `tests.md` (кейсы), `review.md` (итог ревью: закрыто, осталось, отклонено), `summary.md` (итог задачи; его наличие = задача завершена) |
-| агенты, `<ключ>/agent/` | `context.md` (≤ 300 строк), `scope.txt` (куда можно писать), `critique1..3.md`, `sonar.md`, `review-raw-1..2.md` |
-| репозиторий | `.claude/tasks/about.md` — слепок проекта, пишет Explore |
+| агенты, `<ключ>/agent/` | `context.md` (≤ 200 строк, пишет `scout`), `scope.txt` (куда можно писать), `critique.md`, `sonar.md`, `review-<агент>-<веха>.md` |
+| репозиторий | `.claude/tasks/about.md` — слепок проекта, пишет `scout` |
 
-`/feature` пишет `plan.md` (кейсы внутри), `review.md`, `summary.md`, `agent/{critique1,sonar}.md`, `agent/scope.txt`;
+`/feature` пишет `plan.md` (кейсы внутри), `review.md`, `summary.md`, `agent/{critique,sonar}.md`, `agent/scope.txt`;
 `/review` — `review.md`, `agent/sonar.md`. Форматы: `playbook/templates/plan-template.md` (статусы
-`[ ] [~] [x] [!] [#]`, ≤ 150 строк), `tests-template.md` (Дано/Когда/Тогда, статусы `[ ] [~] [x] [!]`).
+`[ ] [~] [x] [!] [#]`, вехи, ≤ 150 строк на веху, шапка `Тесты:` и `Коммиты:`; сводка — `plan-status.sh --summary`), `tests-template.md` (Дано/Когда/Тогда, статусы `[ ] [~] [x] [!]`).
 
 Границы задачи. Требования агенты берут только из `plan.md`, `tests.md` и `agent/context.md`; недостающее —
 вопрос `[!]`, а не допущение. Писать можно только в файлы из `agent/scope.txt` (первая строка —
@@ -175,7 +191,7 @@ MEDIUM механические — исправить, требующие пе�
 | `scripts/setup-global.sh status\|install\|uninstall [--apply]` | развернуть или откатить конфиг: компоненты skills, agents, commands, hooks, claude-md, output-styles, statusline, git-excludes, config, workspace |
 | `scripts/install-hooks.sh [--write]` | хуки и permissions в `settings.json` (`CLAUDE_SETTINGS_TARGET` для тестов) |
 | `scripts/helpers/ai-init.sh`, `scope.sh`, `design-init.sh` | каталог задачи `.claude/tasks/<ключ>/` (ключ из ветки, `--new`, перенос `.ai/`; `scripts/lib/task-dir.sh`), scope файлов задачи, каркас `docs/projects/` |
-| `scripts/helpers/plan-status.sh`, `tests-status.sh` | статусы шагов и кейсов без чтения файла моделью |
+| `scripts/helpers/plan-status.sh`, `tests-status.sh` | статусы шагов и кейсов без чтения файла моделью; `plan-status.sh <plan.md> --summary` — сводка плана |
 | `scripts/helpers/test-summary.sh <команда>` | только упавшие тесты и итог; полный вывод в файл |
 | `scripts/helpers/sonar-local.sh`, `sonar-issues.sh`, `sonar-rule.sh`, `sonar-rules-for-diff.sh` | раздел 9; выжимка правил по составу диффа, когда сервер недоступен |
 | `scripts/analyze-usage.sh [дней]` | быстрый отчёт по логам |
@@ -197,6 +213,9 @@ MEDIUM механические — исправить, требующие пе�
 
 Дополнительно после перестройки: блокировки по новым хукам (`blocks.jsonl`, поле `kind`), число `[!]`
 и `[#]` в планах, итерации ревью, доля замечаний критика «по желанию», доля вопросов по Sonar.
+После лёгкого `/task` (27.09): стоимость и активные часы на 1000 строк кода — цель вдвое быстрее и на треть
+дешевле полного `/task` (в разборе $39 и ~540 строк в час); средний контекст главного потока — до 200 тыс.;
+запусков `general-purpose` в `/task` — ноль.
 Контрольные точки: 2026-10-17 (`maxTurns`), 2026-11-15 (всё остальное).
 
 ## 12. Куда класть новое и конвенция авторинга
@@ -208,7 +227,7 @@ MEDIUM механические — исправить, требующие пе�
 - `hooks/` — ограждение с простым надёжным правилом и тестом; текст правила — просьба, хук — гарантия.
 - Скрипт вместо промпта, когда шаги детерминированы (`scripts/helpers/`); по TDD, с тестом в `tests/`.
 
-Frontmatter: команда — `description`, `argument-hint`, `allowed-tools`, `disable-model-invocation`;
+Frontmatter: команда — `description`, `argument-hint`, `allowed-tools`, `disable-model-invocation`, `effort`;
 агент — `name`, `description`, `tools`, `disallowedTools`, `model` (`opus`, `sonnet`, `inherit`), `effort`,
 `maxTurns`, `skills`; скил — `name`, `description`, `paths`. Русский в чате, комментариях, коммитах,
 документации; без ИИ-слопа (правило 07).

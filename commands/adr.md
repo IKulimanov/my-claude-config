@@ -2,6 +2,7 @@
 description: Write or clean up an Architecture Decision Record in the repo's own ADR template (fallback — shared template), Russian, no AI filler. Use when a design decision was made and must be recorded, or when an existing ADR needs de-slopping.
 argument-hint: <решение одной фразой | путь к существующему ADR для чистки>
 allowed-tools: Read, Grep, Glob, Write, Edit, AskUserQuestion
+effort: medium
 ---
 
 # ADR — записать решение
