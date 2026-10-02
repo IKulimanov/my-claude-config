@@ -1,7 +1,7 @@
 ---
 description: Lightweight quickfix for small bugs and simple changes. Minimal context loading for token efficiency.
 argument-hint: <bug description or file:line>
-allowed-tools: Read, Edit, Grep, Glob, Bash
+allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 ---
 
 # Fix
@@ -40,17 +40,16 @@ allowed-tools: Read, Edit, Grep, Glob, Bash
 
 ## Формат вывода
 
+Подробности - в файл `.claude/tasks/fix-<ГГГГ-ММ-ДД>-<слово>/summary.md` (каталог не в git) по
+`~/.claude/my-claude-config/playbook/templates/summary-template.md`: причина, изменение по файлам, тест, проверка,
+что проверить руками. В чат - коротко:
+
 ```text
-## Правка: <краткое описание>
-
-### Изменение
-- <файл>:<строки> — <что изменилось и зачем>
-
-### Тест
-- <файл теста> — <что проверяется>
-
-### Проверка
-- <запущенная команда> — <результат>
+Правка: <что исправлено, одной строкой>
+Причина: <почему ломалось>
+Изменение: <файл>:<строки>
+Проверка: <команда> - <результат>
+Подробности: <путь к summary.md>
 ```
 
 ## Правила
