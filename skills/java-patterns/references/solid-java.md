@@ -60,7 +60,7 @@ High-level modules should depend on abstractions, not concretions.
 
 - One level of abstraction per method.
 - No more than 3 parameters; group related params into an object.
-- Boolean parameters usually signal a method doing two things — split it.
+- Boolean parameters usually signal a method doing two things - split it.
 - Side-effecting methods should not also return a value (Command/Query Separation).
 
 ### Avoiding Common Pitfalls

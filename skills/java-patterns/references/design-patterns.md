@@ -113,7 +113,7 @@ public void onOrderPlaced(OrderPlacedEvent event) { ... }
 ## Proxy
 
 **Problem:** Add cross-cutting concerns (caching, security, transactions) without modifying the target.
-**Spring idiom:** Spring AOP — `@Transactional`, `@Cacheable`, `@Async`, `@PreAuthorize` are all proxies.
+**Spring idiom:** Spring AOP - `@Transactional`, `@Cacheable`, `@Async`, `@PreAuthorize` are all proxies.
 
 **Critical rule:** Spring proxies only intercept external calls to a bean. Self-invocation (calling `this.method()`) bypasses the proxy. Restructure or use `ApplicationContext.getBean(getClass())` as a last resort.
 

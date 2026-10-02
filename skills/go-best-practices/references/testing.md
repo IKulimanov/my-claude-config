@@ -129,8 +129,8 @@ Run: `go test -bench=. -benchmem ./...`
 
 ## Anti-Patterns
 
-- Testing private functions directly — test through the public API.
-- `time.Sleep` in tests — use channels, tickers, or `assert.Eventually`.
-- Giant test setup — extract helpers with `t.Helper()`.
+- Testing private functions directly - test through the public API.
+- `time.Sleep` in tests - use channels, tickers, or `assert.Eventually`.
+- Giant test setup - extract helpers with `t.Helper()`.
 - Shared mutable state across parallel tests.
-- Ignoring `-race` flag — always run `go test -race ./...` in CI.
+- Ignoring `-race` flag - always run `go test -race ./...` in CI.

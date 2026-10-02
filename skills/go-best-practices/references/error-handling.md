@@ -69,11 +69,11 @@ func mapError(err error) (int, string) {
 ### Logging
 - Log errors at the top level (handler or main loop), not at every layer.
 - Include structured context: `slog.Error("failed to process order", "order_id", id, "error", err)`.
-- Do not log and return the same error — choose one.
+- Do not log and return the same error - choose one.
 
 ## Anti-Patterns
 
 - `panic` for expected failures (use `return err`).
 - Wrapping without new context: `fmt.Errorf("%w", err)` adds nothing.
-- Strings matching: `strings.Contains(err.Error(), "not found")` — use sentinel errors.
-- Swallowing errors in goroutines — always propagate via channels or `errgroup`.
+- Strings matching: `strings.Contains(err.Error(), "not found")` - use sentinel errors.
+- Swallowing errors in goroutines - always propagate via channels or `errgroup`.

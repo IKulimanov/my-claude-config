@@ -5,7 +5,7 @@
 ```
 project/
   cmd/
-    server/main.go          # entrypoint — thin, wires dependencies
+    server/main.go          # entrypoint - thin, wires dependencies
     cli/main.go              # additional entrypoints if needed
   internal/
     domain/                  # core business types and logic (no external deps)
@@ -25,16 +25,16 @@ project/
 ## Key Principles
 
 ### Package Design
-- Package names are short, lowercase, singular: `user`, `order`, `auth` — not `users`, `models`, `utils`.
+- Package names are short, lowercase, singular: `user`, `order`, `auth` - not `users`, `models`, `utils`.
 - A package exposes a cohesive API. If two types are always used together, they belong in the same package.
-- Avoid `common`, `utils`, `helpers`, `shared` — they become dumping grounds.
-- `internal/` prevents external imports — use it for everything that is not a public API.
+- Avoid `common`, `utils`, `helpers`, `shared` - they become dumping grounds.
+- `internal/` prevents external imports - use it for everything that is not a public API.
 
 ### Dependency Direction
 ```
-cmd/ → internal/service → internal/domain
-                        → internal/repository
-internal/handler → internal/service
+cmd/ -> internal/service -> internal/domain
+                        -> internal/repository
+internal/handler -> internal/service
 ```
 - Domain types have zero external dependencies.
 - Repository implements interfaces defined in the service or domain layer.

@@ -75,9 +75,9 @@ case <-ctx.Done():
 
 ## Anti-Patterns
 
-- **Fire-and-forget goroutines** — always track goroutine lifecycle.
-- **Shared memory without synchronization** — use mutexes or channels.
-- **Unbounded goroutine spawning** — use a semaphore or worker pool.
-- **Closing channels from receiver** — only the sender closes.
-- **Goroutine leak** — every goroutine must have a cancellation path.
-- **`time.Sleep` for synchronization** — use proper sync primitives.
+- **Fire-and-forget goroutines** - always track goroutine lifecycle.
+- **Shared memory without synchronization** - use mutexes or channels.
+- **Unbounded goroutine spawning** - use a semaphore or worker pool.
+- **Closing channels from receiver** - only the sender closes.
+- **Goroutine leak** - every goroutine must have a cancellation path.
+- **`time.Sleep` for synchronization** - use proper sync primitives.

@@ -11,8 +11,8 @@
 
 ```
 project/
-  docker-compose.yml          # base — infra only (db, kafka, redis)
-  docker-compose.override.yml # local dev — app with bind mounts, debug ports
+  docker-compose.yml          # base - infra only (db, kafka, redis)
+  docker-compose.override.yml # local dev - app with bind mounts, debug ports
   .env.local                  # secrets and local overrides (gitignored)
   .env.example                # template with placeholder values (committed)
   Dockerfile                  # multi-stage: build + runtime
@@ -76,7 +76,7 @@ services:
 ```
 
 Attach remote debugger in IntelliJ:
-- Run → Edit Configurations → Remote JVM Debug → localhost:5005
+- Run -> Edit Configurations -> Remote JVM Debug -> localhost:5005
 
 ## Go Dev Container
 

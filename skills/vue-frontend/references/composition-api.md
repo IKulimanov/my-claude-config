@@ -102,7 +102,7 @@ export function useAsync<T>(fn: () => Promise<T>) {
 - One component = one responsibility.
 - Props down, events up. Never mutate props.
 - Use `v-model` with `defineModel()` for two-way binding.
-- Prefer `<script setup>` — more concise, better TypeScript inference.
+- Prefer `<script setup>` - more concise, better TypeScript inference.
 - Keep templates readable: max 3 levels of nesting, extract sub-components.
 - Use named slots for flexible composition.
 - Prefer `computed` over `watch` when possible.
@@ -116,7 +116,7 @@ export function useAsync<T>(fn: () => Promise<T>) {
 - Define emit types: `defineEmits<{ event: [payload: Type] }>()`.
 - Type template refs: `const input = ref<HTMLInputElement | null>(null)`.
 - Export shared types from `@/types/` directory.
-- Avoid `any` — use `unknown` and narrow with type guards.
+- Avoid `any` - use `unknown` and narrow with type guards.
 
 ## File & Directory Conventions
 

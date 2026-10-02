@@ -21,22 +21,22 @@ Use this skill for all Go development and review work.
 
 1. Read the local `CLAUDE.md` for Go version, module path, and project constraints.
 2. Load the relevant reference based on the task:
-   - `references/project-structure.md` — layout, packages, dependency management
-   - `references/error-handling.md` — error wrapping, sentinel errors, error types
-   - `references/concurrency.md` — goroutines, channels, context, sync primitives
-   - `references/testing.md` — table-driven tests, testify, httptest, benchmarks
+   - `references/project-structure.md` - layout, packages, dependency management
+   - `references/error-handling.md` - error wrapping, sentinel errors, error types
+   - `references/concurrency.md` - goroutines, channels, context, sync primitives
+   - `references/testing.md` - table-driven tests, testify, httptest, benchmarks
 3. Inspect existing code to match the project's style before writing new code.
 
 ## Guardrails
 
 - Prefer the standard library over third-party packages unless there is a clear benefit.
-- Return errors explicitly — never panic for expected failures.
+- Return errors explicitly - never panic for expected failures.
 - Always propagate `context.Context` as the first parameter.
-- Keep interfaces small (1–3 methods); define them where they are consumed, not where they are implemented.
+- Keep interfaces small (1-3 methods); define them where they are consumed, not where they are implemented.
 - Use `struct` embedding for composition, not inheritance simulation.
-- Avoid `init()` — prefer explicit initialization.
+- Avoid `init()` - prefer explicit initialization.
 - Never ignore errors with `_` unless the function contract guarantees safety.
 - Use `go vet`, `staticcheck`, and `golangci-lint` as baseline quality checks.
-- Keep goroutine lifecycle explicit — every goroutine must have a clear shutdown path.
+- Keep goroutine lifecycle explicit - every goroutine must have a clear shutdown path.
 - Prefer `sync.WaitGroup` or `errgroup.Group` over bare goroutine spawning.
 - Use `defer` for cleanup, but be aware of loop-scope captures.

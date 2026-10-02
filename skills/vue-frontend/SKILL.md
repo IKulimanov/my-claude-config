@@ -30,14 +30,14 @@ Use this skill when working in a Vue 3 + Vite frontend project.
 
 ## Guardrails
 
-- Use Composition API with `<script setup>` — never Options API in new code.
+- Use Composition API with `<script setup>` - never Options API in new code.
 - Props must have type declarations and default values where appropriate.
 - Emits must be declared with type validation.
-- Never mutate props directly — emit events to parent.
+- Never mutate props directly - emit events to parent.
 - Keep components focused: one responsibility per component.
 - Prefer computed properties over methods for derived state.
 - Use `defineModel()` for two-way binding (Vue 3.4+).
 - Reactive state: `ref()` for primitives, `reactive()` for objects.
-- Don't use `reactive()` for values that get reassigned — use `ref()`.
-- Keep template logic minimal — extract to composables or computed properties.
+- Don't use `reactive()` for values that get reassigned - use `ref()`.
+- Keep template logic minimal - extract to composables or computed properties.
 - Always unsubscribe/cleanup in `onUnmounted` for manual listeners and intervals.

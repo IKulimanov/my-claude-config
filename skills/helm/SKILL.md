@@ -46,9 +46,9 @@ my-service/
 
 ## Guardrails
 
-- Keep `values.yaml` as the source of defaults — all values should have a default.
-- Do not hardcode environment-specific values in templates — use `values-{env}.yaml` overrides.
-- Never put secrets in `values.yaml` or commit them to git — use Helm Secrets plugin or external secrets.
+- Keep `values.yaml` as the source of defaults - all values should have a default.
+- Do not hardcode environment-specific values in templates - use `values-{env}.yaml` overrides.
+- Never put secrets in `values.yaml` or commit them to git - use Helm Secrets plugin or external secrets.
 - Use `_helpers.tpl` for reusable label blocks to ensure consistency across templates.
 - Always `helm lint` before committing a chart change.
 - Use `helm upgrade --atomic` in CI to auto-rollback on failed deployments.

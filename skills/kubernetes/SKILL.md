@@ -28,11 +28,11 @@ Use this skill when writing, reviewing, or troubleshooting Kubernetes manifests 
 
 ## Guardrails
 
-- Always set `resources.requests` and `resources.limits` — pods without limits get evicted first.
+- Always set `resources.requests` and `resources.limits` - pods without limits get evicted first.
 - Never run pods as root (`runAsNonRoot: true`).
-- Never put secret values in ConfigMap — use Secret or an external secrets operator.
-- `readinessProbe` determines when traffic is sent; `livenessProbe` determines when to restart. They serve different purposes — always configure both.
+- Never put secret values in ConfigMap - use Secret or an external secrets operator.
+- `readinessProbe` determines when traffic is sent; `livenessProbe` determines when to restart. They serve different purposes - always configure both.
 - For Spring Boot: use `/actuator/health/readiness` and `/actuator/health/liveness` as probe paths.
 - Set `PodDisruptionBudget` for production services to prevent all replicas being evicted simultaneously.
 - Use `RollingUpdate` strategy with `maxUnavailable: 0` for zero-downtime deployments.
-- Namespace everything — do not deploy to `default` in production.
+- Namespace everything - do not deploy to `default` in production.

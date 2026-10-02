@@ -3,7 +3,7 @@
 ## File Layout Conventions
 
 ```
-docker-compose.yml          # base definitions — used in all environments
+docker-compose.yml          # base definitions - used in all environments
 docker-compose.override.yml # local dev overrides (auto-merged by Compose)
 docker-compose.ci.yml       # CI-specific overrides
 docker-compose.prod.yml     # prod-specific (usually minimal or absent)
@@ -64,7 +64,7 @@ depends_on:
     condition: service_healthy
 ```
 
-Never rely on `depends_on` alone without healthchecks — it only waits for container start, not readiness.
+Never rely on `depends_on` alone without healthchecks - it only waits for container start, not readiness.
 
 ## Common Infrastructure Services
 
@@ -90,7 +90,7 @@ postgres:
     retries: 5
 ```
 
-### Kafka (with KRaft — no Zookeeper)
+### Kafka (with KRaft - no Zookeeper)
 
 ```yaml
 kafka:

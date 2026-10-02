@@ -29,24 +29,24 @@ Use this skill when creating or modifying `.gitlab-ci.yml`, GitLab runner config
 ## Core Stages for Java/Spring Service
 
 ```
-build → test → package → docker-build → deploy-staging → deploy-prod
+build -> test -> package -> docker-build -> deploy-staging -> deploy-prod
 ```
 
-- `build` — `mvn compile`
-- `test` — `mvn verify` (unit + integration)
-- `package` — `mvn package -DskipTests`, produces the JAR artifact
-- `docker-build` — build and push image
-- `deploy-staging` — auto on `master`/main
-- `deploy-prod` — manual gate (`when: manual`)
+- `build` - `mvn compile`
+- `test` - `mvn verify` (unit + integration)
+- `package` - `mvn package -DskipTests`, produces the JAR artifact
+- `docker-build` - build and push image
+- `deploy-staging` - auto on `master`/main
+- `deploy-prod` - manual gate (`when: manual`)
 
 ## Guardrails
 
-- Never hardcode secrets or tokens in `.gitlab-ci.yml` — use masked CI/CD variables.
+- Never hardcode secrets or tokens in `.gitlab-ci.yml` - use masked CI/CD variables.
 - Pin Docker images to specific versions/digests in CI, not `latest`.
-- Use `rules:` over `only:`/`except:` — it is more explicit and composable.
+- Use `rules:` over `only:`/`except:` - it is more explicit and composable.
 - Set `interruptible: true` on build/test jobs so new pushes cancel stale pipelines.
 - Use `needs:` for DAG parallelism; do not serialize jobs that can run in parallel.
-- Scope artifacts narrowly — large artifacts slow down every downstream job.
+- Scope artifacts narrowly - large artifacts slow down every downstream job.
 - Use `cache:` with a `key` based on the lockfile (`pom.xml` hash) to avoid stale caches.
 - Protect production environments: require manual approval + limit who can trigger.
 - Use `extends:` or `!reference` to avoid YAML duplication.

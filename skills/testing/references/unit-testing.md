@@ -2,7 +2,7 @@
 
 ## Team Unit Test Standard
 
-Write tests that describe system behavior — not implementation details.
+Write tests that describe system behavior - not implementation details.
 
 ### Checklist for Every Test
 
@@ -194,7 +194,7 @@ SoftAssertions.assertSoftly(soft -> {
 
 ## Test Data Builders
 
-Avoid scattered construction — use dedicated builder or mother object:
+Avoid scattered construction - use dedicated builder or mother object:
 
 ```java
 public class OrderTestData {

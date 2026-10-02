@@ -120,9 +120,9 @@ class OrderIntegrationTest {
 
 ## @MockBean vs @SpyBean
 
-- `@MockBean` — replaces the real bean with a Mockito mock; you must stub everything.
-- `@SpyBean` — wraps the real bean; only stubbed methods are replaced. Use when the real behavior is mostly correct but one external call needs to be overridden.
-- Both cause Spring to rebuild the context → prefer `@Mock` in unit tests to keep tests fast.
+- `@MockBean` - replaces the real bean with a Mockito mock; you must stub everything.
+- `@SpyBean` - wraps the real bean; only stubbed methods are replaced. Use when the real behavior is mostly correct but one external call needs to be overridden.
+- Both cause Spring to rebuild the context -> prefer `@Mock` in unit tests to keep tests fast.
 
 ---
 

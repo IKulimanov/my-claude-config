@@ -11,7 +11,7 @@ Use this skill when a task touches outbound REST, Kafka, secrets, or cross-servi
 
 1. Read the local project `CLAUDE.md`.
 2. Read `references/service-integrations.md` for REST, secrets, and logging patterns.
-3. For Kafka-specific work in a work project, read `006_common_software/01_kafka.md` in the canonical convention directory (line «Каноническая Java-конвенция» in `~/.claude/workspace.md`; not set → skip) for consumer/producer conventions.
+3. For Kafka-specific work in a work project, read `006_common_software/01_kafka.md` in the canonical convention directory (line "Каноническая Java-конвенция" in `~/.claude/workspace.md`; not set -> skip) for consumer/producer conventions.
 4. Check the change for observability, secret handling, retry behavior, and backward compatibility.
 5. If the change includes DB-backed outbox or persistence, also load `jpa-db-review`.
 

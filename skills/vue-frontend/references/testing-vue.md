@@ -137,7 +137,7 @@ describe('useOrderStore', () => {
 - Mount with `mount()` for integration, `shallowMount()` for isolation.
 - Always test: rendering, user interactions, emitted events, error states.
 - Don't test Vue internals (reactivity system, lifecycle hooks directly).
-- Keep test files next to source: `OrderList.vue` → `OrderList.spec.ts` or `__tests__/` directory.
+- Keep test files next to source: `OrderList.vue` -> `OrderList.spec.ts` or `__tests__/` directory.
 - Mock API calls with `vi.mock()`, never make real HTTP requests in unit tests.
 - One test = one user-facing behavior.
 

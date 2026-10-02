@@ -24,7 +24,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
 
 - Store JWT secret in environment variable or secrets manager, never in code or config files.
 - Validate: signature, expiry (`exp`), issuer (`iss`), audience (`aud`) if applicable.
-- Use short-lived access tokens (15–60 min) + refresh tokens (store refresh token server-side for revocation).
+- Use short-lived access tokens (15-60 min) + refresh tokens (store refresh token server-side for revocation).
 - Set `Authorization: Bearer <token>` header; do not put tokens in URL parameters.
 - Use `jjwt` or `nimbus-jose-jwt` libraries; do not implement JWT manually.
 
@@ -44,7 +44,7 @@ public CorsConfigurationSource corsConfigurationSource() {
 }
 ```
 
-Never use `allowedOrigins("*")` together with `allowCredentials(true)` — browsers block this.
+Never use `allowedOrigins("*")` together with `allowCredentials(true)` - browsers block this.
 
 ## CSRF
 

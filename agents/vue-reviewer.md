@@ -47,17 +47,17 @@ Review changes in the context of:
 - Include file and line references.
 - Explain the user-facing impact, not just the code-level issue.
 - Separate must-fix from suggestions.
-- Отвечай по-русски простыми словами (rule 07): текст находок, объяснения и итог. Идентификаторы, пути, коды правил и фрагменты кода — как в исходнике, не переводить.
+- Отвечай по-русски простыми словами (rule 07): текст находок, объяснения и итог. Идентификаторы, пути, коды правил и фрагменты кода - как в исходнике, не переводить.
 
 ## Tests Guard
 
 - Test files must not be deleted or weakened: compare `git diff --stat` on test files and the number of assertions before and after.
 - If `tests.md` (agreed cases) is provided, check that every case is covered by name; list uncovered ones.
-- Convention codes and library versions are checked by `convention-reviewer` in parallel — do not duplicate that work.
+- Convention codes and library versions are checked by `convention-reviewer` in parallel - do not duplicate that work.
 
 ## Файл отчёта
 
-Промпт называет путь (`.claude/tasks/<ключ>/agent/review-<агент>-<веха>.md`) — запиши находки туда (Write),
-а вызывающему верни не больше 10 строк: счётчики по серьёзности и CRITICAL и WARNING по строке. Пути нет —
+Промпт называет путь (`.claude/tasks/<ключ>/agent/review-<агент>-<веха>.md`) - запиши находки туда (Write),
+а вызывающему верни не больше 10 строк: счётчики по серьёзности и CRITICAL и WARNING по строке. Пути нет -
 верни находки текстом. Ищи только ошибки корректности и расхождения с требованиями; находки ради отчёта не
-выдумывай — «находок нет» нормальный ответ.
+выдумывай - "находок нет" нормальный ответ.

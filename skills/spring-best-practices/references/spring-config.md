@@ -5,7 +5,7 @@
 Prefer `@ConfigurationProperties` when:
 - Config has 2+ related fields (group them into a typed class)
 - You need validation (`@Validated` + JSR-303 on the class)
-- You want relaxed binding (kebab-case in YAML → camelCase in Java)
+- You want relaxed binding (kebab-case in YAML -> camelCase in Java)
 
 Use `@Value` only for a single independent property or SpEL expression.
 
@@ -26,10 +26,10 @@ public record PaymentGatewayConfig(
 
 ## Bean Lifecycle
 
-- `@PostConstruct` — runs after dependency injection; use for initialization that needs injected state.
-- `@PreDestroy` — runs before context shutdown; use for cleanup (close connections, cancel tasks).
-- `InitializingBean` / `DisposableBean` — Spring-specific interfaces; prefer `@PostConstruct` / `@PreDestroy` for less coupling.
-- `@Bean(initMethod = "...", destroyMethod = "...")` — for third-party classes you cannot annotate.
+- `@PostConstruct` - runs after dependency injection; use for initialization that needs injected state.
+- `@PreDestroy` - runs before context shutdown; use for cleanup (close connections, cancel tasks).
+- `InitializingBean` / `DisposableBean` - Spring-specific interfaces; prefer `@PostConstruct` / `@PreDestroy` for less coupling.
+- `@Bean(initMethod = "...", destroyMethod = "...")` - for third-party classes you cannot annotate.
 
 Do not call overridable methods from `@PostConstruct`.
 
@@ -42,14 +42,14 @@ Do not call overridable methods from `@PostConstruct`.
 | `@ConditionalOnClass` | Optional dependency on a library |
 | `@Profile` | Environment-specific beans (dev/test/prod) |
 
-Avoid `@Profile` for business feature flags — use `@ConditionalOnProperty` instead.
+Avoid `@Profile` for business feature flags - use `@ConditionalOnProperty` instead.
 
 ## Profile Management
 
 - Keep environment-specific config in `application-{profile}.yaml`, not in `application.yaml`.
 - Do not mix profile-specific values with common values in the same file.
 - Test profile (`application-test.yaml`) should override external services with stubs or Testcontainers.
-- Never put secrets in `application.yaml` — use environment variables or a secrets manager.
+- Never put secrets in `application.yaml` - use environment variables or a secrets manager.
 
 ## @Bean Method Injection
 
@@ -69,6 +69,6 @@ private PaymentGatewayConfig config;
 
 ## Scope Management
 
-- Default scope is `singleton` — design beans to be stateless.
+- Default scope is `singleton` - design beans to be stateless.
 - `@RequestScope` or `@SessionScope` creates a proxy; ensure thread-safe access.
 - Injecting a narrow-scoped bean (request) into a wide-scoped bean (singleton) requires `@ScopedProxy`.

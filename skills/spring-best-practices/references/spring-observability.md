@@ -2,7 +2,7 @@
 
 ## Actuator Setup
 
-Expose endpoints explicitly — never use `include: '*'` in production without a separate security layer.
+Expose endpoints explicitly - never use `include: '*'` in production without a separate security layer.
 
 ```yaml
 management:
@@ -19,9 +19,9 @@ management:
 ```
 
 Key endpoints:
-- `/actuator/health` — liveness + readiness; Kubernetes probes point here
-- `/actuator/prometheus` — Micrometer metrics for Prometheus scraping
-- `/actuator/info` — build version, git commit; keep it current
+- `/actuator/health` - liveness + readiness; Kubernetes probes point here
+- `/actuator/prometheus` - Micrometer metrics for Prometheus scraping
+- `/actuator/info` - build version, git commit; keep it current
 
 ## Health Indicators
 
@@ -48,7 +48,7 @@ management.endpoint.health.group:
 
 ## Micrometer Metrics
 
-Use `MeterRegistry` for custom metrics; avoid creating meters inside hot paths — register once, record often.
+Use `MeterRegistry` for custom metrics; avoid creating meters inside hot paths - register once, record often.
 
 ```java
 // Counter
@@ -64,7 +64,7 @@ Timer.builder("payment.duration")
      .record(() -> processPayment(request));
 ```
 
-Tag cardinality matters: do not use user IDs or request IDs as tag values — it creates unbounded cardinality.
+Tag cardinality matters: do not use user IDs or request IDs as tag values - it creates unbounded cardinality.
 
 ## Distributed Tracing
 

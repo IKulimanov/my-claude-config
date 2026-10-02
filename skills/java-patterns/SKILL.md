@@ -18,7 +18,7 @@ Use this skill when design decisions matter: introducing a new abstraction, choo
 
 ## Workflow
 
-1. Identify the actual problem being solved — not just "which pattern fits".
+1. Identify the actual problem being solved - not just "which pattern fits".
 2. Load `references/design-patterns.md` for GOF pattern guidance in Spring/Java context.
 3. Load `references/solid-java.md` for SOLID, Clean Code, and Java idiom guidance.
 4. Recommend the simplest solution that solves the problem.
@@ -27,9 +27,9 @@ Use this skill when design decisions matter: introducing a new abstraction, choo
 ## Guardrails
 
 - Do not introduce a pattern unless it reduces complexity in the current codebase.
-- Keep inheritance depth ≤ 2; prefer composition.
-- `Optional` is for return types — not parameters, not fields.
+- Keep inheritance depth <= 2; prefer composition.
+- `Optional` is for return types - not parameters, not fields.
 - Use streams for transformations, not side effects; for side effects prefer plain loops.
 - Functional interfaces should express intent in their name, not just type: `UserValidator`, not `Function<User, Boolean>`.
-- Factory patterns in Spring are often just `@Bean` methods — do not add a factory class unless there is runtime variation.
+- Factory patterns in Spring are often just `@Bean` methods - do not add a factory class unless there is runtime variation.
 - Avoid premature abstraction: three similar methods are better than a wrong abstraction.

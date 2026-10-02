@@ -2,9 +2,9 @@
 
 ## General Principles
 
-- One concern per image — don't bundle unrelated services.
+- One concern per image - don't bundle unrelated services.
 - Prefer official base images (`eclipse-temurin`, `golang`, `alpine`, `distroless`).
-- Always pin image versions — avoid `latest` in Dockerfiles that go to CI or prod.
+- Always pin image versions - avoid `latest` in Dockerfiles that go to CI or prod.
 - Use `.dockerignore` to exclude `target/`, `build/`, `.git/`, `*.log`, local env files.
 
 ## Layer Caching
@@ -91,9 +91,9 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
 
 ## ENTRYPOINT vs CMD
 
-- `ENTRYPOINT` — fixed executable, not overridable at runtime without `--entrypoint`
-- `CMD` — default arguments, easily overridden at `docker run`
-- Prefer exec form `["executable", "arg"]` over shell form `"executable arg"` — avoids PID 1 signal handling issues
+- `ENTRYPOINT` - fixed executable, not overridable at runtime without `--entrypoint`
+- `CMD` - default arguments, easily overridden at `docker run`
+- Prefer exec form `["executable", "arg"]` over shell form `"executable arg"` - avoids PID 1 signal handling issues
 
 ```dockerfile
 # Prefer this
@@ -123,8 +123,8 @@ environment:
 
 ## Common Mistakes
 
-- Copying `target/` or `build/` without `.dockerignore` — bloats context
-- Running `apt-get update` without `--no-cache` in Alpine — causes layer bloat
+- Copying `target/` or `build/` without `.dockerignore` - bloats context
+- Running `apt-get update` without `--no-cache` in Alpine - causes layer bloat
 - Forgetting to clean package manager caches in the same `RUN` layer
-- Using `ADD` instead of `COPY` for local files — `ADD` has implicit tar extraction
-- Setting `ENV` for secrets — they persist in image history; use `--secret` or runtime env instead
+- Using `ADD` instead of `COPY` for local files - `ADD` has implicit tar extraction
+- Setting `ENV` for secrets - they persist in image history; use `--secret` or runtime env instead
