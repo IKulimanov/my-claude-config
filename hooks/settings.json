@@ -83,6 +83,12 @@
 
     "PostToolUse": [
       {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "HOOKS_DIR/check-prose.sh", "timeout": 10 }
+        ]
+      },
+      {
         "matcher": "*",
         "hooks": [
           { "type": "command", "command": "HOOKS_DIR/log-tool.sh post", "timeout": 5, "async": true }

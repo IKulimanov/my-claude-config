@@ -93,6 +93,13 @@ hook_ask() {
     '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "ask", permissionDecisionReason: $r}}'
 }
 
+# Отдать JSON-ответ для PostToolUse: текст попадает агенту как напоминание, инструмент не блокируется.
+# Args: <text>
+hook_context() {
+  local text="$1"
+  jq -n --arg m "$text" '{hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext: $m}}'
+}
+
 # Профиль проекта по правилу 10: строка «Тип проекта: work|personal» в CLAUDE.md корня репозитория →
 # каталог WORK_ROOT (CLAUDE_WORK_ROOT для тестов → workspace.conf репозитория конфига, файл задаёт
 # CLAUDE_WORKSPACE_CONF → $HOME/dev/work) → personal. Пути сравниваются после pwd -P: /var и /private/var.

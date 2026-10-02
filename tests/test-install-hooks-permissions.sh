@@ -37,6 +37,7 @@ jq -e '[.hooks.PreToolUse[].hooks[].command] | any(test("guard-git.sh"))' "$TARG
 jq -e '[.hooks.PreToolUse[].hooks[].command] | any(test("block-push-secrets.sh")) | not' "$TARGET" >/dev/null || fail "block-push-secrets.sh всё ещё подключён"
 jq -e '[.hooks[][] | .hooks[] | select(.command | test("log-|notify-stop")) | .async] | length > 0 and all(. == true)' "$TARGET" >/dev/null || fail "логирующие хуки не async"
 jq -e '[.hooks.PreToolUse[].hooks[] | select(.command | test("guard-|block-|check-commit")) | .async // false] | all(. == false)' "$TARGET" >/dev/null || fail "ограждение помечено async"
+jq -e '[.hooks.PostToolUse[] | select(.matcher == "Edit|Write|MultiEdit") | .hooks[] | select(.command | test("check-prose.sh")) | .async // false] == [false]' "$TARGET" >/dev/null || fail "check-prose.sh не подключён к PostToolUse или помечен async"
 
 FIRST=$(jq -S . "$TARGET")
 CLAUDE_SETTINGS_TARGET="$TARGET" "$ROOT/scripts/install-hooks.sh" --write >/dev/null
