@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тон и формат текстов</title>
+<style>
+:root {
+  --bg: #F6F7F9; --surface: #FFFFFF; --text: #1A1E25; --muted: #5D6675;
+  --line: #D9DEE5; --line-strong: #B9C1CC;
+  --accent: #1D5BA6; --accent-soft: #E4EDF9;
+  --ok: #1F7A4D; --ok-soft: #E3F3EA;
+  --warn: #8F6210; --warn-soft: #FBF0D9;
+  --crit: #B23A2E; --crit-soft: #F9E3E0;
+  --code-bg: #EEF1F5;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #13161B; --surface: #1B1F26; --text: #E6E9EE; --muted: #9AA4B1;
+    --line: #2C323B; --line-strong: #3E4652;
+    --accent: #7DB0F0; --accent-soft: #1E2C40;
+    --ok: #5CC28C; --ok-soft: #173224;
+    --warn: #E0B255; --warn-soft: #3A2E12;
+    --crit: #F08A7E; --crit-soft: #3E1F1B;
+    --code-bg: #232830;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #13161B; --surface: #1B1F26; --text: #E6E9EE; --muted: #9AA4B1;
+  --line: #2C323B; --line-strong: #3E4652;
+  --accent: #7DB0F0; --accent-soft: #1E2C40;
+  --ok: #5CC28C; --ok-soft: #173224;
+  --warn: #E0B255; --warn-soft: #3A2E12;
+  --crit: #F08A7E; --crit-soft: #3E1F1B;
+  --code-bg: #232830;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; padding: 32px 16px 96px; background: var(--bg); color: var(--text);
+  font-family: var(--sans); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 1060px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 32px; }
+@media (min-width: 1100px) {
+  .wrap { grid-template-columns: 220px minmax(0, 790px); }
+  nav.toc { position: sticky; top: 16px; align-self: start; max-height: calc(100vh - 32px); overflow-y: auto; }
+}
+nav.toc { font-size: 14px; }
+nav.toc .toc-title { text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+nav.toc ol { list-style: none; margin: 0 0 14px; padding: 0; }
+nav.toc li { margin: 0 0 6px; }
+nav.toc a { color: var(--text); text-decoration: none; border-left: 2px solid transparent; padding-left: 10px; display: block; }
+nav.toc a:hover, nav.toc a:focus-visible { border-left-color: var(--accent); color: var(--accent); outline: none; }
+nav.toc button { font: inherit; font-size: 13px; color: var(--muted); background: none; border: 1px solid var(--line);
+  border-radius: 6px; padding: 3px 9px; margin: 0 6px 6px 0; cursor: pointer; }
+nav.toc button:hover { color: var(--accent); border-color: var(--accent); }
+main { min-width: 0; }
+a { color: var(--accent); }
+h1, h2, h3 { line-height: 1.25; text-wrap: balance; }
+h1 { font-size: 28px; font-weight: 600; margin: 0 0 6px; }
+h2 { font-size: 21px; font-weight: 600; margin: 48px 0 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+h3 { font-size: 16px; font-weight: 600; margin: 28px 0 8px; }
+p { margin: 0 0 14px; max-width: 72ch; }
+ul, ol { margin: 0 0 14px; padding-left: 22px; max-width: 76ch; }
+li { margin-bottom: 5px; }
+.meta { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+.meta span { display: inline-block; margin-right: 18px; }
+code { font-family: var(--mono); font-size: .88em; background: var(--code-bg); border-radius: 4px; padding: 1px 5px; overflow-wrap: anywhere; }
+pre { font-family: var(--mono); font-size: 13.5px; line-height: 1.5; background: var(--code-bg); border: 1px solid var(--line);
+  border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 0 0 18px; }
+pre code { background: none; padding: 0; font-size: inherit; }
+.scroll { overflow-x: auto; margin: 0 0 20px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; line-height: 1.45; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-weight: 600; color: var(--muted); font-size: 13px; border-bottom: 1px solid var(--line-strong); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td code { background: none; padding: 0; }
+.summary { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+  border-radius: 10px; padding: 16px 20px; margin: 0 0 24px; }
+.summary > :last-child { margin-bottom: 0; }
+.note { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--warn);
+  border-radius: 8px; padding: 12px 16px; margin: 0 0 18px; font-size: 15px; }
+.chip { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.crit { background: var(--crit-soft); color: var(--crit); }
+.chip.info { background: var(--accent-soft); color: var(--accent); }
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; margin: 0 0 14px; }
+details > summary { cursor: pointer; padding: 10px 14px; font-weight: 600; font-size: 15px; }
+details > summary:hover { color: var(--accent); }
+details[open] > summary { border-bottom: 1px solid var(--line); }
+details > .body { padding: 14px 16px 4px; }
+ul.todo { list-style: none; padding-left: 0; }
+ul.todo li { display: flex; gap: 10px; align-items: flex-start; }
+ul.todo input { margin-top: 5px; flex: none; width: 16px; height: 16px; accent-color: var(--accent); }
+ul.todo input:checked + span { color: var(--muted); text-decoration: line-through; }
+figure { margin: 0 0 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; overflow-x: auto; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+svg { max-width: 100%; height: auto; display: block; }
+svg text { font-family: var(--sans); font-size: 13px; fill: var(--text); }
+svg .muted { fill: var(--muted); }
+svg .box { fill: var(--accent-soft); stroke: var(--accent); }
+svg .edge { stroke: var(--line-strong); stroke-width: 1.5; fill: none; }
+svg .bar { fill: var(--accent); }
+svg .axis { stroke: var(--line-strong); }
+.src { font-size: 13px; color: var(--muted); }
+@media print { nav.toc { display: none; } details { break-inside: avoid; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="toc" aria-label="Содержание">
+  <div class="toc-title">Содержание</div>
+  <ol>
+    <li><a href="#s1">1. Вывод</a></li>
+    <li><a href="#s2">2. Что работает</a></li>
+    <li><a href="#s3">3. Что не работает</a></li>
+    <li><a href="#s4">4. Что сделано в конфиге</a></li>
+    <li><a href="#s5">5. Что сделать тебе</a></li>
+    <li><a href="#s6">6. Подробности</a></li>
+  </ol>
+  <button type="button" id="toggle-details">Развернуть всё</button>
+  <button type="button" id="toggle-theme">Тема</button>
+</nav>
+
+<main>
+<h1>Тон и формат текстов: что работает у других</h1>
+<div class="meta"><span>2026-10-02</span><span>my-claude-config</span><span>ветка feat/writing-style</span></div>
+
+<section id="s1" class="summary">
+  <p>Правила стиля держатся, когда у каждого требования один владелец и тот слой, который срабатывает в нужный момент:
+  тон чата в стиле вывода, символы в хуке, навыки писателя в скиле.</p>
+  <ul>
+    <li>Правила из <code>CLAUDE.md</code> в длинной сессии слабеют. Стиль вывода уходит в системный промпт с каждым запросом.</li>
+    <li>Работают проверяемые формулировки ("первое предложение - результат"), общие ("будь краток") забываются.</li>
+    <li>То, что должно соблюдаться всегда, проверяет скрипт, а не модель.</li>
+    <li>Источники слабые: блоги, README скилов, обсуждения. Замеров с контрольной группой нет.</li>
+  </ul>
+</section>
+
+<h2 id="s2">2. Что работает</h2>
+
+<div class="scroll"><table>
+  <thead><tr><th>Приём</th><th>Почему работает</th><th>Источник</th><th>Что взяли</th></tr></thead>
+  <tbody>
+    <tr><td>Тон и длина ответа в стиле вывода</td><td>Инструкции стиля отправляются с каждым запросом, в отличие от <code>CLAUDE.md</code>, который стоит в начале диалога</td><td>документация Claude Code; обсуждение на HN</td><td><code>output-styles/personal.md</code></td></tr>
+    <tr><td>Проверяемые правила</td><td>Модель может сверить ответ с правилом: есть вступление или нет</td><td>jensensics/claude-code-output-styles; mejba.me</td><td>"первое предложение - результат", "ответ короче 10 строк без заголовков"</td></tr>
+    <tr><td>Хук для обязательного</td><td>Хук запускает сам Claude Code, результат не зависит от того, помнит ли модель правило</td><td>документация Claude Code</td><td><code>check-prose.sh</code></td></tr>
+    <tr><td>Скил с примерами "было - стало" и вторым проходом</td><td>Пример задаёт образец точнее запрета; повторное чтение своего текста ловит то, что прошло в черновике</td><td>blader/humanizer; hardikpandya/stop-slop</td><td>скил <code>writing</code>, <code>slop-patterns.md</code></td></tr>
+    <tr><td>Правила про приём, а не про слово</td><td>Запрет слова даёт соседнее слово; запрет приёма убирает причину</td><td>история версий humanizer</td><td>В скиле приёмы, список слов только в хуке (20 строк)</td></tr>
+    <tr><td>Конкретное поведение против поддакивания</td><td>"Не начинай с согласия" проверяемо, "будь критичен" нет</td><td>issue 14759 и 37254; beginnersinai.org</td><td>Раздел "Тон" в стиле вывода</td></tr>
+    <tr><td>HTML для документов, которые читают</td><td>Оглавление, схемы, сворачивание, галочки; длинный markdown пролистывают</td><td>пост Anthropic "The unreasonable effectiveness of HTML"</td><td><code>report-template.html</code>, этот файл</td></tr>
+    <tr><td>Короткий всегда включённый слой</td><td>Меньше конкурирующих инструкций в каждом запросе</td><td>terseai; принцип этого репозитория</td><td><code>rules/</code> выросли на 15 байт</td></tr>
+  </tbody>
+</table></div>
+
+<figure>
+  <svg viewBox="0 0 700 130" role="img" aria-label="Четыре слоя письма и момент, когда каждый срабатывает">
+    <rect class="box" x="10" y="20" width="160" height="44" rx="6"/><text x="90" y="47" text-anchor="middle">стиль вывода</text>
+    <rect class="box" x="183" y="20" width="160" height="44" rx="6"/><text x="263" y="47" text-anchor="middle">правило 07</text>
+    <rect class="box" x="356" y="20" width="160" height="44" rx="6"/><text x="436" y="47" text-anchor="middle">скил writing</text>
+    <rect class="box" x="529" y="20" width="160" height="44" rx="6"/><text x="609" y="47" text-anchor="middle">хук check-prose</text>
+    <text class="muted" x="90" y="86" text-anchor="middle">каждый ответ в чате</text>
+    <text class="muted" x="90" y="104" text-anchor="middle">тон, длина, структура</text>
+    <text class="muted" x="263" y="86" text-anchor="middle">любой текст, все агенты</text>
+    <text class="muted" x="263" y="104" text-anchor="middle">символы, вода, галочки</text>
+    <text class="muted" x="436" y="86" text-anchor="middle">когда пишется документ</text>
+    <text class="muted" x="436" y="104" text-anchor="middle">тип, форма, md или html</text>
+    <text class="muted" x="609" y="86" text-anchor="middle">после записи .md, .html</text>
+    <text class="muted" x="609" y="104" text-anchor="middle">символы и штампы</text>
+  </svg>
+  <figcaption>Слои от всегда включённого (слева) к срабатывающему по событию (справа). Под каждым: когда действует и за что отвечает.</figcaption>
+</figure>
+
+<h2 id="s3">3. Что не работает</h2>
+
+<div class="scroll"><table>
+  <thead><tr><th>Приём</th><th>Что происходит</th><th>Решение в конфиге</th></tr></thead>
+  <tbody>
+    <tr><td>Общие слова "будь краток", "будь критичен"</td><td>Держатся одну-две реплики. Автор issue 37254 оценивает действие таких правил в длинном диалоге примерно в 20% (личная оценка, не замер)</td><td>Заменены проверяемым поведением</td></tr>
+    <tr><td>Длинный список запрещённых слов во всегда включённом слое</td><td>Раздувает контекст, модель подставляет синонимы</td><td>В правиле 07 списка нет; 20 фраз лежат в данных хука</td></tr>
+    <tr><td>Жёсткий лимит длины на все ответы</td><td>Режет условия и исключения, которые меняют ответ</td><td>"Длина по задаче"</td></tr>
+    <tr><td>Телеграфный стиль</td><td>Экономит токены, но ответ перестаёт объяснять</td><td>Отклонён ещё аудитом августа (<code>docs/audit-2026-08/report.html</code>)</td></tr>
+    <tr><td>Самооценка текста по баллам</td><td>Субъективно, лишние токены на каждый документ</td><td>Чек-лист "Второй проход" без баллов</td></tr>
+    <tr><td>Блокирующий хук на текст</td><td>Ложные срабатывания на цитатах, примерах и чужих файлах</td><td>Хук только предупреждает и смотрит только добавленный текст</td></tr>
+    <tr><td>HTML для всего</td><td>В 2-4 раза больше токенов, плохо читается в diff</td><td><code>plan.md</code>, <code>tests.md</code>, <code>summary.md</code>, ADR, задачи остаются markdown</td></tr>
+    <tr><td>Правила, написанные в стиле, который они запрещают</td><td>Модель копирует стиль инструкций</td><td>Свои правила, шаблоны, команды и скилы очищены от тире, ёлочек и стрелок</td></tr>
+  </tbody>
+</table></div>
+
+<figure>
+  <svg viewBox="0 0 700 210" role="img" aria-label="Число длинных тире в файлах конфига до чистки">
+    <line class="axis" x1="40" y1="170" x2="680" y2="170"/>
+    <rect class="bar" x="70" y="149" width="70" height="21" rx="3"/><text x="105" y="141" text-anchor="middle">64</text><text class="muted" x="105" y="190" text-anchor="middle">rules</text>
+    <rect class="bar" x="190" y="116" width="70" height="54" rx="3"/><text x="225" y="108" text-anchor="middle">163</text><text class="muted" x="225" y="190" text-anchor="middle">agents</text>
+    <rect class="bar" x="310" y="103" width="70" height="67" rx="3"/><text x="345" y="95" text-anchor="middle">202</text><text class="muted" x="345" y="190" text-anchor="middle">skills</text>
+    <rect class="bar" x="430" y="56" width="70" height="114" rx="3"/><text x="465" y="48" text-anchor="middle">345</text><text class="muted" x="465" y="190" text-anchor="middle">commands</text>
+    <rect class="bar" x="550" y="40" width="70" height="130" rx="3"/><text x="585" y="32" text-anchor="middle">393</text><text class="muted" x="585" y="190" text-anchor="middle">playbook</text>
+  </svg>
+  <figcaption>Длинных тире в файлах конфига до чистки, штук по каталогам (git grep по .md, коммит 7faa5c6). После чистки: rules 1 (таблица замен в правиле 07), agents 0, commands 1 и skills 22 (блоки кода и файлы-исключения), playbook 299 (шаблоны 0 из 94, остальной плейбук не трогали).</figcaption>
+</figure>
+
+<h2 id="s4">4. Что сделано в конфиге</h2>
+
+<div class="scroll"><table>
+  <thead><tr><th>Требование</th><th>Где живёт</th><th>Состояние</th></tr></thead>
+  <tbody>
+    <tr><td>1. Меньше воды</td><td><code>output-styles/personal.md</code>, правило 07 "Любой текст", скил <code>writing</code></td><td><span class="chip ok">сделано</span></td></tr>
+    <tr><td>2. Обычные символы</td><td>таблица замен в правиле 07, хук <code>check-prose.sh</code></td><td><span class="chip ok">сделано</span></td></tr>
+    <tr><td>3. Технический писатель</td><td><code>skills/writing/</code></td><td><span class="chip ok">сделано</span></td></tr>
+    <tr><td>4. Тон без поддакивания</td><td>раздел "Тон" в стиле вывода</td><td><span class="chip ok">сделано</span></td></tr>
+    <tr><td>5. Чат кратко, подробности в файле</td><td>стиль вывода, <code>summary-template.md</code>, команды <code>/task</code>, <code>/feature</code>, <code>/fix</code></td><td><span class="chip ok">сделано</span></td></tr>
+    <tr><td>6. HTML для анализа и статистики</td><td><code>report-template.html</code>, <code>references/html-report.md</code></td><td><span class="chip warn">план остаётся markdown</span></td></tr>
+    <tr><td>7. Сворачивание второстепенного</td><td><code>&lt;details&gt;</code> в шаблонах отчёта, итога и плана</td><td><span class="chip warn">журнал плана не свёрнут</span></td></tr>
+    <tr><td>8. Списки с галочками</td><td>правило 07, шаблоны</td><td><span class="chip ok">сделано</span></td></tr>
+  </tbody>
+</table></div>
+
+<p>Две оговорки. <code>plan.md</code> и <code>tests.md</code> остаются markdown: их правят скрипты статусов и агенты. Журнал плана не свёрнут:
+<code>plan-status.sh</code> дописывает строки в конец раздела и сломал бы закрывающий тег.</p>
+
+<h2 id="s5">5. Что сделать тебе</h2>
+
+<ul class="todo" data-key="todo-main">
+  <li><label><input type="checkbox"> <span>Посмотреть diff ветки <code>feat/writing-style</code> (6 коммитов) и слить её в <code>main</code>.</span></label></li>
+  <li><label><input type="checkbox"> <span>Поставить хук: <code>bash scripts/install-hooks.sh</code> покажет результат, <code>--write</code> запишет в <code>~/.claude/settings.json</code>.</span></label></li>
+  <li><label><input type="checkbox"> <span>Перезапустить Claude Code: стиль вывода читается при старте.</span></label></li>
+  <li><label><input type="checkbox"> <span>В новой сессии задать простой вопрос: ответ начинается с результата, без похвалы и вступления.</span></label></li>
+  <li><label><input type="checkbox"> <span>Предложить заведомо слабую идею: возражение стоит первым предложением.</span></label></li>
+  <li><label><input type="checkbox"> <span>Попросить записать заметку в <code>scratch.md</code> со стрелкой: хук вернул предупреждение, агент исправил сам.</span></label></li>
+  <li><label><input type="checkbox"> <span>Добавить свои кейсы в <code>tests/test-check-prose.sh</code>, если девяти мало.</span></label></li>
+  <li><label><input type="checkbox"> <span>На аудите 15.11 посмотреть записи <code>kind:"prose"</code> в <code>blocks.jsonl</code> и решить про хук на Stop для чата.</span></label></li>
+</ul>
+
+<h2 id="s6">6. Подробности</h2>
+
+<details>
+  <summary>Что отложено (4)</summary>
+  <div class="body">
+    <ul>
+      <li>Проверка ответов в чате хуком на Stop: каждое срабатывание стоит повторной генерации. Решение после аудита 15.11.</li>
+      <li>HTML-вид плана скриптом из <code>plan.md</code>: без токенов модели, но нужен свой рендер markdown.</li>
+      <li>Чистка символов в <code>playbook/sdlc.md</code>, остальном плейбуке, <code>docs/</code> и <code>README.md</code>.</li>
+      <li>Проверка комментариев в коде хуком: для них действует только правило 07.</li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary>Как хук решает, что проверять</summary>
+  <div class="body">
+    <ul>
+      <li>Событие PostToolUse, инструменты Edit, Write, MultiEdit; файлы <code>.md</code>, <code>.markdown</code>, <code>.html</code>, <code>.htm</code>, <code>.txt</code>.</li>
+      <li>Берёт только добавленный текст: <code>content</code>, <code>new_string</code>, <code>edits[].new_string</code>. Старые строки файла не дают предупреждений.</li>
+      <li>Пропускает блоки кода, <code>inline code</code>, в HTML ещё <code>style</code>, <code>script</code>, <code>code</code>, <code>pre</code>.</li>
+      <li>Пропускает пути: <code>skills/synced/</code>, <code>skills/writing/references/</code>, <code>hooks/data/</code>, <code>tests/</code>, <code>sonar-rules.md</code>.</li>
+      <li>Ответ: <code>additionalContext</code> со списком символов, замен и штампов. Запись файла не отменяется.</li>
+      <li>Журнал: <code>blocks.jsonl</code>, <code>kind:"prose"</code>, <code>decision:"warn"</code>.</li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary>Качество источников</summary>
+  <div class="body">
+    <p>Официальных источников два: документация Claude Code про стили вывода и хуки, пост Anthropic про HTML. Остальное - опыт отдельных
+    авторов. Статья terseai приводит одно измерение (файл 8400 и 2900 токенов) и не сравнивает качество ответов. Оценка "20%" из issue 37254 -
+    впечатление автора. Вывод "стиль вывода держится лучше CLAUDE.md" опирается на механику из документации и на отзывы, а не на эксперимент.
+    Проверить его можно своими логами на аудите 15.11.</p>
+  </div>
+</details>
+
+<details>
+  <summary>Источники (9)</summary>
+  <div class="body">
+    <ul class="src">
+      <li><a href="https://code.claude.com/docs/en/output-styles.md">Claude Code: output styles</a>: как стиль попадает в запрос, чем отличается от CLAUDE.md, скилов и хуков.</li>
+      <li><a href="https://code.claude.com/docs/en/hooks.md">Claude Code: hooks</a>: формат ответа PostToolUse, <code>additionalContext</code>.</li>
+      <li><a href="https://claude.dev/blog/using-claude-code-the-unreasonable-effectiveness-of-html/">Anthropic: The unreasonable effectiveness of HTML</a>: для каких документов HTML, приёмы, цена в токенах.</li>
+      <li><a href="https://github.com/blader/humanizer">blader/humanizer</a>: 26 приёмов по шести группам, второй проход по своему тексту.</li>
+      <li><a href="https://github.com/hardikpandya/stop-slop">hardikpandya/stop-slop</a>: фразы, структуры, примеры; оценка по пяти шкалам (не взяли).</li>
+      <li><a href="https://hn.nuxt.dev/item/49610631">Обсуждение на Hacker News</a>: CLAUDE.md слабеет с ростом контекста, стили вывода держатся лучше.</li>
+      <li><a href="https://claudeissues.com/issue/37254-bug-claude-md-anti-sycophancy-instructions-not-retained-across-conversation-turn">Issue 37254</a>: правила против поддакивания из CLAUDE.md держатся одну-две реплики.</li>
+      <li><a href="https://buttondown.com/terseai/archive/your-claudemd-is-3-u00d7-too-long/">terseai: Your CLAUDE.md is 3x too long</a>: короткие повелительные пункты.</li>
+      <li><a href="https://www.mejba.me/es/blog/claude-opus-5-output-style">mejba.me: output style</a>: какой слой чем владеет, вред жёстких лимитов длины.</li>
+    </ul>
+  </div>
+</details>
+
+</main>
+</div>
+
+<script>
+(function () {
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  };
+  var page = location.pathname;
+
+  document.querySelectorAll('ul.todo').forEach(function (list) {
+    var key = page + '#' + (list.dataset.key || 'todo');
+    var saved = (store.get(key) || '').split('');
+    list.querySelectorAll('input[type=checkbox]').forEach(function (box, i, all) {
+      box.checked = saved[i] === '1';
+      box.addEventListener('change', function () {
+        store.set(key, Array.prototype.map.call(all, function (b) { return b.checked ? '1' : '0'; }).join(''));
+      });
+    });
+  });
+
+  var detailsBtn = document.getElementById('toggle-details');
+  detailsBtn.addEventListener('click', function () {
+    var all = document.querySelectorAll('details');
+    var open = Array.prototype.some.call(all, function (d) { return !d.open; });
+    all.forEach(function (d) { d.open = open; });
+    detailsBtn.textContent = open ? 'Свернуть всё' : 'Развернуть всё';
+  });
+
+  var root = document.documentElement;
+  var theme = store.get('report-theme');
+  if (theme) root.dataset.theme = theme;
+  document.getElementById('toggle-theme').addEventListener('click', function () {
+    var dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme = dark ? 'light' : 'dark';
+    store.set('report-theme', root.dataset.theme);
+  });
+})();
+</script>
+</body>
+</html>

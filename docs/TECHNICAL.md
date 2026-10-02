@@ -1,6 +1,7 @@
 # Техническое описание my-claude-config
 
-Обновлено 2026-09-27: лёгкий `/task` по разбору сессий 24–27.09 (перестройка — `docs/refactor-2026-09/plan.html`).
+Обновлено 2026-10-02: слой письма - тон в стиле вывода, раздел "Любой текст" в правиле 07, скил `writing`,
+хук `check-prose`, шаблоны отчёта и итога (разбор - `docs/writing-style-2026-10/analysis.html`).
 
 ## 1. Каталоги
 
@@ -8,17 +9,17 @@
 rules/            9 правил, всегда включены через ~/.claude/CLAUDE.md (@import)
 commands/         12 slash-команд
 agents/           14 субагентов (свой `Explore` заменяет встроенного)
-skills/           15 скилов (SKILL.md + references/)
+skills/           16 скилов (SKILL.md + references/)
 playbook/         плейбук проектирования, нейминг, выжимки PDF, templates/
 shared/           блоки для промптов команд: stack-detection.md, affected-layers.md
-hooks/            settings.json (хуки + permissions) и scripts/ (ограждения, логи, lib/)
+hooks/            settings.json (хуки + permissions), scripts/ (ограждения, логи, lib/), data/ (список штампов)
 scripts/          setup-global.sh, install-hooks.sh, analyze-usage.sh, gen-convention-checklist.sh,
                   helpers/ (скрипты для команд), lib/, audit/ (месячный аудит)
 templates/        CLAUDE.<profile>.md.template, settings.<profile>.json.template
 workspace.conf.example  каталоги машины: work, personal, конвенция, плагин Sonar, ревью; копия workspace.conf не в git
 docs/             TECHNICAL.md, projects/<проект>/, audit-<месяц>/report.html
 tests/            bash-тесты хуков и скриптов
-output-styles/    personal.md — стиль вывода главного агента
+output-styles/    personal.md - тон и структура ответа главного агента в чате (на субагентов не действует)
 statusline/       statusline.sh
 ```
 
@@ -72,7 +73,7 @@ statusline/       statusline.sh
 | `planner` | opus / high / 250 | planning | `/task`: план всей задачи с вехами и кейсами; правка по критике или по `[!]` |
 | `critic` | opus / high / 150 | planning | `/task`, `/feature`: один проход до кода → `agent/critique.md` |
 | `implementer` | opus / high / 300, без Agent | стек-скил грузит сам | `/task` по фазам, фиксер (пишет `review.md`) |
-| `architect` | opus / high / 200 | design-docs, java-patterns, integration-patterns, jpa-db-review | `/design` |
+| `architect` | opus / high / 200 | design-docs, writing, java-patterns, integration-patterns, jpa-db-review | `/design` |
 | `convention-reviewer` | sonnet / medium / 150 | java-service-convention, git-convention | `/review`, `/review-mr`, `/task` (work) |
 | `java-reviewer` | opus / medium / 250 | jpa-db-review, integration-patterns, testing | там же |
 | `go-reviewer`, `vue-reviewer` | opus / medium / 250 | go-best-practices; vue-frontend | там же |
@@ -107,6 +108,13 @@ statusline/       statusline.sh
 | `planning` | явно из команд | как планируем: шаги, фазы, простота, кейсы, оценка плана |
 | `design-docs` | `/design`, разговоры о дизайне | шаги плейбука, чек-листы, позиции для вариантов, вопросы ревью |
 | `git-convention` | ветки, коммиты | форматы веток и коммитов, staging-flow, что запрещено |
+| `writing` | любой документ для человека; явно из `/adr`, `/jira`, `/design`; ссылка из правила 07 | тип документа, вывод первым, проза или список или таблица, md или html, второй проход; `references/slop-patterns.md` (приёмы воды), `references/html-report.md` (HTML-отчёт по `playbook/templates/report-template.html`) |
+
+Слой письма. Тон и структура ответа в чате - `output-styles/personal.md` (уходит в системный промпт с каждым
+запросом). Символы с клавиатуры, отсутствие воды, галочки и `<details>` для всех текстов - правило 07, раздел
+"Любой текст" (действует и на субагентов). Как писать документ - скил `writing`. Символы и штампы проверяет хук
+`check-prose.sh`. Анализ, отчёты и статистика - HTML-файлом в проекте; `plan.md`, `tests.md`, `summary.md`, ADR и
+задачи - markdown.
 
 ## 6. Хуки и permissions
 
@@ -121,6 +129,7 @@ statusline/       statusline.sh
 | `guard-paths.sh` | Edit, Write, MultiEdit, Bash | ask на запись в `.gitlab-ci.yml`, `.gitlab/`, `helm/` |
 | `guard-tests.sh` | Edit, Write, MultiEdit, Bash | ask на правку тест-файла, который есть в git и не изменён относительно HEAD |
 | `guard-scope.sh` | Edit, Write, MultiEdit | ask на запись в файл репозитория вне `agent/scope.txt` задачи текущей ветки, пока scope активен; Bash-записи не смотрит |
+| `check-prose.sh` | PostToolUse Edit, Write, MultiEdit | не блокирует: возвращает агенту `additionalContext` со списком символов не с клавиатуры и фраз-штампов (`hooks/data/prose-stamps.txt`) в добавленном тексте `.md`, `.html`, `.txt`; код, `<style>`, `<script>` и пути-исключения пропускает; пишет `kind:"prose"` в `blocks.jsonl` |
 | `block-destructive.sh` | Bash | deny: `rm -rf` вне `target/`, `build/`, `dist/`, `node_modules/` и scratch-каталогов; DROP/TRUNCATE, chmod 777, mkfs |
 | `block-secrets.sh` | Read, Edit, Write, MultiEdit, Bash | deny: чтение `.env` и вариантов, ключей `.pem`/`.p12`/`.jks`, `~/.ssh`, `~/.aws`, `~/.gnupg`, kubeconfig; проверяются только аргументы-пути: имя в `ls`, `find -name`, `--exclude`, шаблон `grep` проходят; `.envrc` и `node_modules/` безопасны |
 | `log-*.sh`, `notify-stop.sh` | все события | логи для аналитики (вопросы `AskUserQuestion` пишутся текстом), уведомление на Stop; помечены `async` (замер 2026-09-04: 51 мс на хук, два на вызов); журнал больше 20 МБ (`CLAUDE_LOG_MAX_MB`) отрезается в `<имя>-<дата>.jsonl`, срезы не удаляются |
@@ -158,7 +167,9 @@ statusline/       statusline.sh
 
 `/feature` пишет `plan.md` (кейсы внутри), `review.md`, `summary.md`, `agent/{critique,sonar}.md`, `agent/scope.txt`;
 `/review` — `review.md`, `agent/sonar.md`. Форматы: `playbook/templates/plan-template.md` (статусы
-`[ ] [~] [x] [!] [#]`, вехи, ≤ 150 строк на веху, шапка `Тесты:` и `Коммиты:`; сводка — `plan-status.sh --summary`), `tests-template.md` (Дано/Когда/Тогда, статусы `[ ] [~] [x] [!]`).
+`[ ] [~] [x] [!] [#]`, вехи, ≤ 150 строк на веху, шапка `Тесты:` и `Коммиты:`; сводка — `plan-status.sh --summary`), `tests-template.md` (Дано/Когда/Тогда, статусы `[ ] [~] [x] [!]`), `summary-template.md` (итог, что проверить
+руками галочками, проверки в `<details>`; в чат идёт только "Итог" и путь), `report-template.html` (отчёт одним
+файлом без сети: темы, оглавление, `<details>`, чекбоксы с `localStorage`, SVG-схема и график).
 
 Границы задачи. Требования агенты берут только из `plan.md`, `tests.md` и `agent/context.md`; недостающее —
 вопрос `[!]`, а не допущение. Писать можно только в файлы из `agent/scope.txt` (первая строка —
@@ -216,6 +227,9 @@ MEDIUM механические — исправить, требующие пе�
 После лёгкого `/task` (27.09): стоимость и активные часы на 1000 строк кода — цель вдвое быстрее и на треть
 дешевле полного `/task` (в разборе $39 и ~540 строк в час); средний контекст главного потока — до 200 тыс.;
 запусков `general-purpose` в `/task` — ноль.
+После слоя письма (02.10): записи `kind:"prose"` в `blocks.jsonl` (сколько и на каких файлах, есть ли шум на
+цитатах); реплики "короче", "убери воду", "без стрелок" в `prompts.jsonl` - цель ноль; если стиля не хватает -
+решить, нужен ли хук на Stop для ответов в чате.
 Контрольные точки: 2026-10-17 (`maxTurns`), 2026-11-15 (всё остальное).
 
 ## 12. Куда класть новое и конвенция авторинга
